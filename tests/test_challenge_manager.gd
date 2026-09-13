@@ -1,7 +1,9 @@
 extends SceneTree
 
+const ChallengeManagerScript = preload("res://scripts/core/challenge_manager.gd")
+
 func _init() -> void:
-    var manager := ChallengeManager.new()
+    var manager := ChallengeManagerScript.new()
     assert(manager.challenges.size() == 20)
 
     var seen_ids := {}
