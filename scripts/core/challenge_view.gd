@@ -168,16 +168,16 @@ func _run_react(token: int) -> void:
 
 func _run_switch(token: int) -> void:
     var old_rule := "TAP BLUE"
-    var new_rule := "NOW TAP RED"
+    var new_rule := "RULE CHANGED"
     if challenge_id == "sound_switch":
         old_rule = "KEEP LISTENING"
-        new_rule = "SWITCH RULE"
+        new_rule = "LISTEN FOR THE CHANGE"
     elif challenge_id == "no_repeat":
         old_rule = "DO NOT REPEAT LEFT"
-        new_rule = "CHOOSE RIGHT"
+        new_rule = "THE RULE HAS CHANGED"
     elif challenge_id == "instruction_change":
         old_rule = "FOLLOW OLD INSTRUCTION"
-        new_rule = "FOLLOW NEW INSTRUCTION"
+        new_rule = "FOLLOW THE NEW INSTRUCTION"
     _label("RULE 1", 24)
     _card(old_rule, 40, 70)
     await get_tree().create_timer(0.7).timeout
@@ -187,7 +187,7 @@ func _run_switch(token: int) -> void:
     _new_root()
     _label("RULE CHANGED", 26)
     var new_rule_card := _card(new_rule, 40, 82)
-    _label("SWITCH", 28)
+    _label("CHOOSE", 28)
     _pulse(new_rule_card)
     _set_input_ready(true)
 
@@ -215,7 +215,7 @@ func _run_mix(token: int) -> void:
     clear_view()
     _new_root()
     _label("SWITCH", 24)
-    var new_rule := _card("NEW RULE: TAP C", 36, 78)
+    var new_rule := _card("THE RULE HAS CHANGED", 36, 78)
     _pulse(new_rule)
     await get_tree().create_timer(0.55).timeout
     if token != phase_token or visual_root == null:
