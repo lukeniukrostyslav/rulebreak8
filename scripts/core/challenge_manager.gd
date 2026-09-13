@@ -39,7 +39,15 @@ func _append_extended_levels() -> void:
         ["MIX", "mix_memory_switch", "Remember the pattern, then follow the changed rule.", 2], ["MIX", "mix_see_react", "Spot the visual change, then react.", 1], ["MIX", "mix_trick_react", "Ignore the decoy, then react to the signal.", 3], ["MIX", "mix_switch_memory", "Learn rule one, switch, then recall the target.", 0], ["MIX", "mix_full", "See, remember, switch and react in one round.", 2]
     ]
     for spec in specs:
-        challenges.append({"id": spec[1], "rule_key": "RULE_" + str(spec[1]).to_upper(), "description": spec[2], "choices": ["FIRST", "SECOND", "THIRD", "FOURTH"], "correct": int(spec[3]), "kind_key": "KIND_" + str(spec[0])})
+        var family := str(spec[0])
+        var choices: Array
+        match family:
+            "SEE": choices = ["A", "B", "C", "D"]
+            "REMEMBER": choices = ["1", "2", "3", "4"]
+            "REACT": choices = ["RED", "BLUE", "GREEN", "YELLOW"]
+            "SWITCH": choices = ["BLUE", "RED", "GREEN", "YELLOW"]
+            _: choices = ["FIRST", "SECOND", "THIRD", "FOURTH"]
+        challenges.append({"id": spec[1], "rule_key": "RULE_" + str(spec[1]).to_upper(), "description": spec[2], "choices": choices, "correct": int(spec[3]), "kind_key": "KIND_" + family})
 
 func current() -> Dictionary:
     return challenges[index]
