@@ -20,3 +20,12 @@ jobs:
           echo "godot-workflow-started"
           uname -a
           test "$RUNNER_OS" = "Linux"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify repository files
+        run: |
+          set -euo pipefail
+          test -f project.godot
+          test -f export_presets.cfg
