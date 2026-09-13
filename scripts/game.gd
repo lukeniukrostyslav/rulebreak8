@@ -9,10 +9,13 @@ var rule_label: Label
 var streak_label: Label
 var feedback_label: Label
 var challenge_label: Label
+var reaction_started_at_ms := -1
+var reaction_duration_ms := 0
 
 func _ready() -> void:
     _set_device_language()
     challenge_view.input_ready_changed.connect(_on_visual_input_ready)
+    challenge_view.response_window_started.connect(_on_response_window_started)
     progression.load_state()
     _build_ui()
     _show_challenge()
@@ -91,6 +94,8 @@ func _build_ui() -> void:
     root.add_child(feedback_label)
 
 func _show_challenge() -> void:
+    reaction_started_at_ms = -1
+    reaction_duration_ms = 0
     var challenge: Dictionary = challenge_manager.current()
     var total := challenge_manager.challenges.size()
     var position := challenge_manager.index + 1
@@ -115,11 +120,19 @@ func _on_visual_input_ready(ready: bool) -> void:
     for b in buttons:
         b.disabled = not ready
 
+func _on_response_window_started(started_at_ms: int, duration_ms: int) -> void:
+    reaction_started_at_ms = started_at_ms
+    reaction_duration_ms = duration_ms
+
 func _on_choice(choice: int) -> void:
     if not challenge_view.input_ready:
         return
 
-    var correct := challenge_manager.check(choice)
+    var reaction_timed_out := false
+    if reaction_started_at_ms >= 0:
+        reaction_timed_out = Time.get_ticks_msec() - reaction_started_at_ms > reaction_duration_ms
+
+    var correct := challenge_manager.check(choice) and not reaction_timed_out
     for b in buttons:
         b.disabled = true
 
