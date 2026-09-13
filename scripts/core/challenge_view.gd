@@ -93,6 +93,20 @@ func _card(text: String, size: int = 46, height: int = 78) -> PanelContainer:
     _pop_in(panel)
     return panel
 
+func _color_word_card(word: String, color: Color, size: int = 58, height: int = 90) -> PanelContainer:
+    var panel := PanelContainer.new()
+    panel.custom_minimum_size = Vector2(0, height)
+    var label := Label.new()
+    label.text = word
+    label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+    label.add_theme_font_size_override("font_size", size)
+    label.add_theme_color_override("font_color", color)
+    panel.add_child(label)
+    visual_root.add_child(panel)
+    _pop_in(panel)
+    return panel
+
 func _pop_in(node: Control) -> void:
     node.modulate.a = 0.0
     node.scale = Vector2(0.94, 0.94)
@@ -234,6 +248,10 @@ func _build_trick() -> void:
     elif challenge_id == "obvious_wrong":
         _card("OBVIOUS   SECOND   THIRD   FOURTH", 28, 78)
         _label("THE FIRST IMPRESSION MAY BE WRONG", 25)
+    elif challenge_id == "word_color":
+        _color_word_card("BLUE", Color("e24b4b"), 58, 90)
+        _label("THE WORD AND COLOR DISAGREE", 26)
+        _label("CHOOSE WHICH SIGNAL MATTERS", 25)
     else:
         _card("RED", 58, 78)
         _label("THE WORD AND COLOR DISAGREE", 26)
