@@ -25,8 +25,11 @@ func show_challenge(challenge: Dictionary) -> void:
 
     match str(challenge.get("kind_key", "")):
         "KIND_SEE":
-            _build_see()
-            _set_input_ready(true)
+            if challenge_id == "speed_change":
+                await _run_speed_change(token)
+            else:
+                _build_see()
+                _set_input_ready(true)
         "KIND_REMEMBER":
             await _run_remember(token)
         "KIND_REACT":
@@ -122,6 +125,30 @@ func _build_see() -> void:
         _card(shape, 52, 82)
     _label("FIND THE CHANGE", 26)
 
+func _run_speed_change(token: int) -> void:
+    _label("WATCH THE SPEED", 26)
+    var cards: Array[Control] = []
+    for i in 4:
+        var card := _card(str(char(65 + i)), 52, 82)
+        cards.append(card)
+    await get_tree().create_timer(0.55).timeout
+    if token != phase_token or visual_root == null:
+        return
+    for i in 4:
+        if i == correct_index:
+            _pulse(cards[i])
+            await get_tree().create_timer(0.10).timeout
+        else:
+            await get_tree().create_timer(0.22).timeout
+    await get_tree().create_timer(0.35).timeout
+    if token != phase_token or visual_root == null:
+        return
+    clear_view()
+    _new_root()
+    _label("WHICH ONE CHANGED SPEED?", 26)
+    _card("A        B        C        D", 44, 82)
+    _set_input_ready(true)
+
 func _run_remember(token: int) -> void:
     _label("MEMORIZE", 26)
     var sequence := "●   →   ▲   →   ■"
@@ -186,42 +213,32 @@ func _run_switch(token: int) -> void:
     clear_view()
     _new_root()
     _label("RULE CHANGED", 26)
-    var new_rule_card := _card(new_rule, 40, 82)
-    _label("CHOOSE", 28)
-    _pulse(new_rule_card)
-    _set_input_ready(true)
-
-func _build_trick() -> void:
-    if challenge_id == "dont_press":
-        _card("PRESS IT", 44, 78)
-        _label("THE RULE SAYS: WAIT", 28)
-    elif challenge_id == "largest_wrong":
-        _card("SMALL   MEDIUM   LARGE", 34, 78)
-        _label("THE LARGEST IS WRONG", 26)
-    elif challenge_id == "obvious_wrong":
-        _card("OBVIOUS   SECOND   THIRD   FOURTH", 28, 78)
-        _label("THE OBVIOUS ANSWER IS WRONG", 25)
+    if challenge_id == "rule_switch":
+        _card("BLUE  →  RED", 42, 82)
+        _label("REMEMBER THE NEW TARGET", 24)
     else:
-        _card("RED", 58, 78)
-        _label("THE WORD IS BLUE", 26)
-        _label("FOLLOW THE WORD", 25)
-
-func _run_mix(token: int) -> void:
-    _label("SEE", 24)
-    _card("◆   ●   ▲   ◆", 44, 72)
+        _card(new_rule, 40, 82)
+        _label("CHOOSE", 28)
     await get_tree().create_timer(0.55).timeout
     if token != phase_token or visual_root == null:
         return
     clear_view()
     _new_root()
-    _label("SWITCH", 24)
-    var new_rule := _card("THE RULE HAS CHANGED", 36, 78)
-    _pulse(new_rule)
-    await get_tree().create_timer(0.55).timeout
-    if token != phase_token or visual_root == null:
-        return
-    _label("REACT", 24)
+    _label("CHOOSE", 28)
+    _card("?   ?   ?   ?", 44, 82)
     _set_input_ready(true)
 
-func _build_generic() -> void:
-    _card(challenge_id, 36, 78)
+func _build_trick() -> void:
+    if challenge_id == "dont_press":
+        _card("PRESS IT", 44, 78)
+        _label("DO NOT TRUST THE OBVIOUS MOVE", 26)
+    elif challenge_id == "largest_wrong":
+        _card("SMALL   MEDIUM   LARGE", 34, 78)
+        _label("ONE OF THESE BREAKS THE RULE", 26)
+    elif challenge_id == "obvious_wrong":
+        _card("OBVIOUS   SECOND   THIRD   FOURTH", 28, 78)
+        _label("THE FIRST IMPRESSION MAY BE WRONG", 25)
+    else:
+        _card("RED", 58, 78)
+        _label("THE WORD AND COLOR DISAGREE", 26)
+        _label("CHOOSE WHICH SIGNAL MATTERS", 25)
