@@ -12,6 +12,7 @@ var challenge_label: Label
 
 func _ready() -> void:
     _set_device_language()
+    challenge_view.input_ready_changed.connect(_on_visual_input_ready)
     progression.load_state()
     _build_ui()
     _show_challenge()
@@ -103,9 +104,21 @@ func _show_challenge() -> void:
     var choices: Array = challenge.get("choices", [])
     for i in buttons.size():
         buttons[i].text = tr(str(choices[i])) if i < choices.size() else "—"
-        buttons[i].disabled = false
+        buttons[i].disabled = not challenge_view.input_ready
+
+func _on_visual_input_ready(ready: bool) -> void:
+    if feedback_label:
+        if ready:
+            feedback_label.text = ""
+        else:
+            feedback_label.text = "WAIT..."
+    for b in buttons:
+        b.disabled = not ready
 
 func _on_choice(choice: int) -> void:
+    if not challenge_view.input_ready:
+        return
+
     var correct := challenge_manager.check(choice)
     for b in buttons:
         b.disabled = true
