@@ -20,6 +20,19 @@ This test checks the 20-challenge catalog, unique IDs, four-choice shape, valid 
 
 A passing smoke test is not a substitute for runtime gameplay QA.
 
+## Automated CI gate
+
+GitHub Actions workflow `.github/workflows/godot.yml` runs on pushes to `main`, pull requests targeting `main`, and manual dispatch.
+
+The workflow:
+
+1. Checks out the repository.
+2. Downloads the pinned Godot 4.3 stable Linux binary.
+3. Opens/imports the project headlessly and exits.
+4. Runs `tests/test_challenge_manager.gd` headlessly.
+
+The workflow is a repository-level verification mechanism. Its existence does **not** mean the current commit has passed CI; the actual workflow run must be checked before reporting a verified result.
+
 ## Development gate
 
 1. Open project in Godot 4.x.
