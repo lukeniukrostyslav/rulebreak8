@@ -10,14 +10,12 @@ var visual_root: Control
 var input_ready := false
 var phase_token := 0
 var response_duration_ms := 1400
-var response_token := 0
 
 func _ready() -> void:
     mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 func show_challenge(challenge: Dictionary) -> void:
     phase_token += 1
-    response_token += 1
     var token := phase_token
     _set_input_ready(false)
     clear_view()
@@ -55,16 +53,15 @@ func _set_input_ready(ready: bool) -> void:
     input_ready = ready
     input_ready_changed.emit(ready)
     if ready and (challenge_id == "color_timer" or challenge_id == "second_signal" or challenge_id == "only_x"):
-        response_token += 1
-        var token := response_token
-        var started_at := Time.get_ticks_msec()
-        response_window_started.emit(started_at, response_duration_ms)
-        _close_response_window(token)
+        response_window_started.emit(Time.get_ticks_msec(), response_duration_ms)
 
 func _close_response_window(token: int) -> void:
     await get_tree().create_timer(float(response_duration_ms) / 1000.0).timeout
-    if token == response_token and input_ready:
-        _set_input_ready(false)
+    if token != phase_token or not input_ready:
+        return
+    _set_input_ready(false)
+    if visual_root:
+        _label("TOO SLOW", 26)
 
 func clear_view() -> void:
     if visual_root:
@@ -146,7 +143,7 @@ func _run_remember(token: int) -> void:
     clear_view()
     _new_root()
     _label("NOW CHOOSE", 30)
-    _card("?   ?   ?", 42, 86)
+    _card("?   ?   ?", 44, 86)
     _set_input_ready(true)
 
 func _run_react(token: int) -> void:
@@ -166,6 +163,8 @@ func _run_react(token: int) -> void:
     _label("REACT NOW", 28)
     _pulse(signal_card)
     _set_input_ready(true)
+    if challenge_id == "color_timer" or challenge_id == "second_signal" or challenge_id == "only_x":
+        _close_response_window(token)
 
 func _run_switch(token: int) -> void:
     var old_rule := "TAP BLUE"
