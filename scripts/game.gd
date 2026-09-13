@@ -13,12 +13,24 @@ var reaction_started_at_ms := -1
 var reaction_duration_ms := 0
 
 func _ready() -> void:
+    _load_generated_translations()
     _set_device_language()
     challenge_view.input_ready_changed.connect(_on_visual_input_ready)
     challenge_view.response_window_started.connect(_on_response_window_started)
     progression.load_state()
     _build_ui()
     _show_challenge()
+
+func _load_generated_translations() -> void:
+    var locale_dir := DirAccess.open("res://locale")
+    if locale_dir == null:
+        return
+    for file_name in locale_dir.get_files():
+        if not file_name.ends_with(".translation"):
+            continue
+        var translation := ResourceLoader.load("res://locale/" + file_name) as Translation
+        if translation:
+            TranslationServer.add_translation(translation)
 
 func _set_device_language() -> void:
     var language := OS.get_locale_language()
@@ -119,7 +131,7 @@ func _on_visual_input_ready(ready: bool) -> void:
         if ready:
             feedback_label.text = ""
         else:
-            feedback_label.text = "WAIT..."
+            feedback_label.text = tr("WAIT")
     for b in buttons:
         b.disabled = not ready
 
