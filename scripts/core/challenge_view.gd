@@ -213,12 +213,8 @@ func _run_switch(token: int) -> void:
     clear_view()
     _new_root()
     _label("RULE CHANGED", 26)
-    if challenge_id == "rule_switch":
-        _card("BLUE  →  RED", 42, 82)
-        _label("REMEMBER THE NEW TARGET", 24)
-    else:
-        _card(new_rule, 40, 82)
-        _label("CHOOSE", 28)
+    _card(new_rule, 40, 82)
+    _label("CHOOSE", 28)
     await get_tree().create_timer(0.55).timeout
     if token != phase_token or visual_root == null:
         return
