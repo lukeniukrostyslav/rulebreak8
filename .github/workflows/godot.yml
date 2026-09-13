@@ -57,13 +57,14 @@ jobs:
           test -d "$ANDROID_HOME/platforms/android-34"
           test -d "$ANDROID_HOME/build-tools/34.0.0"
 
-      - name: Install Godot 4.3
+      - name: Install Godot 4.3 patch release
         run: |
           set -euo pipefail
+          GODOT_VERSION="4.3.4"
           curl -fsSL -o /tmp/godot.zip \
-            https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
           unzip -q /tmp/godot.zip -d /tmp/godot
-          mv /tmp/godot/Godot_v4.3-stable_linux.x86_64 /usr/local/bin/godot
+          mv "/tmp/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64" /usr/local/bin/godot
           chmod +x /usr/local/bin/godot
           godot --version
 
@@ -99,19 +100,15 @@ jobs:
       - name: Install Godot export templates
         run: |
           set -euo pipefail
-          mkdir -p "$HOME/.local/share/godot/export_templates/4.3.stable"
+          GODOT_VERSION="4.3.4"
+          mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
           curl -fsSL -o /tmp/templates.tpz \
-            https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz
+            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
           unzip -q /tmp/templates.tpz -d /tmp/templates
           test -d /tmp/templates/templates
-          cp -a /tmp/templates/templates/. "$HOME/.local/share/godot/export_templates/4.3.stable/"
-          test -f "$HOME/.local/share/godot/export_templates/4.3.stable/android_debug.apk"
+          cp -a /tmp/templates/templates/. "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/"
+          test -f "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/android_debug.apk"
 
-      # Godot 4.3 has known Linux/headless editor-import failure modes. The
-      # editor import pass is not required for project validation or export:
-      # the headless test runs and export command perform the actual resource
-      # loading/import work needed by this project. Keeping a separate editor
-      # process here made CI fail before the real tests could execute.
       - name: Validate project through headless runtime tests
         run: |
           set -euo pipefail
