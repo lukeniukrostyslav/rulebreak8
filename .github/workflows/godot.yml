@@ -27,10 +27,6 @@ jobs:
       - name: Validate project import
         run: |
           /tmp/godot/Godot_v4.3-stable_linux.x86_64 --headless --editor --path . --quit
-          echo "Generated translation resources:"
-          find locale -maxdepth 1 -type f -name '*.translation' -print | sort
-          count=$(find locale -maxdepth 1 -type f -name '*.translation' | wc -l)
-          test "$count" -ge 84
 
       - name: Run deterministic ChallengeManager test
         run: |
@@ -40,6 +36,6 @@ jobs:
         run: |
           /tmp/godot/Godot_v4.3-stable_linux.x86_64 --headless --path . --script tests/test_challenge_view.gd
 
-      - name: Run localization import/runtime test
+      - name: Run runtime CSV localization test
         run: |
           /tmp/godot/Godot_v4.3-stable_linux.x86_64 --headless --path . --script tests/test_localization.gd
