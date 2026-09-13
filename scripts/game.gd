@@ -2,7 +2,7 @@ extends Control
 
 var challenge_manager := ChallengeManager.new()
 var progression := Progression.new()
-var challenge_view := ChallengeView.new()
+var challenge_view := ChallengeViewV2.new()
 
 var buttons: Array[Button] = []
 var rule_label: Label
