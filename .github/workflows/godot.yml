@@ -10,7 +10,7 @@ on:
 jobs:
   verify:
     runs-on: ubuntu-22.04
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
@@ -23,6 +23,15 @@ jobs:
             https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip
           unzip -q /tmp/godot.zip -d /tmp/godot
           chmod +x /tmp/godot/Godot_v4.3-stable_linux.x86_64
+
+      - name: Install Godot 4.3 Android export templates
+        run: |
+          mkdir -p "$HOME/.local/share/godot/export_templates/4.3.stable"
+          curl -L --fail --retry 3 \
+            -o /tmp/templates.tpz \
+            https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz
+          unzip -q /tmp/templates.tpz -d /tmp/godot-templates
+          find /tmp/godot-templates -type f -name '*.zip' -exec cp {} "$HOME/.local/share/godot/export_templates/4.3.stable/" \;
 
       - name: Validate project import
         run: |
@@ -40,3 +49,17 @@ jobs:
       - name: Run runtime CSV localization test
         run: |
           /tmp/godot/Godot_v4.3-stable_linux.x86_64 --headless --path . --script tests/test_localization.gd
+
+      - name: Export Android debug APK
+        run: |
+          mkdir -p build/android
+          /tmp/godot/Godot_v4.3-stable_linux.x86_64 --headless --path . --export-debug "Android Debug" build/android/rulebreak-debug.apk
+          test -s build/android/rulebreak-debug.apk
+          ls -lh build/android/rulebreak-debug.apk
+
+      - name: Upload Android debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: rulebreak-android-debug
+          path: build/android/rulebreak-debug.apk
+          if-no-files-found: error
