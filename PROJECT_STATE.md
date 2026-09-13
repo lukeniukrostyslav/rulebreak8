@@ -16,7 +16,7 @@ ENGINEERING / MVP BUILD
 ## Last verified repository state
 Repository: `lukeniukrostyslav/rulebreak8`
 Default branch: `main`
-Current project foundation: Godot 4 configuration, main scene, initial game loop, README.
+Current project foundation: Godot 4.3 configuration, 100-level challenge catalog, expanded runtime renderer, local progression, deterministic tests and Android export gates.
 
 ## Product rules
 - Short challenges, generally 5–30 seconds.
@@ -29,27 +29,11 @@ Current project foundation: Godot 4 configuration, main scene, initial game loop
 ## Challenge families
 SEE / REMEMBER / REACT / SWITCH / TRICK / MIX
 
-## Initial challenge set
-1. Find the only shape that changed.
-2. Remember positions of 3 objects; one subtly changes.
-3. Memorize a sequence of 3 symbols.
-4. Repeat a sequence in reverse.
-5. Tap the correct color before the timer ends.
-6. Ignore the first signal; react to the second.
-7. Rule changes from BLUE to RED after three actions.
-8. Rule changes after a sound signal.
-9. Word says BLUE while text is RED; choose by color.
-10. Largest shape is not the correct answer.
-11. Find an object moving at a different speed.
-12. Choose the original order after objects disappear.
-13. Tap only when X appears.
-14. Cannot repeat the last action.
-15. A DON’T PRESS instruction becomes the correct choice.
-16. Find the mirrored object.
-17. Rule disappears after two seconds.
-18. Instruction changes during the round.
-19. Obvious answer is deliberately wrong.
-20. MIX: SEE + SWITCH + REACT.
+## Current challenge catalog
+- Exactly 100 entries: 20 seed entries + 80 extended entries.
+- Distribution: SEE 18, REMEMBER 20, REACT 18, SWITCH 19, TRICK 19, MIX 6.
+- Extended choices are family-aware and the runtime renderer is required by the manager test contract.
+- Extended rule descriptions have an explicit English fallback so raw `RULE_*` keys are not intentionally shown.
 
 ## Architecture target
 Rule Engine → Challenge Manager → Challenge Modules → Progression → UI → Local Save.
@@ -65,24 +49,32 @@ Rule Engine → Challenge Manager → Challenge Modules → Progression → UI �
 - Complex economy
 - Always-online daily service
 
-## Current progress
+## Current progress (management estimates)
 Research 100%
 Concept 100%
 Game Design 100%
-Visual Direction 70%
+Visual Direction 78%
 Architecture 85%
 Monetization 90%
 Viral Loop 90%
-Engineering 10%
-QA 0%
+Engineering 50%
+QA 15%
 Google Play 0%
 Release 0%
-Overall approximately 72%
+Overall approximately 58%
 
-These percentages are management estimates only and must never be presented as verified implementation percentages.
+These percentages are estimates only and are not claims of runtime or release verification.
 
 ## Next safe work
-Continue engineering from the actual repository state. Inspect current files before changing architecture. Implement the reusable rule/challenge system, then complete the challenge families, UI, progression, local save, audio/feedback, tests and Android build configuration.
+1. Verify the current GitHub Actions runs for the final commit.
+2. Run Godot runtime tests and Android export gates.
+3. Device-test all 100 levels, touch targets, portrait layout and persistence.
+4. Add production-quality audio/feedback and finish visual polish.
+5. Prepare production signing and complete the Google Play readiness audit.
+
+## Current blockers
+- Physical Android device testing is not available in this execution environment.
+- Production signing/Play Console submission require the owner-side release credentials and account access.
 
 ## Truth rule
 Never claim a feature is implemented unless it exists in the repository and has been checked. If something is only designed or planned, label it PLANNED.
