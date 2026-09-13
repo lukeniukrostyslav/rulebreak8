@@ -1,0 +1,21 @@
+name: Actions runner diagnostic
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  runner:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify runner startup
+        run: |
+          set -euo pipefail
+          echo "runner-started"
+          uname -a
+          test -n "$RUNNER_OS"
+          test "$RUNNER_OS" = "Linux"
