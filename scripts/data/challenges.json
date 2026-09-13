@@ -1,5 +1,8 @@
 {
-  "version": 1,
+  "version": 2,
+  "total_levels": 100,
+  "base_seed_levels": 20,
+  "generated_extension_levels": 80,
   "challenge_families": ["SEE", "REMEMBER", "REACT", "SWITCH", "TRICK", "MIX"],
   "mvp_seed": [
     {"id":"see_change","family":"SEE","description":"Find the only shape that changed."},
