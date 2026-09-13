@@ -1,9 +1,11 @@
 extends SceneTree
 
 const ChallengeManagerScript = preload("res://scripts/core/challenge_manager.gd")
+const ChallengeViewScript = preload("res://scripts/core/challenge_view_v2.gd")
 
 func _init() -> void:
     var manager := ChallengeManagerScript.new()
+    var view := ChallengeViewScript.new()
     assert(manager.challenges.size() == 100)
 
     var seen_ids := {}
@@ -14,11 +16,11 @@ func _init() -> void:
         var kind := str(challenge.get("kind_key", ""))
         var choices: Array = challenge.get("choices", [])
         var correct := int(challenge.get("correct", -1))
-
         assert(not id.is_empty())
         assert(not seen_ids.has(id))
         seen_ids[id] = true
         assert(not kind.is_empty())
+        assert(view.supports_challenge(challenge))
         seen_families[kind] = true
         family_counts[kind] = int(family_counts.get(kind, 0)) + 1
         assert(choices.size() == 4)
@@ -41,18 +43,14 @@ func _init() -> void:
     assert(manager.index == 0)
     assert(manager.check(0))
     assert(not manager.check(1))
-
     var first_id := str(manager.current().get("id"))
-    for _i in manager.challenges.size():
-        manager.next()
+    for _i in manager.challenges.size(): manager.next()
     assert(str(manager.current().get("id")) == first_id)
     assert(manager.index == 0)
-
     manager.index = 99
     assert(str(manager.current().get("id")) == "mix_full")
     manager.next()
     assert(manager.index == 0)
     assert(str(manager.current().get("id")) == first_id)
-
-    print("RULEBREAK ChallengeManager tests: PASS — 100 levels")
+    print("RULEBREAK ChallengeManager tests: PASS — 100 levels + view contract")
     quit(0)
