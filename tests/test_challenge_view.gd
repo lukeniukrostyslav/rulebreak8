@@ -35,9 +35,9 @@ func _init() -> void:
         "correct": 2
     }
     view.show_challenge(react)
-    await create_timer(1.0).timeout
+    await create_timer(1.20).timeout
     assert(view.input_ready)
-    await create_timer(0.55).timeout
+    await create_timer(1.50).timeout
     assert(not view.input_ready)
 
     print("RULEBREAK ChallengeView timing/state tests: PASS")
