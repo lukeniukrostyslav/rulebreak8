@@ -10,12 +10,14 @@ var visual_root: Control
 var input_ready := false
 var phase_token := 0
 var response_duration_ms := 1400
+var response_token := 0
 
 func _ready() -> void:
     mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 func show_challenge(challenge: Dictionary) -> void:
     phase_token += 1
+    response_token += 1
     var token := phase_token
     _set_input_ready(false)
     clear_view()
@@ -53,7 +55,16 @@ func _set_input_ready(ready: bool) -> void:
     input_ready = ready
     input_ready_changed.emit(ready)
     if ready and (challenge_id == "color_timer" or challenge_id == "second_signal" or challenge_id == "only_x"):
-        response_window_started.emit(Time.get_ticks_msec(), response_duration_ms)
+        response_token += 1
+        var token := response_token
+        var started_at := Time.get_ticks_msec()
+        response_window_started.emit(started_at, response_duration_ms)
+        _close_response_window(token)
+
+func _close_response_window(token: int) -> void:
+    await get_tree().create_timer(float(response_duration_ms) / 1000.0).timeout
+    if token == response_token and input_ready:
+        _set_input_ready(false)
 
 func clear_view() -> void:
     if visual_root:
@@ -98,7 +109,6 @@ func _pulse(node: Control) -> void:
 
 func _build_see() -> void:
     _label("A        B        C        D", 24)
-    var panels: Array[PanelContainer] = []
     for i in 4:
         var shape := "●"
         if i == 1:
@@ -112,7 +122,7 @@ func _build_see() -> void:
                 shape = "◀"
             else:
                 shape = "✦"
-        panels.append(_card(shape, 52, 82))
+        _card(shape, 52, 82)
     _label("FIND THE CHANGE", 26)
 
 func _run_remember(token: int) -> void:
@@ -136,7 +146,7 @@ func _run_remember(token: int) -> void:
     clear_view()
     _new_root()
     _label("NOW CHOOSE", 30)
-    _card("THE SEQUENCE IS GONE", 30, 86)
+    _card("?   ?   ?", 42, 86)
     _set_input_ready(true)
 
 func _run_react(token: int) -> void:
