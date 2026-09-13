@@ -39,15 +39,73 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v4
 
-      - name: Verify Android SDK bootstrap
+      - name: Install Android build packages
+        run: |
+          set -euo pipefail
+          sdkmanager --install \
+            "platform-tools" \
+            "platforms;android-34" \
+            "build-tools;34.0.0"
+          yes | sdkmanager --licenses >/dev/null || true
+
+      - name: Verify Android SDK
         run: |
           set -euo pipefail
           test -n "$ANDROID_HOME"
           test -x "$(command -v sdkmanager)"
           sdkmanager --version
+          test -d "$ANDROID_HOME/platforms/android-34"
+          test -d "$ANDROID_HOME/build-tools/34.0.0"
 
-      - name: Verify repository files
+      - name: Install Godot 4.3
         run: |
           set -euo pipefail
-          test -f project.godot
-          test -f export_presets.cfg
+          curl -fsSL -o /tmp/godot.zip \
+            https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          mv /tmp/godot/Godot_v4.3-stable_linux.x86_64 /usr/local/bin/godot
+          chmod +x /usr/local/bin/godot
+          godot --version
+
+      - name: Install Godot export templates
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.local/share/godot/export_templates/4.3.stable"
+          curl -fsSL -o /tmp/templates.tpz \
+            https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz
+          unzip -q /tmp/templates.tpz -d /tmp/templates
+          test -d /tmp/templates/templates
+          cp -a /tmp/templates/templates/. "$HOME/.local/share/godot/export_templates/4.3.stable/"
+          test -f "$HOME/.local/share/godot/export_templates/4.3.stable/android_debug.apk"
+
+      - name: Configure Godot Android paths
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.config/godot"
+          godot --headless --editor --path . --quit-after 1
+          godot --headless --editor --path . --quit-after 1 \
+            --path . \
+            --export-debug "Android Debug" /tmp/rulebreak-preflight.apk || true
+
+      - name: Run deterministic tests
+        run: |
+          set -euo pipefail
+          godot --headless --path . --script tests/test_challenge_manager.gd
+          godot --headless --path . --script tests/test_challenge_view.gd
+          godot --headless --path . --script tests/test_localization.gd
+
+      - name: Export Android debug APK
+        run: |
+          set -euo pipefail
+          mkdir -p build/android
+          godot --headless --path . --export-debug "Android Debug" build/android/rulebreak-debug.apk
+          test -s build/android/rulebreak-debug.apk
+          file build/android/rulebreak-debug.apk
+          unzip -l build/android/rulebreak-debug.apk | grep -E '(^|/)lib/arm64-v8a/'
+
+      - name: Upload Android debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: rulebreak-android-debug
+          path: build/android/rulebreak-debug.apk
+          if-no-files-found: error
