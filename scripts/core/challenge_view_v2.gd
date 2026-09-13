@@ -78,7 +78,10 @@ func _remember(token:int)->void:
 func _react(token:int)->void:
     _label("REACT_WAIT",30); _card("○",72,86); await get_tree().create_timer(0.5).timeout
     if token!=phase_token:return
-    var target:=REACT[abs(challenge_id.hash())%REACT.size()]
+    var target:=REACT[correct_index]
+    if challenge_id=="second_signal" or challenge_id=="react_signal_two": target="SECOND"
+    elif challenge_id=="only_x" or challenge_id=="react_x_only": target="X"
+    elif challenge_id=="color_timer": target="GREEN"
     clear_view(); _new_root(); _label("REACT_WATCH",26); _card(target,58,92); await get_tree().create_timer(0.25).timeout
     if token!=phase_token:return
     clear_view(); _new_root(); _label("REACT_NOW",28); _pulse(_card(target,64,96)); _set_input_ready(true)
@@ -96,8 +99,9 @@ func _switch_new()->String:
     return [tr("SWITCH_NEW_RULE"),tr("SWITCH_REVERSE"),tr("SWITCH_DIRECTION"),tr("SWITCH_ACTION")][abs(challenge_id.hash())%4]
 
 func _trick()->void:
-    var options:=["SMALL   MEDIUM   LARGE","FIRST   SECOND   THIRD   FOURTH","REAL   DECOY   REAL   REAL","OLD RULE → NEW RULE"]
-    var n:=abs(challenge_id.hash())%4; _card(options[n],34,84); _label(["TRICK_SIZE","TRICK_FIRST_IS_DECOY","TRICK_DECOY","TRICK_LATEST"][n],26); _set_input_ready(true)
+    var mode:=abs(challenge_id.hash())%4; var items:=[]
+    for i in 4: items.append("EXCEPTION" if i==correct_index else ("SMALL" if mode==0 else "DECOY"))
+    _card("   ".join(items),30,84); _label(["TRICK_SIZE","TRICK_FIRST_IS_DECOY","TRICK_DECOY","TRICK_LATEST"][mode],26); _set_input_ready(true)
 
 func _mix(token:int)->void:
     _label("MIX_SEE",24); _card("●   ▲   ◆   ●",42,72); _label("MIX_NOTICE",22); await get_tree().create_timer(0.4).timeout
