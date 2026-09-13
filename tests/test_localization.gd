@@ -4,9 +4,10 @@ const EXPECTED_LOCALES := [
     "en", "es", "pt_BR", "fr", "de", "it", "ru", "uk", "pl", "tr", "nl",
     "ar", "he", "hi", "id", "vi", "th", "ja", "ko", "zh", "zh_TW"
 ]
+const LocalizationScript = preload("res://scripts/core/localization.gd")
 
 func _init() -> void:
-    var localization := Localization.new()
+    var localization = LocalizationScript.new()
     root.add_child(localization)
     await process_frame
 
