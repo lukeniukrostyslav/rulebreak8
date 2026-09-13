@@ -21,7 +21,7 @@ var challenges: Array[Dictionary] = [
     {"id":"vanishing_rule","rule_key":"RULE_VANISH","choices":["TAP_A","TAP_B","TAP_C","TAP_D"],"correct":2,"kind_key":"KIND_REMEMBER"},
     {"id":"instruction_change","rule_key":"RULE_INSTRUCTION","choices":["FOLLOW_NEW","FOLLOW_OLD","IGNORE_BOTH","TAP_ALL"],"correct":0,"kind_key":"KIND_SWITCH"},
     {"id":"obvious_wrong","rule_key":"RULE_OBVIOUS","choices":["OBVIOUS","SECOND","THIRD","FOURTH"],"correct":1,"kind_key":"KIND_TRICK"},
-    {"id":"mixed","rule_key":"RULE_MIX","choices":["A","B","C","D"],"correct":2,"kind_key":"KIND_MIX"}
+    {"id":"mixed","rule_key":"RULE_MIX","choices":["FIRST","SECOND","THIRD","FOURTH"],"correct":2,"kind_key":"KIND_MIX"}
 ]
 
 var index := 0
