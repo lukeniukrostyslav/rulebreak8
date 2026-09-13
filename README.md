@@ -9,18 +9,18 @@ Android-first premium micro-puzzle game. MVP target: one-time purchase around �
 - Godot 4.3 project configuration
 - Portrait 1080×1920 mobile-first viewport
 - Live ChallengeManager + Progression game loop
-- 20 canonical challenge definitions across six families
+- 100 challenge catalog entries across six families with family-specific visual/timing implementations
 - ChallengeView implementations for SEE / REMEMBER / REACT / SWITCH / TRICK / MIX
 - Streak, best streak and local statistics persistence
-- 21-locale localization infrastructure
-- Deterministic ChallengeManager smoke test in `tests/test_challenge_manager.gd`
+- 21-locale localization infrastructure with English fallback for extended challenge rules
+- Deterministic ChallengeManager and ChallengeView tests
 - Build/test and release-gate documentation in `docs/BUILD_AND_TEST.md`
 
 ## Product direction
 
 Short 5–30 second challenges. The player learns a simple rule, then must notice when the rule changes or when the obvious interpretation is wrong.
 
-Target content: 100 handcrafted challenges, expanding from the current 20-challenge engineering catalog into a larger campaign, then ENDLESS/STREAK, DAILY RULE and Challenge Friend.
+Target content: 100 handcrafted challenges, building on the 100-level engineering catalog, then ENDLESS/STREAK, DAILY RULE and Challenge Friend.
 
 ## Architecture
 
@@ -36,13 +36,13 @@ Google Play premium Android game. Initial target price around €1.99. No recurr
 
 - Research / concept / product direction: 100%
 - Architecture: 85%
-- Engineering: 84% estimate
-- Challenge content: 78% estimate
-- UX / visual: 96% estimate
-- Persistence: 60% estimate; code hardened, runtime restore not verified
-- Audio / feedback: 5% estimate
-- QA / testing: 5% — deterministic test exists, runtime execution not verified in this environment
-- Android build: 0% VERIFIED — no export preset/build has been executed here
+- Engineering: 50% estimate
+- Challenge content: 90% estimate
+- UX / visual: 78% estimate
+- Persistence: 70% estimate; code hardened, runtime restore not verified
+- Audio / feedback: 10% estimate
+- QA / testing: 15% — deterministic tests strengthened, runtime execution not verified in this environment
+- Android build: 10% infrastructure — debug APK workflow and unsigned release-AAB workflow are defined; no build executed in this environment
 - Google Play readiness: 0%
 - Release: 0%
 
