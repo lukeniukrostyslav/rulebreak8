@@ -36,6 +36,16 @@ jobs:
           java -version
           test -n "$JAVA_HOME"
 
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Verify Android SDK bootstrap
+        run: |
+          set -euo pipefail
+          test -n "$ANDROID_HOME"
+          test -x "$(command -v sdkmanager)"
+          sdkmanager --version
+
       - name: Verify repository files
         run: |
           set -euo pipefail
