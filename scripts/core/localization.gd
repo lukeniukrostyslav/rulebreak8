@@ -1,4 +1,3 @@
-class_name Localization
 extends Node
 
 const LOCALES := [
