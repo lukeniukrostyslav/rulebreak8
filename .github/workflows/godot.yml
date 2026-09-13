@@ -31,10 +31,10 @@ jobs:
             -o /tmp/templates.tpz \
             https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz
           unzip -q /tmp/templates.tpz -d /tmp/godot-templates
-          test -f /tmp/godot-templates/templates/android_debug.apk
-          test -f /tmp/godot-templates/templates/android_release.apk
-          cp /tmp/godot-templates/templates/android_debug.apk "$HOME/.local/share/godot/export_templates/4.3.stable/android_debug.apk"
-          cp /tmp/godot-templates/templates/android_release.apk "$HOME/.local/share/godot/export_templates/4.3.stable/android_release.apk"
+          find /tmp/godot-templates -type f -name 'android_debug.apk' -print -exec cp {} "$HOME/.local/share/godot/export_templates/4.3.stable/android_debug.apk" \;
+          find /tmp/godot-templates -type f -name 'android_release.apk' -print -exec cp {} "$HOME/.local/share/godot/export_templates/4.3.stable/android_release.apk" \;
+          test -s "$HOME/.local/share/godot/export_templates/4.3.stable/android_debug.apk"
+          test -s "$HOME/.local/share/godot/export_templates/4.3.stable/android_release.apk"
           ls -lh "$HOME/.local/share/godot/export_templates/4.3.stable/"
 
       - name: Validate project import
