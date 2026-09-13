@@ -16,6 +16,13 @@ jobs:
     timeout-minutes: 30
 
     steps:
+      - name: Runner preflight
+        run: |
+          set -euo pipefail
+          echo "godot-workflow-started"
+          uname -a
+          test "$RUNNER_OS" = "Linux"
+
       - name: Checkout
         uses: actions/checkout@v4
 
