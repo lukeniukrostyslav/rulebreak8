@@ -2,12 +2,14 @@ class_name ChallengeView
 extends Control
 
 signal input_ready_changed(ready: bool)
+signal response_window_started(started_at_ms: int, duration_ms: int)
 
 var challenge_id := ""
 var correct_index := -1
 var visual_root: Control
 var input_ready := false
 var phase_token := 0
+var response_duration_ms := 1400
 
 func _ready() -> void:
     mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -50,6 +52,8 @@ func _new_root() -> void:
 func _set_input_ready(ready: bool) -> void:
     input_ready = ready
     input_ready_changed.emit(ready)
+    if ready and (challenge_id == "color_timer" or challenge_id == "second_signal" or challenge_id == "only_x"):
+        response_window_started.emit(Time.get_ticks_msec(), response_duration_ms)
 
 func clear_view() -> void:
     if visual_root:
