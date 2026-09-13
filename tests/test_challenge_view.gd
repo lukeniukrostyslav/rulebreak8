@@ -1,7 +1,9 @@
 extends SceneTree
 
+const ChallengeViewScript = preload("res://scripts/core/challenge_view.gd")
+
 func _init() -> void:
-    var view := ChallengeView.new()
+    var view := ChallengeViewScript.new()
     root.add_child(view)
     await process_frame
 
