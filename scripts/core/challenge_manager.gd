@@ -15,7 +15,7 @@ var challenges: Array[Dictionary] = [
     {"id":"speed_change","rule_key":"RULE_SPEED","choices":["A","B","C","D"],"correct":2,"kind_key":"KIND_SEE"},
     {"id":"order_memory","rule_key":"RULE_ORDER","choices":["1-2-3","2-1-3","3-2-1","1-3-2"],"correct":0,"kind_key":"KIND_REMEMBER"},
     {"id":"only_x","rule_key":"RULE_X","choices":["X","O","△","□"],"correct":0,"kind_key":"KIND_REACT"},
-    {"id":"no_repeat","rule_key":"RULE_NO_REPEAT","choices":["LEFT","RIGHT","LEFT","NONE"],"correct":1,"kind_key":"KIND_SWITCH"},
+    {"id":"no_repeat","rule_key":"RULE_NO_REPEAT","choices":["LEFT","RIGHT","UP","NONE"],"correct":1,"kind_key":"KIND_SWITCH"},
     {"id":"dont_press","rule_key":"RULE_DONT_PRESS","choices":["PRESS_IT","WAIT","LEAVE","PRESS_TWICE"],"correct":1,"kind_key":"KIND_TRICK"},
     {"id":"mirrored","rule_key":"RULE_MIRROR","choices":["A","B","C","D"],"correct":3,"kind_key":"KIND_SEE"},
     {"id":"vanishing_rule","rule_key":"RULE_VANISH","choices":["TAP_A","TAP_B","TAP_C","TAP_D"],"correct":2,"kind_key":"KIND_REMEMBER"},
