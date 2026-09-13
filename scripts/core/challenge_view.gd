@@ -242,3 +242,23 @@ func _build_trick() -> void:
         _card("RED", 58, 78)
         _label("THE WORD AND COLOR DISAGREE", 26)
         _label("CHOOSE WHICH SIGNAL MATTERS", 25)
+
+func _run_mix(token: int) -> void:
+    _label("SEE", 24)
+    _card("◆   ●   ▲   ◆", 44, 72)
+    await get_tree().create_timer(0.55).timeout
+    if token != phase_token or visual_root == null:
+        return
+    clear_view()
+    _new_root()
+    _label("SWITCH", 24)
+    var new_rule := _card("THE RULE HAS CHANGED", 36, 78)
+    _pulse(new_rule)
+    await get_tree().create_timer(0.55).timeout
+    if token != phase_token or visual_root == null:
+        return
+    _label("REACT", 24)
+    _set_input_ready(true)
+
+func _build_generic() -> void:
+    _card(challenge_id, 36, 78)
