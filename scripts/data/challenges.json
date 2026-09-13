@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "challenge_families": ["SEE", "REMEMBER", "REACT", "SWITCH", "TRICK", "MIX"],
+  "mvp_seed": [
+    {"id":"see_change","family":"SEE","description":"Find the only shape that changed."},
+    {"id":"remember_positions","family":"REMEMBER","description":"Remember three positions; one changes."},
+    {"id":"sequence","family":"REMEMBER","description":"Memorize a three-symbol sequence."},
+    {"id":"reverse_sequence","family":"REMEMBER","description":"Repeat a sequence in reverse."},
+    {"id":"color_timer","family":"REACT","description":"Tap the correct color before time expires."},
+    {"id":"second_signal","family":"REACT","description":"Ignore the first signal and react to the second."},
+    {"id":"rule_switch","family":"SWITCH","description":"The rule changes after several correct actions."},
+    {"id":"sound_switch","family":"SWITCH","description":"The rule changes after a signal."},
+    {"id":"word_color","family":"TRICK","description":"Choose the word rather than the displayed color."},
+    {"id":"largest_wrong","family":"TRICK","description":"The largest shape is deliberately not the answer."},
+    {"id":"speed_change","family":"SEE","description":"Find the object moving at a different speed."},
+    {"id":"order_memory","family":"REMEMBER","description":"Choose the original order after objects disappear."},
+    {"id":"only_x","family":"REACT","description":"Tap only when X appears."},
+    {"id":"no_repeat","family":"SWITCH","description":"Do not repeat the previous action."},
+    {"id":"dont_press","family":"TRICK","description":"The forbidden-looking button becomes correct."},
+    {"id":"mirrored","family":"SEE","description":"Find the mirrored object."},
+    {"id":"vanishing_rule","family":"REMEMBER","description":"The instruction disappears after two seconds."},
+    {"id":"instruction_change","family":"SWITCH","description":"The instruction changes during the round."},
+    {"id":"obvious_wrong","family":"TRICK","description":"The obvious answer is deliberately wrong."},
+    {"id":"mixed","family":"MIX","description":"Combine SEE, SWITCH and REACT in one short challenge."}
+  ]
+}
