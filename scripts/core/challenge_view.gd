@@ -204,26 +204,52 @@ func _run_react(token: int) -> void:
     await get_tree().create_timer(0.75).timeout
     if token != phase_token or visual_root == null:
         return
+
     clear_view()
     _new_root()
-    var signal_text := "GREEN"
-    if challenge_id == "second_signal":
-        signal_text = "SECOND!"
-    elif challenge_id == "only_x":
-        signal_text = "X"
-    var signal_card := _card(signal_text, 58, 92)
-    _label("REACT NOW", 28)
-    _pulse(signal_card)
+    if challenge_id == "color_timer":
+        _label("WATCH THE SIGNAL", 26)
+        _card("RED", 58, 92)
+        await get_tree().create_timer(0.35).timeout
+        if token != phase_token or visual_root == null:
+            return
+        clear_view()
+        _new_root()
+        var green_card := _card("GREEN", 58, 92)
+        _label("REACT NOW", 28)
+        _pulse(green_card)
+    elif challenge_id == "second_signal":
+        _label("IGNORE THE FIRST", 26)
+        _card("FIRST", 58, 92)
+        await get_tree().create_timer(0.35).timeout
+        if token != phase_token or visual_root == null:
+            return
+        clear_view()
+        _new_root()
+        var second_card := _card("SECOND", 58, 92)
+        _label("REACT NOW", 28)
+        _pulse(second_card)
+    else:
+        _label("IGNORE O — REACT TO X", 26)
+        _card("O", 58, 92)
+        await get_tree().create_timer(0.35).timeout
+        if token != phase_token or visual_root == null:
+            return
+        clear_view()
+        _new_root()
+        var x_card := _card("X", 58, 92)
+        _label("REACT NOW", 28)
+        _pulse(x_card)
+
     _set_input_ready(true)
-    if challenge_id == "color_timer" or challenge_id == "second_signal" or challenge_id == "only_x":
-        _close_response_window(token)
+    _close_response_window(token)
 
 func _run_switch(token: int) -> void:
     var old_rule := "TAP BLUE"
     var new_rule := "RULE CHANGED"
     if challenge_id == "sound_switch":
-        old_rule = "KEEP LISTENING"
-        new_rule = "LISTEN FOR THE CHANGE"
+        old_rule = "WATCH FOR THE SIGNAL"
+        new_rule = "SWITCH RULE NOW"
     elif challenge_id == "no_repeat":
         old_rule = "DO NOT REPEAT LEFT"
         new_rule = "THE RULE HAS CHANGED"
@@ -270,7 +296,8 @@ func _build_trick() -> void:
 
 func _run_mix(token: int) -> void:
     _label("SEE", 24)
-    _card("◆   ●   ▲   ◆", 44, 72)
+    _card("●   ▲   ◆   ●", 44, 72)
+    _label("NOTICE THE PATTERN", 22)
     await get_tree().create_timer(0.55).timeout
     if token != phase_token or visual_root == null:
         return
@@ -282,7 +309,12 @@ func _run_mix(token: int) -> void:
     await get_tree().create_timer(0.55).timeout
     if token != phase_token or visual_root == null:
         return
+    clear_view()
+    _new_root()
     _label("REACT", 24)
+    _card("WAIT → GO", 44, 76)
+    _label("WHICH SIGNAL CAME AFTER THE CHANGE?", 24)
+    _card("FIRST     SECOND     THIRD     FOURTH", 30, 78)
     _set_input_ready(true)
 
 func _build_generic() -> void:
