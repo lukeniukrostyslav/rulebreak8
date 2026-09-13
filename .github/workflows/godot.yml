@@ -26,7 +26,8 @@ jobs:
 
       - name: Validate project import
         run: |
-          /tmp/godot/Godot_v4.3-stable_linux.x86_64 --headless --editor --path . --quit
+          set -o pipefail
+          /tmp/godot/Godot_v4.3-stable_linux.x86_64 --headless --editor --path . --quit --verbose 2>&1 | tee /tmp/godot-import.log
 
       - name: Run deterministic ChallengeManager test
         run: |
