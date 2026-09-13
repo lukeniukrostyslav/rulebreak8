@@ -148,13 +148,24 @@ func _run_speed_change(token: int) -> void:
     await get_tree().create_timer(0.55).timeout
     if token != phase_token or visual_root == null:
         return
+
     for i in 4:
+        var pulse_count := 1
+        var pulse_time := 0.22
         if i == correct_index:
-            _pulse(cards[i])
-            await get_tree().create_timer(0.10).timeout
-        else:
-            await get_tree().create_timer(0.22).timeout
-    await get_tree().create_timer(0.35).timeout
+            pulse_count = 4
+            pulse_time = 0.08
+        for _pulse_index in pulse_count:
+            if token != phase_token or visual_root == null:
+                return
+            var tween := create_tween()
+            tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+            tween.tween_property(cards[i], "scale", Vector2(1.07, 1.07), pulse_time)
+            tween.tween_property(cards[i], "scale", Vector2.ONE, pulse_time)
+            await tween.finished
+        await get_tree().create_timer(0.10).timeout
+
+    await get_tree().create_timer(0.30).timeout
     if token != phase_token or visual_root == null:
         return
     clear_view()
