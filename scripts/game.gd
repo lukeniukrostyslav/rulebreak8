@@ -10,9 +10,16 @@ var feedback_label: Label
 var challenge_label: Label
 
 func _ready() -> void:
+    _set_device_language()
     progression.load_state()
     _build_ui()
     _show_challenge()
+
+func _set_device_language() -> void:
+    var language := OS.get_locale_language()
+    if language.is_empty():
+        language = "en"
+    TranslationServer.set_locale(language)
 
 func _build_ui() -> void:
     var bg := ColorRect.new()
@@ -33,7 +40,7 @@ func _build_ui() -> void:
     margin.add_child(root)
 
     var title := Label.new()
-    title.text = "RULEBREAK"
+    title.text = tr("GAME_TITLE")
     title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     title.add_theme_font_size_override("font_size", 42)
     root.add_child(title)
@@ -81,14 +88,15 @@ func _show_challenge() -> void:
     var challenge: Dictionary = challenge_manager.current()
     var total := challenge_manager.challenges.size()
     var position := challenge_manager.index + 1
-    challenge_label.text = "CHALLENGE  %d / %d   •   %s" % [position, total, str(challenge.get("kind", "")).to_upper()]
-    rule_label.text = str(challenge.get("rule", ""))
-    streak_label.text = "STREAK  %d   •   BEST  %d" % [progression.streak, progression.best_streak]
+    var kind_key := str(challenge.get("kind_key", ""))
+    challenge_label.text = "%s  %d / %d   •   %s" % [tr("CHALLENGE"), position, total, tr(kind_key)]
+    rule_label.text = tr(str(challenge.get("rule_key", "")))
+    streak_label.text = "%s  %d   •   %s  %d" % [tr("STREAK"), progression.streak, tr("BEST"), progression.best_streak]
     feedback_label.text = ""
 
     var choices: Array = challenge.get("choices", [])
     for i in buttons.size():
-        buttons[i].text = str(choices[i]) if i < choices.size() else "—"
+        buttons[i].text = tr(str(choices[i])) if i < choices.size() else "—"
         buttons[i].disabled = false
 
 func _on_choice(choice: int) -> void:
@@ -99,11 +107,11 @@ func _on_choice(choice: int) -> void:
     progression.record(correct)
 
     if correct:
-        feedback_label.text = "CORRECT  ✓"
+        feedback_label.text = "%s  ✓" % tr("CORRECT")
         challenge_manager.next()
         await get_tree().create_timer(0.35).timeout
     else:
-        feedback_label.text = "WRONG  •  TRY AGAIN"
+        feedback_label.text = "%s  •  %s" % [tr("WRONG"), tr("TRY_AGAIN")]
         await get_tree().create_timer(0.7).timeout
 
     _show_challenge()
