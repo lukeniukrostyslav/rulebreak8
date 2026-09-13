@@ -61,8 +61,8 @@ jobs:
         run: |
           set -euo pipefail
           GODOT_VERSION="4.3.3"
-          curl -fsSL -o /tmp/godot.zip \
-            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          BASE_URL="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
+          curl -fsSL -o /tmp/godot.zip "$BASE_URL/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
           unzip -q /tmp/godot.zip -d /tmp/godot
           mv "/tmp/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64" /usr/local/bin/godot
           chmod +x /usr/local/bin/godot
