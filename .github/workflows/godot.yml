@@ -108,6 +108,12 @@ jobs:
           godot --headless --path . --script tests/test_challenge_view.gd
           godot --headless --path . --script tests/test_localization.gd
 
+      - name: Reset Godot import cache before export
+        run: |
+          set -euo pipefail
+          rm -rf .godot
+          test ! -d .godot
+
       - name: Export Android debug APK
         run: |
           set -euo pipefail
