@@ -7,34 +7,29 @@ ACTIVE
 ENGINEERING / MVP BUILD
 
 ## Current mission
-Turn the existing Godot foundation into a commercially credible, testable RULEBREAK MVP without claiming runtime or Android readiness before it is verified.
+Turn the existing Godot foundation into a reusable, testable RULEBREAK game loop with real challenge modules and a verifiable Android release path.
 
-## Completed in the current checkpoint
-- Live game loop uses `ChallengeManager` and `Progression`.
-- 20-challenge engineering catalog spans SEE, REMEMBER, REACT, SWITCH, TRICK and MIX.
-- `ChallengeView` contains implementations for all six families.
-- Rule-switch spoiler was removed from the pre-input UI.
-- Deterministic `ChallengeManager` smoke test exists at `tests/test_challenge_manager.gd`.
-- `docs/BUILD_AND_TEST.md` defines development and release gates.
-- Local progression save/load was hardened against missing/unopenable files, invalid JSON values and inconsistent best-streak data.
-- README and project state were refreshed to match the current repository rather than the earlier foundation-only snapshot.
+## Completed in this checkpoint
+- Live ChallengeManager and Progression are integrated into the game loop.
+- ChallengeView implements all six challenge families: SEE, REMEMBER, REACT, SWITCH, TRICK and MIX.
+- Hardened local progression parsing/writing against malformed save state.
+- Added deterministic ChallengeManager smoke test; runtime execution remains unverified because Godot is not available in this environment.
+- Improved reaction challenges so the player sees the prerequisite signal before the response window.
+- Reworked MIX into a coherent SEE → SWITCH → REACT sequence with four positional answers.
+- Removed the misleading "sound" behavior from the visible instruction; the current `sound_switch` catalog item is now treated as a visual signal-switch placeholder until real audio is implemented.
+- Updated README and project-state documentation to reflect actual verification status.
 
 ## Immediate sequence
-1. Tighten weak challenge semantics: especially `sound_switch`, `mixed`, and timing challenges.
-2. Remove or localize remaining hard-coded player-facing strings in `ChallengeView`.
-3. Verify the 20 challenge definitions against their visual presentation and correct indexes.
-4. Add/strengthen deterministic tests where they can run without a device or editor UI.
-5. Inspect Android export configuration and add only verified, non-secret project configuration; never commit release credentials.
-6. Run Godot parse/smoke tests when a Godot runtime is available.
-7. Run physical Android touch/layout/restart testing.
-8. Expand content from the 20-challenge engineering catalog toward the 100-challenge commercial target.
-9. Perform a release-readiness audit before any Google Play submission.
+1. Audit and localize remaining hardcoded ChallengeView strings.
+2. Replace the visual `sound_switch` placeholder with a real audio-driven mechanic, or formally rename/reclassify it before content lock.
+3. Add stronger deterministic tests for challenge timing/state transitions where feasible.
+4. Add a safe Android debug export preset/configuration without committing release credentials.
+5. Execute Godot headless/runtime tests when a Godot-capable environment is available.
+6. Test touch input, portrait layouts, persistence restart and all 20 challenges on a physical Android device.
+7. Prepare AAB/release signing outside the repository and run the final release-readiness audit.
 
 ## Current blockers
-- Godot runtime is not available in the current execution environment, so the deterministic test and gameplay runtime remain NOT VERIFIED here.
-- No Android export preset has been verified in the repository yet.
-- Physical Android device testing has not been performed.
-- Release signing and Google Play account actions are external owner actions and must remain unclaimed until completed.
+No repository-level blocker. Runtime verification is blocked by the absence of a Godot executable in the current environment.
 
 ## Truth rule
-Never claim a feature, test, build, device run or release step is complete unless repository evidence or an actual execution result verifies it. Management percentages are estimates only.
+Never claim a feature is runtime-tested, Android-built, signed, or Play-ready unless there is direct evidence from the actual tool/build/device result.
