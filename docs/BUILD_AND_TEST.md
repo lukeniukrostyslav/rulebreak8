@@ -42,6 +42,6 @@ A passing smoke test is not a substitute for runtime gameplay QA.
 - Release signing configured outside the repository.
 - Google Play build is AAB, not APK.
 
-Godot supports headless command-line export/testing workflows; an export preset must exist before `--export-release` can produce a build. citeturn0search0turn0search1
+Godot supports headless command-line export/testing workflows; an export preset must exist before `--export-release` can produce a build.
 
-For Google Play, the Android build must be an AAB and signed with a non-debug keystore. Keep the keystore and passwords outside GitHub. citeturn0search3
+For Google Play, the Android build must be an AAB and signed with a non-debug keystore. Keep the keystore and passwords outside GitHub.
