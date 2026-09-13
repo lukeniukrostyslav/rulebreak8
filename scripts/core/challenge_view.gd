@@ -5,7 +5,7 @@ signal input_ready_changed(ready: bool)
 
 var challenge_id := ""
 var visual_root: Control
-var input_ready := true
+var input_ready := false
 var phase_token := 0
 
 func _ready() -> void:
@@ -17,43 +17,33 @@ func show_challenge(challenge: Dictionary) -> void:
     _set_input_ready(false)
     clear_view()
     challenge_id = str(challenge.get("id", ""))
-    visual_root = VBoxContainer.new()
-    visual_root.add_theme_constant_override("separation", 10)
-    visual_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-    visual_root.alignment = BoxContainer.ALIGNMENT_CENTER
-    add_child(visual_root)
+    _new_root()
 
     match str(challenge.get("kind_key", "")):
         "KIND_SEE":
-            _build_see(challenge)
+            _build_see()
             _set_input_ready(true)
         "KIND_REMEMBER":
-            _build_remember(challenge)
-            _set_input_ready(true)
+            await _run_remember(token)
         "KIND_REACT":
-            _build_react(challenge)
-            await get_tree().create_timer(0.75).timeout
-            if token == phase_token:
-                _set_input_ready(true)
-                _label("GO!", 34)
+            await _run_react(token)
         "KIND_SWITCH":
-            _build_switch(challenge)
-            await get_tree().create_timer(0.8).timeout
-            if token == phase_token:
-                _set_input_ready(true)
-                _label("NEW RULE", 26)
+            await _run_switch(token)
         "KIND_TRICK":
-            _build_trick(challenge)
+            _build_trick()
             _set_input_ready(true)
         "KIND_MIX":
-            _build_mix(challenge)
-            await get_tree().create_timer(1.1).timeout
-            if token == phase_token:
-                _set_input_ready(true)
-                _label("REACT", 26)
+            await _run_mix(token)
         _:
-            _build_generic(challenge)
+            _build_generic()
             _set_input_ready(true)
+
+func _new_root() -> void:
+    visual_root = VBoxContainer.new()
+    visual_root.add_theme_constant_override("separation", 8)
+    visual_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    visual_root.alignment = BoxContainer.ALIGNMENT_CENTER
+    add_child(visual_root)
 
 func _set_input_ready(ready: bool) -> void:
     input_ready = ready
@@ -64,7 +54,7 @@ func clear_view() -> void:
         visual_root.queue_free()
         visual_root = null
 
-func _label(text: String, size: int = 34) -> Label:
+func _label(text: String, size: int = 30) -> Label:
     var label := Label.new()
     label.text = text
     label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -73,9 +63,9 @@ func _label(text: String, size: int = 34) -> Label:
     visual_root.add_child(label)
     return label
 
-func _card(text: String, size: int = 46) -> PanelContainer:
+func _card(text: String, size: int = 46, height: int = 78) -> PanelContainer:
     var panel := PanelContainer.new()
-    panel.custom_minimum_size = Vector2(0, 90)
+    panel.custom_minimum_size = Vector2(0, height)
     var label := Label.new()
     label.text = text
     label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -85,40 +75,95 @@ func _card(text: String, size: int = 46) -> PanelContainer:
     visual_root.add_child(panel)
     return panel
 
-func _build_see(challenge: Dictionary) -> void:
-    _label("●   ▲   ■   ◆", 58)
-    _label("        ◆   ← changed", 30)
-    _label("A        B        C        D", 34)
+func _build_see() -> void:
+    var changed := "C"
+    if challenge_id == "mirrored":
+        changed = "D"
+    _label("A        B        C        D", 24)
+    _card("●    ▲    ■    ◆", 48, 82)
+    _label("CHANGED OBJECT: %s" % changed, 26)
 
-func _build_remember(challenge: Dictionary) -> void:
-    _label("●  →  ▲  →  ■", 58)
-    _label("MEMORIZE", 28)
-    await get_tree().create_timer(0.65).timeout
-    if challenge_id == str(challenge.get("id", "")) and visual_root:
-        _label("NOW CHOOSE", 28)
+func _run_remember(token: int) -> void:
+    _label("MEMORIZE", 26)
+    var sequence := "●   →   ▲   →   ■"
+    if challenge_id == "reverse_sequence":
+        sequence = "■   →   ●   →   ▲"
+    elif challenge_id == "order_memory":
+        sequence = "1   →   2   →   3"
+    elif challenge_id == "vanishing_rule":
+        sequence = "A   →   C   →   B"
+    _card(sequence, 44, 86)
+    await get_tree().create_timer(0.9).timeout
+    if token != phase_token or visual_root == null:
+        return
+    clear_view()
+    _new_root()
+    _label("NOW CHOOSE", 30)
+    _card("?   ?   ?", 54, 86)
+    _set_input_ready(true)
 
-func _build_react(challenge: Dictionary) -> void:
+func _run_react(token: int) -> void:
     _label("WAIT...", 30)
-    _card("●", 76)
-    _label("REACT AS SOON AS THE SIGNAL OPENS", 24)
+    _card("○", 72, 86)
+    await get_tree().create_timer(0.75).timeout
+    if token != phase_token or visual_root == null:
+        return
+    clear_view()
+    _new_root()
+    var signal_text := "●"
+    if challenge_id == "only_x":
+        signal_text = "X"
+    elif challenge_id == "color_timer":
+        signal_text = "GREEN"
+    elif challenge_id == "second_signal":
+        signal_text = "SECOND!"
+    _card(signal_text, 58, 92)
+    _label("REACT NOW", 28)
+    _set_input_ready(true)
 
-func _build_switch(challenge: Dictionary) -> void:
-    _label("RULE 1", 28)
-    _card("TAP BLUE", 42)
-    _label("↓  SWITCH  ↓", 30)
-    _card("NOW TAP RED", 42)
+func _run_switch(token: int) -> void:
+    _label("RULE 1", 24)
+    _card("TAP BLUE", 40, 70)
+    await get_tree().create_timer(0.7).timeout
+    if token != phase_token or visual_root == null:
+        return
+    clear_view()
+    _new_root()
+    _label("RULE CHANGED", 26)
+    _card("NOW TAP RED", 40, 82)
+    _label("SWITCH", 28)
+    _set_input_ready(true)
 
-func _build_trick(challenge: Dictionary) -> void:
-    _card("RED", 64)
-    _label("but the word is BLUE", 30)
-    _label("TRUST THE RULE — NOT THE OBVIOUS", 26)
+func _build_trick() -> void:
+    if challenge_id == "dont_press":
+        _card("PRESS IT", 44, 78)
+        _label("THE RULE SAYS: WAIT", 28)
+    elif challenge_id == "largest_wrong":
+        _card("SMALL   MEDIUM   LARGE", 34, 78)
+        _label("THE LARGEST IS WRONG", 26)
+    elif challenge_id == "obvious_wrong":
+        _card("OBVIOUS", 42, 78)
+        _label("THE OBVIOUS ANSWER IS WRONG", 25)
+    else:
+        _card("RED", 58, 78)
+        _label("THE WORD IS BLUE", 26)
+        _label("FOLLOW THE RULE", 25)
 
-func _build_mix(challenge: Dictionary) -> void:
-    _label("SEE", 26)
-    _card("◆   ●   ▲   ◆", 48)
-    _label("↓ SWITCH ↓", 26)
-    _card("NEW RULE: TAP RED", 40)
-    _label("↓ REACT ↓", 26)
+func _run_mix(token: int) -> void:
+    _label("SEE", 24)
+    _card("◆   ●   ▲   ◆", 44, 72)
+    await get_tree().create_timer(0.55).timeout
+    if token != phase_token or visual_root == null:
+        return
+    clear_view()
+    _new_root()
+    _label("SWITCH", 24)
+    _card("NEW RULE: TAP RED", 36, 78)
+    await get_tree().create_timer(0.55).timeout
+    if token != phase_token or visual_root == null:
+        return
+    _label("REACT", 24)
+    _set_input_ready(true)
 
-func _build_generic(challenge: Dictionary) -> void:
-    _card(str(challenge.get("id", "RULE")), 38)
+func _build_generic() -> void:
+    _card(challenge_id, 36, 78)
