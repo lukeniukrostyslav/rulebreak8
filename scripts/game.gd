@@ -2,6 +2,7 @@ extends Control
 
 var challenge_manager := ChallengeManager.new()
 var progression := Progression.new()
+var challenge_view := ChallengeView.new()
 
 var buttons: Array[Button] = []
 var rule_label: Label
@@ -31,12 +32,12 @@ func _build_ui() -> void:
     margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     margin.add_theme_constant_override("margin_left", 48)
     margin.add_theme_constant_override("margin_right", 48)
-    margin.add_theme_constant_override("margin_top", 80)
-    margin.add_theme_constant_override("margin_bottom", 80)
+    margin.add_theme_constant_override("margin_top", 54)
+    margin.add_theme_constant_override("margin_bottom", 54)
     add_child(margin)
 
     var root := VBoxContainer.new()
-    root.add_theme_constant_override("separation", 22)
+    root.add_theme_constant_override("separation", 14)
     margin.add_child(root)
 
     var title := Label.new()
@@ -53,26 +54,30 @@ func _build_ui() -> void:
     rule_label = Label.new()
     rule_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     rule_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-    rule_label.add_theme_font_size_override("font_size", 52)
-    rule_label.custom_minimum_size.y = 150
+    rule_label.add_theme_font_size_override("font_size", 42)
+    rule_label.custom_minimum_size.y = 105
     root.add_child(rule_label)
+
+    challenge_view.custom_minimum_size = Vector2(0, 230)
+    challenge_view.size_flags_vertical = Control.SIZE_EXPAND_FILL
+    root.add_child(challenge_view)
 
     streak_label = Label.new()
     streak_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    streak_label.add_theme_font_size_override("font_size", 28)
+    streak_label.add_theme_font_size_override("font_size", 24)
     root.add_child(streak_label)
 
     var grid := GridContainer.new()
     grid.columns = 2
-    grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
-    grid.add_theme_constant_override("h_separation", 22)
-    grid.add_theme_constant_override("v_separation", 22)
+    grid.custom_minimum_size.y = 250
+    grid.add_theme_constant_override("h_separation", 16)
+    grid.add_theme_constant_override("v_separation", 16)
     root.add_child(grid)
 
     for i in 4:
         var b := Button.new()
-        b.add_theme_font_size_override("font_size", 30)
-        b.custom_minimum_size = Vector2(0, 240)
+        b.add_theme_font_size_override("font_size", 28)
+        b.custom_minimum_size = Vector2(0, 115)
         b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
         b.pressed.connect(_on_choice.bind(i))
         grid.add_child(b)
@@ -80,8 +85,8 @@ func _build_ui() -> void:
 
     feedback_label = Label.new()
     feedback_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    feedback_label.add_theme_font_size_override("font_size", 30)
-    feedback_label.custom_minimum_size.y = 80
+    feedback_label.add_theme_font_size_override("font_size", 28)
+    feedback_label.custom_minimum_size.y = 55
     root.add_child(feedback_label)
 
 func _show_challenge() -> void:
@@ -93,6 +98,7 @@ func _show_challenge() -> void:
     rule_label.text = tr(str(challenge.get("rule_key", "")))
     streak_label.text = "%s  %d   •   %s  %d" % [tr("STREAK"), progression.streak, tr("BEST"), progression.best_streak]
     feedback_label.text = ""
+    challenge_view.show_challenge(challenge)
 
     var choices: Array = challenge.get("choices", [])
     for i in buttons.size():
