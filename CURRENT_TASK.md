@@ -7,46 +7,39 @@ ACTIVE
 ENGINEERING / MVP BUILD
 
 ## Current mission
-Turn the existing Godot foundation into a reusable, testable RULEBREAK game loop with real challenge modules and a verifiable Android release path.
+Turn the existing Godot foundation into a reusable, testable RULEBREAK game loop with 100 real challenge entries and a verifiable Android release path.
 
-## Verified in this checkpoint
-- The repository contains the deterministic ChallengeManager and ChallengeView tests.
-- The previous CI run `34754337567` passed the deterministic ChallengeManager gate.
-- The project targets Godot 4.3 stable and has a credentials-free Android arm64 debug export preset.
+## Latest checkpoint
+- `ChallengeManager` now contains exactly 100 catalog entries: 20 original + 80 extended.
+- Fixed the manager's missing explicit `index` declaration.
+- Updated the deterministic manager test to require 100 levels, validate all six families and verify level-100 wraparound.
+- GitHub Actions run `34784210063` for commit `2741183d41ef4342845f9d70ea44b4b970ba42d6` is currently **IN PROGRESS**. Do not mark the new gate VERIFIED until it finishes successfully.
+- Existing verified Android Debug Release: `v0.1.0-debug.79`, asset `rulebreak-debug.apk`; this is a debug APK, not a signed Google Play AAB.
 
-## Localization correction in progress
-- The previous approach referenced 84 generated `.translation` files that are not committed to the repository and therefore could not be a reliable clean-checkout runtime path.
-- Replaced that approach with a repository-owned runtime CSV localization loader in `scripts/core/localization.gd`.
-- The loader parses the four committed CSV sources, builds one Godot `Translation` resource per locale at runtime, registers all 21 locales with `TranslationServer`, and selects a supported system locale with English fallback.
-- `project.godot` now autoloads `Localization` and no longer references nonexistent generated translation resources.
-- `tests/test_localization.gd` now verifies all 21 locales and representative runtime translations.
-- GitHub Actions now tests runtime CSV localization rather than counting generated import artifacts.
-- The new CI run for commit `99e6dcf9e0a2f9368108af30d471cb594bb6c37f` is currently **IN PROGRESS**; localization is not marked VERIFIED until that run completes successfully.
-
-## Completed in this checkpoint
-- Live ChallengeManager and Progression are integrated into the game loop.
-- ChallengeView implements all six challenge families: SEE, REMEMBER, REACT, SWITCH, TRICK and MIX.
-- Hardened local progression parsing/writing against malformed save state.
-- Added deterministic ChallengeManager smoke test and verified it in GitHub Actions.
-- Improved reaction challenges so the player sees the prerequisite signal before the response window.
-- Reworked MIX into a coherent SEE → SWITCH → REACT sequence with four positional answers.
-- Removed the misleading "sound" behavior from the visible instruction; the current `sound_switch` catalog item is treated as a visual signal-switch placeholder until real audio is implemented.
-- Added `export_presets.cfg` with a credentials-free Android Debug preset targeting arm64.
-- Added credentials-free GitHub Actions verification workflow pinned to Godot 4.3 stable.
-- Reworked localization to a deterministic runtime CSV path and added its automated gate.
+## Completed / present
+- ChallengeManager + Progression integrated into the game loop.
+- ChallengeView implements SEE, REMEMBER, REACT, SWITCH, TRICK and MIX.
+- Local progression parsing/writing hardened.
+- Deterministic ChallengeManager and ChallengeView tests exist.
+- Runtime CSV localization path exists for 21 locales; latest CI result must be checked before calling localization VERIFIED.
+- Credentials-free Android arm64 Debug export preset exists.
+- Godot 4.3 GitHub Actions verification workflow exists.
+- 100-level challenge catalog is now the content target.
 
 ## Immediate sequence
-1. Finish CI verification of runtime CSV localization.
-2. Audit and localize remaining hardcoded ChallengeView strings.
-3. Replace the visual `sound_switch` placeholder with a real audio-driven mechanic, or formally rename/reclassify it before content lock.
-4. Add stronger deterministic tests for challenge timing/state transitions where feasible.
-5. Validate the Android debug export preset with Godot 4.3 in a Godot-capable environment.
-6. Execute Godot runtime tests when a Godot-capable environment is available.
-7. Test touch input, portrait layouts, persistence restart and all 20 challenges on a physical Android device.
-8. Prepare AAB/release signing outside the repository and run the final release-readiness audit.
+1. Finish/inspect the current 100-level CI run.
+2. Audit remaining hardcoded ChallengeView strings and localization coverage.
+3. Replace or formally reclassify the visual `sound_switch` placeholder.
+4. Strengthen timing/state tests where useful.
+5. Validate the Android export from the current main commit and inspect the APK.
+6. Run Godot runtime tests in a Godot-capable environment.
+7. Physical-device test touch, portrait layout, persistence/restart and all 100 levels.
+8. Prepare signed AAB and final Google Play readiness audit.
 
 ## Current blockers
-No repository-level blocker for the deterministic logic tests. Runtime localization verification is **IN PROGRESS** pending CI result. Android export/device testing and release signing remain unverified.
+- Current 100-level CI run: **IN PROGRESS**.
+- Physical Android device validation: unverified.
+- Google Play signing/AAB: OWNER ACTION when signing credentials and Play Console access are required.
 
 ## Truth rule
-Never claim a feature is runtime-tested, Android-built, signed, localization-verified, or Play-ready unless there is direct evidence from the actual tool/build/device result.
+Never claim runtime-tested, Android-built, signed, localization-verified, or Play-ready without direct evidence from the actual tool/build/device result.
