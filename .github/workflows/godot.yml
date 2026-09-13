@@ -106,4 +106,4 @@ jobs:
           path: build/android/rulebreak-debug.apk
           if-no-files-found: error
 
-# Android verification pipeline: keep the debug export reproducible and credential-free.
+# Android verification pipeline: minimal SDK components, reproducible and credential-free.
