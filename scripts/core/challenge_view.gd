@@ -73,15 +73,31 @@ func _card(text: String, size: int = 46, height: int = 78) -> PanelContainer:
     label.add_theme_font_size_override("font_size", size)
     panel.add_child(label)
     visual_root.add_child(panel)
+    _pop_in(panel)
     return panel
+
+func _pop_in(node: Control) -> void:
+    node.modulate.a = 0.0
+    node.scale = Vector2(0.94, 0.94)
+    var tween := create_tween()
+    tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+    tween.parallel().tween_property(node, "modulate:a", 1.0, 0.18)
+    tween.parallel().tween_property(node, "scale", Vector2.ONE, 0.18)
+
+func _pulse(node: Control) -> void:
+    var tween := create_tween()
+    tween.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+    tween.tween_property(node, "scale", Vector2(1.06, 1.06), 0.12)
+    tween.tween_property(node, "scale", Vector2.ONE, 0.16)
 
 func _build_see() -> void:
     var changed := "C"
     if challenge_id == "mirrored":
         changed = "D"
     _label("A        B        C        D", 24)
-    _card("●    ▲    ■    ◆", 48, 82)
+    var card := _card("●    ▲    ■    ◆", 48, 82)
     _label("CHANGED OBJECT: %s" % changed, 26)
+    _pulse(card)
 
 func _run_remember(token: int) -> void:
     _label("MEMORIZE", 26)
@@ -92,7 +108,8 @@ func _run_remember(token: int) -> void:
         sequence = "1   →   2   →   3"
     elif challenge_id == "vanishing_rule":
         sequence = "A   →   C   →   B"
-    _card(sequence, 44, 86)
+    var sequence_card := _card(sequence, 44, 86)
+    _pulse(sequence_card)
     await get_tree().create_timer(0.9).timeout
     if token != phase_token or visual_root == null:
         return
@@ -117,8 +134,9 @@ func _run_react(token: int) -> void:
         signal_text = "GREEN"
     elif challenge_id == "second_signal":
         signal_text = "SECOND!"
-    _card(signal_text, 58, 92)
+    var signal_card := _card(signal_text, 58, 92)
     _label("REACT NOW", 28)
+    _pulse(signal_card)
     _set_input_ready(true)
 
 func _run_switch(token: int) -> void:
@@ -130,8 +148,9 @@ func _run_switch(token: int) -> void:
     clear_view()
     _new_root()
     _label("RULE CHANGED", 26)
-    _card("NOW TAP RED", 40, 82)
+    var new_rule := _card("NOW TAP RED", 40, 82)
     _label("SWITCH", 28)
+    _pulse(new_rule)
     _set_input_ready(true)
 
 func _build_trick() -> void:
@@ -158,7 +177,8 @@ func _run_mix(token: int) -> void:
     clear_view()
     _new_root()
     _label("SWITCH", 24)
-    _card("NEW RULE: TAP RED", 36, 78)
+    var new_rule := _card("NEW RULE: TAP RED", 36, 78)
+    _pulse(new_rule)
     await get_tree().create_timer(0.55).timeout
     if token != phase_token or visual_root == null:
         return
