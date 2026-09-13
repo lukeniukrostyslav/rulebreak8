@@ -2,14 +2,14 @@ class_name ChallengeManager
 extends RefCounted
 
 var challenges: Array[Dictionary] = [
-    {"id":"switch_blue", "rule":"TAP BLUE", "correct":0, "kind":"SWITCH"},
-    {"id":"switch_red", "rule":"TAP RED", "correct":1, "kind":"SWITCH"},
-    {"id":"largest", "rule":"TAP THE LARGEST", "correct":2, "kind":"TRICK"},
-    {"id":"word", "rule":"TAP THE WORD, NOT THE COLOR", "correct":3, "kind":"TRICK"},
-    {"id":"ignore_first", "rule":"IGNORE THE FIRST SIGNAL", "correct":1, "kind":"REACT"},
-    {"id":"no_repeat", "rule":"DO NOT REPEAT YOUR LAST ACTION", "correct":2, "kind":"SWITCH"},
-    {"id":"mirror", "rule":"FIND THE MIRRORED SHAPE", "correct":0, "kind":"SEE"},
-    {"id":"obvious_wrong", "rule":"THE OBVIOUS ANSWER IS WRONG", "correct":3, "kind":"TRICK"}
+    {"id":"blue", "rule":"TAP BLUE", "choices":["BLUE","RED","GREEN","YELLOW"], "correct":0, "kind":"SWITCH"},
+    {"id":"red", "rule":"TAP RED", "choices":["BLUE","RED","GREEN","YELLOW"], "correct":1, "kind":"SWITCH"},
+    {"id":"largest", "rule":"TAP THE LARGEST", "choices":["SMALLEST","LEFT","LARGEST","RIGHT"], "correct":2, "kind":"TRICK"},
+    {"id":"word", "rule":"TAP THE WORD, NOT THE COLOR", "choices":["WORD","COLOR","BOTH","NONE"], "correct":0, "kind":"TRICK"},
+    {"id":"second_signal", "rule":"IGNORE THE FIRST SIGNAL", "choices":["FIRST","SECOND","BOTH","NONE"], "correct":1, "kind":"REACT"},
+    {"id":"no_repeat", "rule":"DO NOT REPEAT YOUR LAST ACTION", "choices":["LEFT","RIGHT","LEFT AGAIN","NONE"], "correct":1, "kind":"SWITCH"},
+    {"id":"mirror", "rule":"FIND THE MIRRORED SHAPE", "choices":["A","B","C","D"], "correct":0, "kind":"SEE"},
+    {"id":"obvious_wrong", "rule":"THE OBVIOUS ANSWER IS WRONG", "choices":["OBVIOUS","SECOND","THIRD","FOURTH"], "correct":1, "kind":"TRICK"}
 ]
 
 var index := 0
