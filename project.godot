@@ -25,6 +25,7 @@ locale/fallback="en"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
 textures/default_filters/use_nearest_mipmap_filter=false
+textures/vram_compression/import_etc2_astc=true
 
 [input]
 tap={"deadzone":0.5,"events":[Object(InputEventScreenTouch,"pressed":true), Object(InputEventMouseButton,"button_index":1,"pressed":true)]}
