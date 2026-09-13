@@ -6,6 +6,7 @@ config_version=5
 config/name="RULEBREAK"
 run/main_scene="res://main.tscn"
 config/features=PackedStringArray("4.3")
+config/icon="res://icon.svg"
 
 [display]
 window/size/viewport_width=1080
