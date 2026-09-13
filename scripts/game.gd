@@ -13,30 +13,16 @@ var reaction_started_at_ms := -1
 var reaction_duration_ms := 0
 
 func _ready() -> void:
-    _load_generated_translations()
-    _set_device_language()
+    # Localization is repository-owned and loaded by the Localization autoload.
+    # Keep this guard so the scene remains safe if autoload initialization is delayed.
+    if not Localization.loaded:
+        Localization.load_translations()
+    TranslationServer.set_locale(Localization.select_system_locale())
     challenge_view.input_ready_changed.connect(_on_visual_input_ready)
     challenge_view.response_window_started.connect(_on_response_window_started)
     progression.load_state()
     _build_ui()
     _show_challenge()
-
-func _load_generated_translations() -> void:
-    var locale_dir := DirAccess.open("res://locale")
-    if locale_dir == null:
-        return
-    for file_name in locale_dir.get_files():
-        if not file_name.ends_with(".translation"):
-            continue
-        var translation := ResourceLoader.load("res://locale/" + file_name) as Translation
-        if translation:
-            TranslationServer.add_translation(translation)
-
-func _set_device_language() -> void:
-    var language := OS.get_locale_language()
-    if language.is_empty():
-        language = "en"
-    TranslationServer.set_locale(language)
 
 func _build_ui() -> void:
     var bg := ColorRect.new()
