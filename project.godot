@@ -1,0 +1,23 @@
+; RULEBREAK - Android-first premium puzzle game
+; Godot 4.x
+config_version=5
+
+[application]
+config/name="RULEBREAK"
+run/main_scene="res://main.tscn"
+config/features=PackedStringArray("4.3")
+
+[display]
+window/size/viewport_width=1080
+window/size/viewport_height=1920
+window/size/window_width_override=540
+window/size/window_height_override=960
+window/stretch/mode="canvas_items"
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/default_filters/use_nearest_mipmap_filter=false
+
+[input]
+tap={"deadzone":0.5,"events":[Object(InputEventScreenTouch,"pressed":true), Object(InputEventMouseButton,"button_index":1,"pressed":true)]}
