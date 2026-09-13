@@ -16,7 +16,7 @@ window/stretch/mode="canvas_items"
 
 [internationalization]
 locale/fallback="en"
-locale/translations=PackedStringArray("res://locale/ui.csv", "res://locale/challenges.csv")
+locale/translations=PackedStringArray("res://locale/ui.csv", "res://locale/challenges.csv", "res://locale/extra_a.csv", "res://locale/extra_b.csv")
 
 [rendering]
 renderer/rendering_method="gl_compatibility"
