@@ -91,23 +91,38 @@ func _pulse(node: Control) -> void:
     tween.tween_property(node, "scale", Vector2.ONE, 0.16)
 
 func _build_see() -> void:
-    var changed := "C"
-    if challenge_id == "mirrored":
+    var changed := "A"
+    var arrangement := "●    ▲    ■    ◆"
+    if challenge_id == "speed_change":
+        changed = "C"
+        arrangement = "●    ▲    ◆    ■"
+    elif challenge_id == "mirrored":
         changed = "D"
+        arrangement = "◆    ■    ▲    ●"
     _label("A        B        C        D", 24)
-    var card := _card("●    ▲    ■    ◆", 48, 82)
+    var card := _card(arrangement, 48, 82)
     _label("CHANGED OBJECT: %s" % changed, 26)
     _pulse(card)
 
 func _run_remember(token: int) -> void:
     _label("MEMORIZE", 26)
     var sequence := "●   →   ▲   →   ■"
-    if challenge_id == "reverse_sequence":
+    var answer_hint := "TOP"
+    if challenge_id == "remember_positions":
+        sequence = "TOP   →   RIGHT   →   BOTTOM"
+        answer_hint = "RIGHT"
+    elif challenge_id == "sequence":
+        sequence = "▲   →   ●   →   ■"
+        answer_hint = "▲ ● ■"
+    elif challenge_id == "reverse_sequence":
         sequence = "■   →   ●   →   ▲"
+        answer_hint = "■ ● ▲"
     elif challenge_id == "order_memory":
         sequence = "1   →   2   →   3"
+        answer_hint = "1-2-3"
     elif challenge_id == "vanishing_rule":
         sequence = "A   →   C   →   B"
+        answer_hint = "TAP_C"
     var sequence_card := _card(sequence, 44, 86)
     _pulse(sequence_card)
     await get_tree().create_timer(0.9).timeout
@@ -116,7 +131,7 @@ func _run_remember(token: int) -> void:
     clear_view()
     _new_root()
     _label("NOW CHOOSE", 30)
-    _card("?   ?   ?", 54, 86)
+    _card(answer_hint, 54, 86)
     _set_input_ready(true)
 
 func _run_react(token: int) -> void:
@@ -127,30 +142,39 @@ func _run_react(token: int) -> void:
         return
     clear_view()
     _new_root()
-    var signal_text := "●"
-    if challenge_id == "only_x":
-        signal_text = "X"
-    elif challenge_id == "color_timer":
-        signal_text = "GREEN"
-    elif challenge_id == "second_signal":
+    var signal_text := "GREEN"
+    if challenge_id == "second_signal":
         signal_text = "SECOND!"
+    elif challenge_id == "only_x":
+        signal_text = "X"
     var signal_card := _card(signal_text, 58, 92)
     _label("REACT NOW", 28)
     _pulse(signal_card)
     _set_input_ready(true)
 
 func _run_switch(token: int) -> void:
+    var old_rule := "TAP BLUE"
+    var new_rule := "NOW TAP RED"
+    if challenge_id == "sound_switch":
+        old_rule = "KEEP LISTENING"
+        new_rule = "SWITCH RULE"
+    elif challenge_id == "no_repeat":
+        old_rule = "DO NOT REPEAT LEFT"
+        new_rule = "CHOOSE RIGHT"
+    elif challenge_id == "instruction_change":
+        old_rule = "FOLLOW OLD INSTRUCTION"
+        new_rule = "FOLLOW NEW INSTRUCTION"
     _label("RULE 1", 24)
-    _card("TAP BLUE", 40, 70)
+    _card(old_rule, 40, 70)
     await get_tree().create_timer(0.7).timeout
     if token != phase_token or visual_root == null:
         return
     clear_view()
     _new_root()
     _label("RULE CHANGED", 26)
-    var new_rule := _card("NOW TAP RED", 40, 82)
+    var new_rule_card := _card(new_rule, 40, 82)
     _label("SWITCH", 28)
-    _pulse(new_rule)
+    _pulse(new_rule_card)
     _set_input_ready(true)
 
 func _build_trick() -> void:
@@ -161,12 +185,12 @@ func _build_trick() -> void:
         _card("SMALL   MEDIUM   LARGE", 34, 78)
         _label("THE LARGEST IS WRONG", 26)
     elif challenge_id == "obvious_wrong":
-        _card("OBVIOUS", 42, 78)
+        _card("OBVIOUS   SECOND   THIRD   FOURTH", 28, 78)
         _label("THE OBVIOUS ANSWER IS WRONG", 25)
     else:
         _card("RED", 58, 78)
         _label("THE WORD IS BLUE", 26)
-        _label("FOLLOW THE RULE", 25)
+        _label("FOLLOW THE WORD", 25)
 
 func _run_mix(token: int) -> void:
     _label("SEE", 24)
@@ -177,7 +201,7 @@ func _run_mix(token: int) -> void:
     clear_view()
     _new_root()
     _label("SWITCH", 24)
-    var new_rule := _card("NEW RULE: TAP RED", 36, 78)
+    var new_rule := _card("NEW RULE: TAP C", 36, 78)
     _pulse(new_rule)
     await get_tree().create_timer(0.55).timeout
     if token != phase_token or visual_root == null:
