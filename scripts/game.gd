@@ -1,21 +1,16 @@
 extends Control
 
-const CHALLENGES := [
-    {"rule":"TAP BLUE","correct":0, "kind":"switch"},
-    {"rule":"TAP RED","correct":1, "kind":"switch"},
-    {"rule":"TAP THE LARGEST","correct":2, "kind":"trick"},
-    {"rule":"TAP THE WORD, NOT THE COLOR","correct":3, "kind":"trick"}
-]
+var challenge_manager := ChallengeManager.new()
+var progression := Progression.new()
 
-var challenge_index := 0
-var streak := 0
-var best_streak := 0
 var buttons: Array[Button] = []
 var rule_label: Label
 var streak_label: Label
 var feedback_label: Label
+var challenge_label: Label
 
 func _ready() -> void:
+    progression.load_state()
     _build_ui()
     _show_challenge()
 
@@ -34,7 +29,7 @@ func _build_ui() -> void:
     add_child(margin)
 
     var root := VBoxContainer.new()
-    root.add_theme_constant_override("separation", 28)
+    root.add_theme_constant_override("separation", 22)
     margin.add_child(root)
 
     var title := Label.new()
@@ -43,10 +38,15 @@ func _build_ui() -> void:
     title.add_theme_font_size_override("font_size", 42)
     root.add_child(title)
 
+    challenge_label = Label.new()
+    challenge_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    challenge_label.add_theme_font_size_override("font_size", 20)
+    root.add_child(challenge_label)
+
     rule_label = Label.new()
     rule_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     rule_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-    rule_label.add_theme_font_size_override("font_size", 56)
+    rule_label.add_theme_font_size_override("font_size", 52)
     rule_label.custom_minimum_size.y = 150
     root.add_child(rule_label)
 
@@ -65,8 +65,8 @@ func _build_ui() -> void:
     for i in 4:
         var b := Button.new()
         b.text = str(i + 1)
-        b.add_theme_font_size_override("font_size", 44)
-        b.custom_minimum_size = Vector2(0, 260)
+        b.add_theme_font_size_override("font_size", 36)
+        b.custom_minimum_size = Vector2(0, 240)
         b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
         b.pressed.connect(_on_choice.bind(i))
         grid.add_child(b)
@@ -74,33 +74,36 @@ func _build_ui() -> void:
 
     feedback_label = Label.new()
     feedback_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    feedback_label.add_theme_font_size_override("font_size", 34)
+    feedback_label.add_theme_font_size_override("font_size", 30)
     feedback_label.custom_minimum_size.y = 80
     root.add_child(feedback_label)
 
 func _show_challenge() -> void:
-    var challenge: Dictionary = CHALLENGES[challenge_index]
-    rule_label.text = challenge.rule
-    streak_label.text = "STREAK  %d   •   BEST  %d" % [streak, best_streak]
+    var challenge: Dictionary = challenge_manager.current()
+    var total := challenge_manager.challenges.size()
+    var position := challenge_manager.index + 1
+    challenge_label.text = "CHALLENGE  %d / %d   •   %s" % [position, total, str(challenge.get("kind", "")).to_upper()]
+    rule_label.text = str(challenge.get("rule", ""))
+    streak_label.text = "STREAK  %d   •   BEST  %d" % [progression.streak, progression.best_streak]
     feedback_label.text = ""
+    var labels := ["BLUE", "RED", "LARGEST", "WORD"]
     for i in buttons.size():
-        buttons[i].text = ["BLUE", "RED", "LARGEST", "WORD"][i]
+        buttons[i].text = labels[i]
         buttons[i].disabled = false
 
 func _on_choice(choice: int) -> void:
-    var challenge: Dictionary = CHALLENGES[challenge_index]
-    var correct: bool = choice == challenge.correct
+    var correct := challenge_manager.check(choice)
     for b in buttons:
         b.disabled = true
+
+    progression.record(correct)
+
     if correct:
-        streak += 1
-        best_streak = max(best_streak, streak)
         feedback_label.text = "CORRECT  ✓"
-        challenge_index = (challenge_index + 1) % CHALLENGES.size()
+        challenge_manager.next()
         await get_tree().create_timer(0.35).timeout
-        _show_challenge()
     else:
-        feedback_label.text = "WRONG  •  BREAK THE RULE"
-        streak = 0
+        feedback_label.text = "WRONG  •  TRY AGAIN"
         await get_tree().create_timer(0.7).timeout
-        _show_challenge()
+
+    _show_challenge()
