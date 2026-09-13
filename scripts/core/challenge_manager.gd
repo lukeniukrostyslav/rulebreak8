@@ -1,6 +1,8 @@
 class_name ChallengeManager
 extends RefCounted
 
+var index: int = 0
+
 var challenges: Array[Dictionary] = [
     {"id":"see_change","rule_key":"RULE_SEE_CHANGE","choices":["A","B","C","D"],"correct":0,"kind_key":"KIND_SEE"},
     {"id":"remember_positions","rule_key":"RULE_REMEMBER_POS","choices":["TOP","RIGHT","BOTTOM","LEFT"],"correct":1,"kind_key":"KIND_REMEMBER"},
