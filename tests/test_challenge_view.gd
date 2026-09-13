@@ -24,7 +24,7 @@ func _init() -> void:
     view.show_challenge(remember)
     assert(not view.input_ready)
     view.show_challenge(see)
-    await get_tree().create_timer(0.05).timeout
+    await create_timer(0.05).timeout
     assert(view.input_ready)
     assert(view.challenge_id == "see_change")
     assert(view.phase_token == 3)
@@ -35,9 +35,9 @@ func _init() -> void:
         "correct": 2
     }
     view.show_challenge(react)
-    await get_tree().create_timer(1.0).timeout
+    await create_timer(1.0).timeout
     assert(view.input_ready)
-    await get_tree().create_timer(0.55).timeout
+    await create_timer(0.55).timeout
     assert(not view.input_ready)
 
     print("RULEBREAK ChallengeView timing/state tests: PASS")
