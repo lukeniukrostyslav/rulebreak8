@@ -1,0 +1,13 @@
+keys,en,es,pt_BR,fr,de,it,ru,uk,pl,tr,nl,ar,he,hi,id,vi,th,ja,ko,zh,zh_TW
+TOP,TOP,ARRIBA,CIMA,HAUT,OBEN,ALTO,ВЕРХ,ВГОРУ,GÓRA,ÜST,BOVEN,أعلى,למעלה,ऊपर,ATAS,TRÊN,บน,上,위,上,上
+RIGHT,RIGHT,DERECHA,DIREITA,DROITE,RECHTS,DESTRA,ВПРАВО,ПРАВОРУЧ,PRAWO,SAĞ,RECHTS,يمين,ימין,दायाँ,KANAN,PHẢI,ขวา,右,오른쪽,右,右
+BOTTOM,BOTTOM,ABAJO,BAIXO,BAS,UNTEN,BASSO,НИЗ,ВНИЗ,DÓŁ,ALT,ONDER,أسفل,למטה,नीचे,BAWAH,DƯỚI,ล่าง,下,아래,下,下
+LEFT,LEFT,IZQUIERDA,ESQUERDA,GAUCHE,LINKS,SINISTRA,ВЛЕВО,ЛІВОРУЧ,LEWO,SOL,LINKS,يسار,שמאל,बायाँ,KIRI,TRÁI,ซ้าย,左,왼쪽,左,左
+FOLLOW_NEW,FOLLOW NEW,FOLLOW NUEVA,SIGA A NOVA,SUIVEZ LA NOUVELLE,NEUE BEFOLGEN,SEGUI LA NUOVA,СЛЕДУЙ НОВОЙ,ДОТРИМУЙСЯ НОВОЇ,PODĄŻAJ ZA NOWĄ,YENİYİ UYGULA,VOLG DE NIEUWE,اتبع الجديدة,עקוב אחר החדש,नए का पालन करें,IKUTI YANG BARU,THEO LUẬT MỚI,ทำตามกฎใหม่,新しい指示に従う,새 규칙 따르기,遵循新指令,遵循新指令
+FOLLOW_OLD,FOLLOW OLD,FOLLOW ANTIGUA,SIGA A ANTIGA,SUIVEZ L'ANCIENNE,ALTE BEFOLGEN,SEGUI LA VECCHIA,СЛЕДУЙ СТАРОЙ,ДОТРИМУЙСЯ СТАРОЇ,PODĄŻAJ ZA STARĄ,ESKİYİ UYGULA,VOLG DE OUDE,اتبع القديمة,עקוב אחר הישן,पुराने का पालन करें,IKUTI YANG LAMA,THEO LUẬT CŨ,ทำตามกฎเดิม,古い指示に従う,이전 규칙 따르기,遵循旧指令,遵循舊指令
+IGNORE_BOTH,IGNORE BOTH,IGNORA AMBAS,IGNORE AMBAS,IGNOREZ LES DEUX,BEIDE IGNORIEREN,IGNORA ENTRAMBI,ИГНОРИРУЙ ОБА,ІГНОРУЙ ОБИДВА,ZIGNORUJ OBA,İKİSİNİ DE YOK SAY,NEGEER BEIDE,تجاهلهما,התעלם משניהם,दोनों अनदेखा करें,ABAIKAN KEDUANYA,BỎ QUA CẢ HAI,ไม่สนใจทั้งคู่,両方無視,둘 다 무시,忽略两者,忽略兩者
+TAP_ALL,TAP ALL,TOCA TODO,TOQUE EM TODOS,TOUCHEZ TOUT,ALLE ANTIPPEN,TOCCA TUTTO,НАЖМИ ВСЁ,НАТИСНИ ВСЕ,KLIKNIJ WSZYSTKO,HEPSİNE DOKUN,TIK ALLES,اضغط الكل,לחץ על כולם,सब टैप करें,TEKAN SEMUA,CHẠM TẤT CẢ,แตะทั้งหมด,すべてタップ,모두 누르기,全部点击,全部點擊
+TAP_A,TAP A,TOCA A,TOQUE A,TOUCHEZ A,A ANTIPPEN,TOCCA A,НАЖМИ A,НАТИСНИ A,KLIKNIJ A,A'YA DOKUN,TIK A,اضغط A,לחץ A,A टैप करें,TEKAN A,CHẠM A,แตะ A,Aをタップ,A 누르기,点击A,點擊A
+TAP_B,TAP B,TOCA B,TOQUE B,TOUCHEZ B,B ANTIPPEN,TOCCA B,НАЖМИ B,НАТИСНИ B,KLIKNIJ B,B'YE DOKUN,TIK B,اضغط B,לחץ B,B टैप करें,TEKAN B,CHẠM B,แตะ B,Bをタップ,B 누르기,点击B,點擊B
+TAP_C,TAP C,TOCA C,TOQUE C,TOUCHEZ C,C ANTIPPEN,TOCCA C,НАЖМИ C,НАТИСНИ C,KLIKNIJ C,C'YE DOKUN,TIK C,اضغط C,לחץ C,C टैप करें,TEKAN C,CHẠM C,แตะ C,Cをタップ,C 누르기,点击C,點擊C
+TAP_D,TAP D,TOCA D,TOQUE D,TOUCHEZ D,D ANTIPPEN,TOCCA D,НАЖМИ D,НАТИСNI D,KLIKNIJ D,D'YE DOKUN,TIK D,اضغط D,לחץ D,D टैप करें,TEKAN D,CHẠM D,แตะ D,Dをタップ,D 누르기,点击D,點擊D
