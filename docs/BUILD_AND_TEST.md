@@ -2,9 +2,9 @@
 
 ## Deterministic smoke test
 
-The repository now contains `tests/test_challenge_manager.gd`.
+The repository contains `tests/test_challenge_manager.gd`.
 
-Run it with a Godot editor binary from the project root:
+Run it with a Godot 4.3 editor binary from the project root:
 
 ```bash
 godot --headless --path . --script tests/test_challenge_manager.gd
@@ -28,14 +28,19 @@ The workflow:
 
 1. Checks out the repository.
 2. Downloads the pinned Godot 4.3 stable Linux binary.
-3. Opens/imports the project headlessly and exits.
-4. Runs `tests/test_challenge_manager.gd` headlessly.
+3. Imports the project headlessly.
+4. Verifies that the expected generated `.translation` resources exist after import.
+5. Runs the deterministic ChallengeManager test.
+6. Runs the deterministic ChallengeView timing/state test.
+7. Runs the localization import/runtime test.
+
+The localization test is intentionally separate from the gameplay smoke tests. Translation import/runtime must not be considered verified merely because the Godot editor import command exits successfully.
 
 The workflow is a repository-level verification mechanism. Its existence does **not** mean the current commit has passed CI; the actual workflow run must be checked before reporting a verified result.
 
 ## Development gate
 
-1. Open project in Godot 4.x.
+1. Open project in Godot 4.3.
 2. Run the main scene.
 3. Verify the rule is visible before input.
 4. Verify correct input increments streak and advances.
@@ -44,7 +49,9 @@ The workflow is a repository-level verification mechanism. Its existence does **
 7. Test touch input on a physical Android device.
 8. Check portrait layout at multiple phone resolutions.
 9. Run the deterministic ChallengeManager smoke test.
-10. Verify every challenge visually and semantically, including timing-dependent challenges.
+10. Run the ChallengeView timing/state test.
+11. Verify localization on representative locales and confirm no hardcoded player-facing strings remain in challenge modules.
+12. Verify every challenge visually and semantically, including timing-dependent challenges.
 
 ## Release gate
 
