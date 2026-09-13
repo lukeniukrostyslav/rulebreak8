@@ -45,7 +45,9 @@ jobs:
           sdkmanager --install \
             "platform-tools" \
             "platforms;android-34" \
-            "build-tools;34.0.0"
+            "build-tools;34.0.0" \
+            "cmake;3.10.2.4988404" \
+            "ndk;23.2.8568313"
           yes | sdkmanager --licenses >/dev/null || true
 
       - name: Verify Android SDK
@@ -56,6 +58,9 @@ jobs:
           sdkmanager --version
           test -d "$ANDROID_HOME/platforms/android-34"
           test -d "$ANDROID_HOME/build-tools/34.0.0"
+          test -d "$ANDROID_HOME/cmake/3.10.2.4988404"
+          test -d "$ANDROID_HOME/ndk/23.2.8568313"
+          test -x "$ANDROID_HOME/platform-tools/adb"
 
       - name: Install Godot 4.3 stable
         run: |
@@ -138,4 +143,4 @@ jobs:
           path: build/android/rulebreak-debug.apk
           if-no-files-found: error
 
-# Android verification pipeline: minimal SDK components, reproducible and credential-free.
+# Android verification pipeline: reproducible Godot 4.3 + Android SDK/NDK/CMake build.
