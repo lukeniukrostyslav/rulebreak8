@@ -82,7 +82,7 @@ jobs:
             -validity 10000 \
             -dname "CN=Android Debug,O=Android,C=US" \
             -noprompt
-          cat > "$HOME/.config/godot/editor_settings-4.tres" <<EOF
+          cat > "$HOME/.config/godot/editor_settings-4.3.tres" <<EOF
           [gd_resource type="EditorSettings" format=3]
 
           [resource]
@@ -92,7 +92,7 @@ jobs:
           export/android/debug_keystore_user = "androiddebugkey"
           export/android/debug_keystore_pass = "android"
           EOF
-          test -f "$HOME/.config/godot/editor_settings-4.tres"
+          test -f "$HOME/.config/godot/editor_settings-4.3.tres"
           test -f "$HOME/.android/debug.keystore"
           test -d "$ANDROID_HOME/platform-tools"
           test -x "$JAVA_HOME/bin/java"
