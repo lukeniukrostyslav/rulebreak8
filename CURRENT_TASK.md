@@ -18,18 +18,19 @@ Turn the existing Godot foundation into a reusable, testable RULEBREAK game loop
 - Reworked MIX into a coherent SEE → SWITCH → REACT sequence with four positional answers.
 - Removed the misleading "sound" behavior from the visible instruction; the current `sound_switch` catalog item is now treated as a visual signal-switch placeholder until real audio is implemented.
 - Updated README and project-state documentation to reflect actual verification status.
+- Added `export_presets.cfg` with a credentials-free Android Debug preset targeting arm64, so the project now has a repository-level Android export configuration without release secrets.
 
 ## Immediate sequence
 1. Audit and localize remaining hardcoded ChallengeView strings.
 2. Replace the visual `sound_switch` placeholder with a real audio-driven mechanic, or formally rename/reclassify it before content lock.
 3. Add stronger deterministic tests for challenge timing/state transitions where feasible.
-4. Add a safe Android debug export preset/configuration without committing release credentials.
+4. Validate the new Android debug export preset with Godot 4.3 in a Godot-capable environment.
 5. Execute Godot headless/runtime tests when a Godot-capable environment is available.
 6. Test touch input, portrait layouts, persistence restart and all 20 challenges on a physical Android device.
 7. Prepare AAB/release signing outside the repository and run the final release-readiness audit.
 
 ## Current blockers
-No repository-level blocker. Runtime verification is blocked by the absence of a Godot executable in the current environment.
+No repository-level blocker. Runtime verification and Android export execution are blocked by the absence of a Godot executable in the current environment. Release signing remains intentionally outside the repository.
 
 ## Truth rule
 Never claim a feature is runtime-tested, Android-built, signed, or Play-ready unless there is direct evidence from the actual tool/build/device result.
