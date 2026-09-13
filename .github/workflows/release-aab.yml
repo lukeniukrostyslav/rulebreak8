@@ -13,6 +13,7 @@ permissions:
 jobs:
   aab:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v5
@@ -56,14 +57,14 @@ jobs:
       - name: Run runtime gates
         run: |
           set -euo pipefail
-          godot --headless --path . --script tests/test_challenge_manager.gd
-          godot --headless --path . --script tests/test_challenge_view.gd
-          godot --headless --path . --script tests/test_localization.gd
+          timeout 90s godot --headless --path . --script tests/test_challenge_manager.gd
+          timeout 90s godot --headless --path . --script tests/test_challenge_view.gd
+          timeout 90s godot --headless --path . --script tests/test_localization.gd
       - name: Export unsigned release AAB
         run: |
           set -euo pipefail
           mkdir -p build/android
-          godot --headless --path . --export-release "Android Release AAB (Unsigned)" build/android/rulebreak-release.aab
+          timeout 180s godot --headless --path . --export-release "Android Release AAB (Unsigned)" build/android/rulebreak-release.aab
           test -s build/android/rulebreak-release.aab
           unzip -t build/android/rulebreak-release.aab >/dev/null
           unzip -l build/android/rulebreak-release.aab | grep -F 'AndroidManifest.xml'
