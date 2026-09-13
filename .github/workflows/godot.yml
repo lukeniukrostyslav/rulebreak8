@@ -134,7 +134,9 @@ jobs:
           godot --headless --path . --export-debug "Android Debug" build/android/rulebreak-debug.apk
           test -s build/android/rulebreak-debug.apk
           file build/android/rulebreak-debug.apk
-          unzip -l build/android/rulebreak-debug.apk | grep -E '(^|/)lib/arm64-v8a/'
+          unzip -t build/android/rulebreak-debug.apk >/dev/null
+          unzip -l build/android/rulebreak-debug.apk | grep -F 'lib/arm64-v8a/libgodot_android.so'
+          unzip -l build/android/rulebreak-debug.apk | grep -F 'AndroidManifest.xml'
 
       - name: Upload Android debug APK
         uses: actions/upload-artifact@v4
