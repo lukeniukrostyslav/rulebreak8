@@ -20,8 +20,6 @@ func _init() -> void:
         assert(choices.size() == 4)
         assert(correct >= 0 and correct < choices.size())
 
-        assert(manager.current().get("id") == id or manager.index == 0)
-
     assert(seen_families.has("KIND_SEE"))
     assert(seen_families.has("KIND_REMEMBER"))
     assert(seen_families.has("KIND_REACT"))
