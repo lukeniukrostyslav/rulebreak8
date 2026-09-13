@@ -4,6 +4,7 @@ extends Control
 signal input_ready_changed(ready: bool)
 
 var challenge_id := ""
+var correct_index := -1
 var visual_root: Control
 var input_ready := false
 var phase_token := 0
@@ -17,6 +18,7 @@ func show_challenge(challenge: Dictionary) -> void:
     _set_input_ready(false)
     clear_view()
     challenge_id = str(challenge.get("id", ""))
+    correct_index = int(challenge.get("correct", -1))
     _new_root()
 
     match str(challenge.get("kind_key", "")):
@@ -91,38 +93,37 @@ func _pulse(node: Control) -> void:
     tween.tween_property(node, "scale", Vector2.ONE, 0.16)
 
 func _build_see() -> void:
-    var changed := "A"
-    var arrangement := "●    ▲    ■    ◆"
-    if challenge_id == "speed_change":
-        changed = "C"
-        arrangement = "●    ▲    ◆    ■"
-    elif challenge_id == "mirrored":
-        changed = "D"
-        arrangement = "◆    ■    ▲    ●"
     _label("A        B        C        D", 24)
-    var card := _card(arrangement, 48, 82)
-    _label("CHANGED OBJECT: %s" % changed, 26)
-    _pulse(card)
+    var panels: Array[PanelContainer] = []
+    for i in 4:
+        var shape := "●"
+        if i == 1:
+            shape = "▲"
+        elif i == 2:
+            shape = "■"
+        elif i == 3:
+            shape = "◆"
+        if i == correct_index:
+            if challenge_id == "mirrored":
+                shape = "◀"
+            else:
+                shape = "✦"
+        panels.append(_card(shape, 52, 82))
+    _label("FIND THE CHANGE", 26)
 
 func _run_remember(token: int) -> void:
     _label("MEMORIZE", 26)
     var sequence := "●   →   ▲   →   ■"
-    var answer_hint := "TOP"
     if challenge_id == "remember_positions":
         sequence = "TOP   →   RIGHT   →   BOTTOM"
-        answer_hint = "RIGHT"
     elif challenge_id == "sequence":
         sequence = "▲   →   ●   →   ■"
-        answer_hint = "▲ ● ■"
     elif challenge_id == "reverse_sequence":
         sequence = "■   →   ●   →   ▲"
-        answer_hint = "■ ● ▲"
     elif challenge_id == "order_memory":
         sequence = "1   →   2   →   3"
-        answer_hint = "1-2-3"
     elif challenge_id == "vanishing_rule":
         sequence = "A   →   C   →   B"
-        answer_hint = "TAP_C"
     var sequence_card := _card(sequence, 44, 86)
     _pulse(sequence_card)
     await get_tree().create_timer(0.9).timeout
@@ -131,7 +132,7 @@ func _run_remember(token: int) -> void:
     clear_view()
     _new_root()
     _label("NOW CHOOSE", 30)
-    _card(answer_hint, 54, 86)
+    _card("THE SEQUENCE IS GONE", 30, 86)
     _set_input_ready(true)
 
 func _run_react(token: int) -> void:
