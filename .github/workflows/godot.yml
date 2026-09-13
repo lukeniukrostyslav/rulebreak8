@@ -24,6 +24,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Verify Java
+        run: |
+          set -euo pipefail
+          java -version
+          test -n "$JAVA_HOME"
+
       - name: Verify repository files
         run: |
           set -euo pipefail
