@@ -101,7 +101,10 @@ func _show_challenge() -> void:
     var position := challenge_manager.index + 1
     var kind_key := str(challenge.get("kind_key", ""))
     challenge_label.text = "%s  %d / %d   •   %s" % [tr("CHALLENGE"), position, total, tr(kind_key)]
-    rule_label.text = tr(str(challenge.get("rule_key", "")))
+    if str(challenge.get("id", "")) == "rule_switch":
+        rule_label.text = tr("RULE_SWITCH_WATCH")
+    else:
+        rule_label.text = tr(str(challenge.get("rule_key", "")))
     streak_label.text = "%s  %d   •   %s  %d" % [tr("STREAK"), progression.streak, tr("BEST"), progression.best_streak]
     feedback_label.text = ""
     challenge_view.show_challenge(challenge)
