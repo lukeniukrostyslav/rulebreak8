@@ -57,11 +57,11 @@ jobs:
           test -d "$ANDROID_HOME/platforms/android-34"
           test -d "$ANDROID_HOME/build-tools/34.0.0"
 
-      - name: Install Godot 4.3 patch release
+      - name: Install Godot 4.3 stable
         run: |
           set -euo pipefail
-          GODOT_VERSION="4.3.3"
-          BASE_URL="https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable"
+          GODOT_VERSION="4.3"
+          BASE_URL="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable"
           curl -fsSL -o /tmp/godot.zip "$BASE_URL/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
           unzip -q /tmp/godot.zip -d /tmp/godot
           mv "/tmp/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64" /usr/local/bin/godot
@@ -100,10 +100,10 @@ jobs:
       - name: Install Godot export templates
         run: |
           set -euo pipefail
-          GODOT_VERSION="4.3.3"
+          GODOT_VERSION="4.3"
           mkdir -p "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
           curl -fsSL -o /tmp/templates.tpz \
-            "https://github.com/godotengine/godot/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+            "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
           unzip -q /tmp/templates.tpz -d /tmp/templates
           test -d /tmp/templates/templates
           cp -a /tmp/templates/templates/. "$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable/"
