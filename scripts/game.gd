@@ -64,8 +64,7 @@ func _build_ui() -> void:
 
     for i in 4:
         var b := Button.new()
-        b.text = str(i + 1)
-        b.add_theme_font_size_override("font_size", 36)
+        b.add_theme_font_size_override("font_size", 30)
         b.custom_minimum_size = Vector2(0, 240)
         b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
         b.pressed.connect(_on_choice.bind(i))
@@ -86,9 +85,10 @@ func _show_challenge() -> void:
     rule_label.text = str(challenge.get("rule", ""))
     streak_label.text = "STREAK  %d   •   BEST  %d" % [progression.streak, progression.best_streak]
     feedback_label.text = ""
-    var labels := ["BLUE", "RED", "LARGEST", "WORD"]
+
+    var choices: Array = challenge.get("choices", [])
     for i in buttons.size():
-        buttons[i].text = labels[i]
+        buttons[i].text = str(choices[i]) if i < choices.size() else "—"
         buttons[i].disabled = false
 
 func _on_choice(choice: int) -> void:
