@@ -78,14 +78,10 @@ jobs:
           cp -a /tmp/templates/templates/. "$HOME/.local/share/godot/export_templates/4.3.stable/"
           test -f "$HOME/.local/share/godot/export_templates/4.3.stable/android_debug.apk"
 
-      - name: Configure Godot Android paths
+      - name: Import project
         run: |
           set -euo pipefail
-          mkdir -p "$HOME/.config/godot"
           godot --headless --editor --path . --quit-after 1
-          godot --headless --editor --path . --quit-after 1 \
-            --path . \
-            --export-debug "Android Debug" /tmp/rulebreak-preflight.apk || true
 
       - name: Run deterministic tests
         run: |
