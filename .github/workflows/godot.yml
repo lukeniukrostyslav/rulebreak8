@@ -13,6 +13,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - name: Runner preflight
         run: |
@@ -117,9 +118,9 @@ jobs:
       - name: Validate project through headless runtime tests
         run: |
           set -euo pipefail
-          godot --headless --path . --script tests/test_challenge_manager.gd
-          godot --headless --path . --script tests/test_challenge_view.gd
-          godot --headless --path . --script tests/test_localization.gd
+          timeout 90s godot --headless --path . --script tests/test_challenge_manager.gd
+          timeout 90s godot --headless --path . --script tests/test_challenge_view.gd
+          timeout 90s godot --headless --path . --script tests/test_localization.gd
 
       - name: Reset Godot import cache before export
         run: |
@@ -131,7 +132,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p build/android
-          godot --headless --path . --export-debug "Android Debug" build/android/rulebreak-debug.apk
+          timeout 180s godot --headless --path . --export-debug "Android Debug" build/android/rulebreak-debug.apk
           test -s build/android/rulebreak-debug.apk
           file build/android/rulebreak-debug.apk
           unzip -t build/android/rulebreak-debug.apk >/dev/null
