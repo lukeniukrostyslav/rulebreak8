@@ -23,21 +23,38 @@ func _init() -> void:
     await process_frame
 
     assert(manager.challenges.size() == 100, "catalog must contain 100 challenges")
+    var seen := {}
+    var family_counts := {}
 
     for index in manager.challenges.size():
         var challenge: Dictionary = manager.challenges[index]
+        var id := str(challenge.get("id", ""))
+        var family := str(challenge.get("kind_key", ""))
+        assert(not id.is_empty(), "challenge %d has empty id" % index)
+        assert(not seen.has(id), "duplicate challenge id: %s" % id)
+        seen[id] = true
+        assert(challenge.get("choices", []).size() == 4, "%s must have four choices" % id)
+        var correct := int(challenge.get("correct", -1))
+        assert(correct >= 0 and correct < 4, "%s has invalid correct index" % id)
+        family_counts[family] = int(family_counts.get(family, 0)) + 1
+
         view.show_challenge(challenge)
         await process_frame
-
-        var family := str(challenge.get("kind_key", ""))
         if family == "KIND_MIX":
             await _wait(2.25)
         else:
             await _wait(0.05)
 
-        assert(view.visual_root != null, "challenge %d (%s) has no visual root" % [index, challenge.get("id", "")])
-        assert(not _visible_text(view).is_empty(), "challenge %d (%s) rendered no visible text" % [index, challenge.get("id", "")])
-        assert(view.input_ready, "challenge %d (%s) never became answerable" % [index, challenge.get("id", "")])
+        assert(view.visual_root != null, "challenge %d (%s) has no visual root" % [index, id])
+        assert(not _visible_text(view).is_empty(), "challenge %d (%s) rendered no visible text" % [index, id])
+        assert(view.input_ready, "challenge %d (%s) never became answerable" % [index, id])
 
-    print("RULEBREAK all-challenge render contract: PASS — all 100 catalog entries rendered and became answerable")
+    assert(int(family_counts.get("KIND_SEE", 0)) == 16, "SEE distribution drifted")
+    assert(int(family_counts.get("KIND_REMEMBER", 0)) == 16, "REMEMBER distribution drifted")
+    assert(int(family_counts.get("KIND_REACT", 0)) == 17, "REACT distribution drifted")
+    assert(int(family_counts.get("KIND_SWITCH", 0)) == 17, "SWITCH distribution drifted")
+    assert(int(family_counts.get("KIND_TRICK", 0)) == 17, "TRICK distribution drifted")
+    assert(int(family_counts.get("KIND_MIX", 0)) == 6, "MIX distribution drifted")
+
+    print("RULEBREAK all-challenge render contract: PASS — 100 unique entries, four choices, valid answers, exact family distribution, all renderable")
     quit(0)
