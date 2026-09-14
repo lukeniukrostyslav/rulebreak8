@@ -16,6 +16,12 @@ func _visible_text(view) -> String:
                 parts.append(str(child.get_child(0).text))
     return " | ".join(parts)
 
+func _find(manager, challenge_id: String) -> Dictionary:
+    for challenge in manager.challenges:
+        if str(challenge.get("id", "")) == challenge_id:
+            return challenge
+    return {}
+
 func _init() -> void:
     var manager := ChallengeManagerScript.new()
     var view := ChallengeViewScript.new()
@@ -36,18 +42,31 @@ func _init() -> void:
             assert(choices != "BLUE   RED   GREEN   YELLOW", "%s still uses SWITCH generic choices" % id)
         assert(changed != tr("SWITCH_RULE"), "%s still uses SWITCH generic rule" % id)
 
+    # Every extended TRICK level must have four concrete choices, a valid answer,
+    # and a description that is consistent with its intended trick mechanic.
     var trick_ids := [
         "trick_smallest", "trick_second", "trick_hidden", "trick_word", "trick_color",
         "trick_reverse", "trick_forbidden", "trick_slowest", "trick_not_largest",
         "trick_decoy", "trick_mislead", "trick_exception", "trick_wrong_label",
         "trick_obvious_two", "trick_contradiction"
     ]
-    for id in trick_ids:
-        view.show_challenge({"id":id, "kind_key":"KIND_TRICK", "correct":0})
+    var trick_keywords := [
+        "smallest", "obvious", "hidden", "word", "color", "opposite", "forbidden",
+        "slowest", "largest", "decoy", "mislead", "exception", "label", "second", "latest"
+    ]
+    for i in trick_ids.size():
+        var challenge := _find(manager, trick_ids[i])
+        assert(not challenge.is_empty(), "%s missing from catalog" % trick_ids[i])
+        var choices: Array = challenge.get("choices", [])
+        var correct := int(challenge.get("correct", -1))
+        assert(choices.size() == 4, "%s must expose exactly four choices" % trick_ids[i])
+        assert(correct >= 0 and correct < choices.size(), "%s has invalid correct index" % trick_ids[i])
+        assert(str(challenge.get("description", "")).to_lower().contains(trick_keywords[i]), "%s description no longer documents its trick" % trick_ids[i])
+        view.show_challenge(challenge)
         await process_frame
-        assert(view.input_ready, "%s did not become answerable" % id)
-        assert(view.visual_root != null, "%s produced no renderer root" % id)
-        assert(not _visible_text(view).is_empty(), "%s produced empty renderer" % id)
+        assert(view.input_ready, "%s did not become answerable" % trick_ids[i])
+        assert(view.visual_root != null, "%s produced no renderer root" % trick_ids[i])
+        assert(not _visible_text(view).is_empty(), "%s produced empty renderer" % trick_ids[i])
 
     var mix_ids := ["mix_memory_switch", "mix_see_react", "mix_trick_react", "mix_switch_memory", "mix_full"]
     var expected_markers := ["REMEMBER_CHOOSE", "MIX_REACT", "MIX_REACT", "REMEMBER_CHOOSE", "MIX_REACT"]
@@ -63,5 +82,5 @@ func _init() -> void:
     assert(view.visual_root != null)
 
     assert(manager.challenges.size() == 100)
-    print("RULEBREAK family behavior contract: PASS — SWITCH/TRICK concrete coverage and all MIX composite flows")
+    print("RULEBREAK family behavior contract: PASS — SWITCH/TRICK catalog semantics and all MIX composite flows")
     quit(0)
