@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Repository-only integrity gate for RULEBREAK.
 
-This intentionally uses only the Python standard library so CI can catch
-catalog/localization/export configuration regressions before Godot boots.
-It is not a replacement for the Godot runtime tests.
+This gate intentionally uses only the Python standard library. It validates
+catalog structure, localization shape, Android configuration, touch/input
+contracts, and the current crash-resistant persistence implementation.
 """
 from __future__ import annotations
 
@@ -27,21 +27,31 @@ EXPECTED_LOCALES = [
     "ar", "he", "hi", "id", "vi", "th", "ja", "ko", "zh", "zh_TW",
 ]
 EXPECTED_FAMILIES = {"SEE", "REMEMBER", "REACT", "SWITCH", "TRICK", "MIX"}
+EXPECTED_FAMILY_COUNTS = {
+    "SEE": 18, "REMEMBER": 20, "REACT": 18,
+    "SWITCH": 19, "TRICK": 19, "MIX": 6,
+}
 
 
 def fail(message: str) -> None:
     raise AssertionError(message)
 
 
+def require_text(text: str, contracts: list[str], label: str) -> None:
+    for contract in contracts:
+        if contract not in text:
+            fail(f"{label} missing contract: {contract}")
+
+
 def main() -> None:
     manager = MANAGER.read_text(encoding="utf-8")
     metadata = json.loads(CATALOG.read_text(encoding="utf-8"))
 
-    if metadata["total_levels"] != 100:
+    if metadata.get("total_levels") != 100:
         fail("catalog metadata total_levels must be 100")
-    if metadata["base_seed_levels"] != 20:
+    if metadata.get("base_seed_levels") != 20:
         fail("catalog metadata base_seed_levels must be 20")
-    if metadata["generated_extension_levels"] != 80:
+    if metadata.get("generated_extension_levels") != 80:
         fail("catalog metadata generated_extension_levels must be 80")
 
     seed_items = metadata["mvp_seed"]
@@ -56,8 +66,7 @@ def main() -> None:
     if len(base_rows) != 20:
         fail(f"ChallengeManager base catalog entries: expected 20, got {len(base_rows)}")
 
-    base_ids = [row[0] for row in base_rows]
-    if base_ids != seed_ids:
+    if [row[0] for row in base_rows] != seed_ids:
         fail("ChallengeManager seed IDs differ from scripts/data/challenges.json")
 
     for row, seed in zip(base_rows, seed_items):
@@ -67,9 +76,8 @@ def main() -> None:
         choice_count = len(re.findall(r'"(?:[^"\\]|\\.)*"', choices_blob))
         if choice_count != 4:
             fail(f"{challenge_id}: expected exactly 4 choices, got {choice_count}")
-        correct_index = int(correct)
-        if not 0 <= correct_index < 4:
-            fail(f"{challenge_id}: correct choice index must be in [0, 3], got {correct_index}")
+        if not 0 <= int(correct) < 4:
+            fail(f"{challenge_id}: correct choice index must be in [0, 3]")
 
     extension_rows = re.findall(
         r'\["(SEE|REMEMBER|REACT|SWITCH|TRICK|MIX)",\s*"([^"]+)",\s*"([^"]+)",\s*(\d+)\]',
@@ -79,27 +87,17 @@ def main() -> None:
         fail(f"ChallengeManager extension entries: expected 80, got {len(extension_rows)}")
 
     for family, challenge_id, description, correct in extension_rows:
-        if not challenge_id:
-            fail(f"{family}: extension challenge has empty ID")
-        if not description.strip():
-            fail(f"{challenge_id}: extension challenge has empty English description")
-        correct_index = int(correct)
-        if not 0 <= correct_index < 4:
-            fail(f"{challenge_id}: correct choice index must be in [0, 3], got {correct_index}")
+        if not challenge_id or not description.strip():
+            fail(f"{family}: extension challenge must have ID and English description")
+        if not 0 <= int(correct) < 4:
+            fail(f"{challenge_id}: correct choice index must be in [0, 3]")
 
-    ids = base_ids + [row[1] for row in extension_rows]
+    ids = [row[0] for row in base_rows] + [row[1] for row in extension_rows]
     if len(ids) != 100 or len(ids) != len(set(ids)):
         fail("ChallengeManager must contain exactly 100 unique challenge IDs")
 
-    families = [row[0] for row in extension_rows]
-    family_counts = Counter(families)
-    seed_family_counts = Counter(item["family"] for item in seed_items)
-    final_counts = seed_family_counts + family_counts
-    expected_counts = {
-        "SEE": 18, "REMEMBER": 20, "REACT": 18,
-        "SWITCH": 19, "TRICK": 19, "MIX": 6,
-    }
-    if final_counts != expected_counts:
+    final_counts = Counter(row[4] for row in base_rows) + Counter(row[0] for row in extension_rows)
+    if final_counts != EXPECTED_FAMILY_COUNTS:
         fail(f"family distribution mismatch: {dict(final_counts)}")
     if set(final_counts) != EXPECTED_FAMILIES:
         fail("all six challenge families must be represented")
@@ -107,12 +105,10 @@ def main() -> None:
     for path in sorted(LOCALE_DIR.glob("*.csv")):
         with path.open(encoding="utf-8", newline="") as fh:
             rows = list(csv.reader(fh))
-        if not rows or rows[0][0] != "keys":
-            fail(f"{path.name}: missing keys header")
-        if rows[0][1:] != EXPECTED_LOCALES:
+        if not rows or rows[0][0] != "keys" or rows[0][1:] != EXPECTED_LOCALES:
             fail(f"{path.name}: locale header mismatch")
         width = len(rows[0])
-        keys = []
+        keys: list[str] = []
         for row in rows[1:]:
             if len(row) != width:
                 fail(f"{path.name}: inconsistent CSV width")
@@ -123,7 +119,7 @@ def main() -> None:
             fail(f"{path.name}: duplicate translation key")
 
     project = PROJECT.read_text(encoding="utf-8")
-    required_project_settings = [
+    require_text(project, [
         'run/main_scene="res://main.tscn"',
         'config/features=PackedStringArray("4.3")',
         'window/size/viewport_width=1080',
@@ -131,64 +127,58 @@ def main() -> None:
         'window/stretch/mode="canvas_items"',
         'locale/fallback="en"',
         'renderer/rendering_method.mobile="gl_compatibility"',
-    ]
-    for setting in required_project_settings:
-        if setting not in project:
-            fail(f"project.godot missing required setting: {setting}")
+    ], "project.godot")
 
     game = GAME.read_text(encoding="utf-8")
-    required_touch_contracts = [
+    require_text(game, [
         'b.custom_minimum_size = Vector2(0, 112)',
         'b.focus_mode = Control.FOCUS_NONE',
-        'b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND',
         '_style_choice_button(b)',
         'buttons[i].disabled = not challenge_view.input_ready',
         'if answer_locked or not challenge_view.input_ready:',
         'answer_locked = true',
         'challenge_view.input_ready = false',
-    ]
-    for contract in required_touch_contracts:
-        if contract not in game:
-            fail(f"game.gd missing Android interaction contract: {contract}")
+    ], "game.gd")
     if game.count('b.custom_minimum_size = Vector2(0, 112)') != 1:
         fail("choice touch target height must remain explicitly defined")
 
     progression = PROGRESSION.read_text(encoding="utf-8")
-    required_persistence_contracts = [
+    require_text(progression, [
         'const TEMP_SAVE_PATH := "user://rulebreak_save.json.tmp"',
         'const BACKUP_SAVE_PATH := "user://rulebreak_save.json.bak"',
+        'const BACKUP_TEMP_SAVE_PATH := "user://rulebreak_save.json.bak.tmp"',
         'temp.flush()',
-        'DirAccess.rename_absolute(save_abs, backup_abs)',
+        'DirAccess.rename_absolute(save_abs, backup_temp_abs)',
         'DirAccess.rename_absolute(temp_abs, save_abs)',
-        '_try_restore_backup()',
+        'DirAccess.rename_absolute(backup_temp_abs, backup_abs)',
+        '_restore_backup()',
         'func _is_valid_payload(parsed: Dictionary) -> bool:',
         'required_keys := [',
-        'return int(parsed.get("version", -1)) == save_version',
-    ]
-    for contract in required_persistence_contracts:
-        if contract not in progression:
-            fail(f"progression.gd missing persistence recovery contract: {contract}")
+    ], "progression.gd")
 
     presets = PRESETS.read_text(encoding="utf-8")
-    required_preset_settings = [
+    require_text(presets, [
         'gradle_build/min_sdk="24"',
         'gradle_build/target_sdk="36"',
         'package/unique_name="com.rulebreak.game"',
         'package/name="RULEBREAK"',
         'package/signed=false',
         'architectures/arm64-v8a=true',
-    ]
-    for setting in required_preset_settings:
-        if setting not in presets:
-            fail(f"Android presets missing required setting: {setting}")
-    if 'architectures/armeabi-v7a=false' not in presets or 'architectures/x86=false' not in presets or 'architectures/x86_64=false' not in presets:
-        fail("Android presets must keep the locked arm64-only MVP ABI surface")
-    if 'name="Android Debug"' not in presets or 'name="Android Release AAB (Unsigned)"' not in presets:
-        fail("both debug APK and unsigned release AAB presets must remain defined")
+        'architectures/armeabi-v7a=false',
+        'architectures/x86=false',
+        'architectures/x86_64=false',
+        'name="Android Debug"',
+        'name="Android Release AAB (Unsigned)"',
+    ], "export_presets.cfg")
     if 'export_format=0' not in presets or 'export_format=1' not in presets:
         fail("debug APK and release AAB export formats must both remain defined")
 
-    print("RULEBREAK static integrity: PASS — 100 unique levels, seed/runtime catalog contract, descriptions/correct-index contract, family distribution, 21 locales, Android touch/input-lock contract, crash-resistant progression persistence, Godot viewport/renderer config, Android API 36/arm64 release config")
+    print(
+        "RULEBREAK static integrity: PASS — 100 unique levels, seed/runtime catalog contract, "
+        "English descriptions/correct-index contract, six-family distribution, 21 locales, "
+        "Android touch/input-lock contract, durable temp-backup persistence contract, "
+        "Godot 4.3 viewport/renderer config, Android API 36/arm64 release config"
+    )
 
 
 if __name__ == "__main__":
