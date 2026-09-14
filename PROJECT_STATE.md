@@ -59,29 +59,30 @@ Rule Engine → Challenge Manager → Challenge Modules → Progression → UI �
 | Game design / core loop | 100% |
 | Visual direction | 78% |
 | Architecture | 92% |
-| Challenge system | 92% |
-| 100-level content catalog | 85% |
+| Challenge system | 94% |
+| 100-level content catalog | 87% |
 | UI / UX | 78% |
-| Progression / local save | 78% |
-| Localization infrastructure | 88% |
-| Audio / haptics / feedback | 18% |
-| Automated QA / deterministic tests | 52% |
-| Android build pipeline | 82% |
+| Progression / local save | 80% |
+| Localization infrastructure | 92% |
+| Audio / haptics / feedback | 20% |
+| Automated QA / deterministic tests | 62% |
+| Android build pipeline | 95% |
 | Android device QA | 0% |
 | Monetization model | 90% |
 | Production signing | 0% |
-| Google Play readiness | 0% |
-| Release readiness | 0% |
+| Google Play readiness | 5% |
+| Release readiness | 5% |
 
-**Overall: approximately 63%** of the full commercial release target.
+**Overall: approximately 66%** of the full commercial release target.
 
-Percentages are management estimates against the complete product/release scope. They are not code-coverage measurements and must not be interpreted as runtime verification.
+Percentages are management estimates against the complete product/release scope. They are not code-coverage measurements and must not be interpreted as runtime/device verification.
 
 ## Verification status
-- Local Python static integrity gate passes for 100 unique levels, locked family distribution, 21 locales and Android API 36 configuration.
-- `ChallengeViewV2` has explicit local types for the variables that previously caused Godot CI inference failures.
-- Local execution environment still does not contain the Godot executable, so Godot runtime tests and Android exports are not falsely marked as passed.
-- GitHub Actions now includes the static gate before runtime tests and targets Android API 36 for both APK and unsigned AAB verification.
+- Latest hardening commit `32cadfef545c62cb494bb9a07b9502ab21a2510f` passed the `Godot 4.3 verification` GitHub Actions job.
+- The GREEN verification job passed repository integrity, Godot headless ChallengeManager/ChallengeView/localization tests, translation generation, Android Debug APK export, APK integrity checks, artifact upload and GitHub Release publication.
+- The same commit passed the independent `Android release artifact verification` job, including repository integrity, runtime gates, translation generation and unsigned Android Release AAB export/integrity checks.
+- The CI-produced AAB is unsigned by design; this does not constitute production signing or Google Play readiness.
+- Local execution environment still does not contain the Godot executable, so CI remains the authoritative runtime/build verification layer for this session.
 
 ## Release engineering
 - `main.tscn` points directly to the canonical `scripts/game.gd` controller.
@@ -96,14 +97,13 @@ Percentages are management estimates against the complete product/release scope.
 - Production signing is intentionally not embedded in the repository.
 
 ## Next safe work
-1. Verify the GitHub Actions runtime tests and Android APK/AAB exports after the hardening commits.
-2. Fix any runtime/export failures discovered by those gates.
-3. Device-test all 100 levels, touch targets, portrait layout and persistence.
+1. Inspect the newly produced CI APK/AAB artifacts as release evidence.
+2. Strengthen any remaining automated catalog/rendering contract checks without expanding MVP scope.
+3. Device-test all 100 levels, touch targets, portrait layout and persistence/restart behavior.
 4. Finish production-quality audio/haptics/feedback and visual polish.
 5. Prepare production signing and complete the Google Play readiness audit.
 
 ## Current blockers
-- Godot runtime/build verification depends on the GitHub-hosted CI environment from this session.
 - Physical Android device testing is not available in this execution environment.
 - Production signing/Play Console submission require owner-side release credentials and account access.
 - Full audio/visual polish remains incomplete.
