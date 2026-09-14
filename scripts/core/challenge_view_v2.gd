@@ -20,21 +20,29 @@ func _ready()->void: mouse_filter=Control.MOUSE_FILTER_IGNORE
 func supports_challenge(c:Dictionary)->bool:
     return FAMILIES.has(str(c.get("kind_key",""))) and not str(c.get("id","")).is_empty()
 
-func show_challenge(c:Dictionary)->void:
-    phase_token+=1; var token:=phase_token; _set_input_ready(false); clear_view()
-    challenge_id=str(c.get("id","")); correct_index=int(c.get("correct",-1)); _new_root()
-    match str(c.get("kind_key","")):
+func show_challenge(c: Dictionary) -> void:
+    phase_token += 1
+    var token: int = phase_token
+    _set_input_ready(false)
+    clear_view()
+    challenge_id = str(c.get("id", ""))
+    correct_index = int(c.get("correct", -1))
+    _new_root()
+    match str(c.get("kind_key", "")):
         "KIND_SEE": await _see(token)
         "KIND_REMEMBER": await _remember(token)
         "KIND_REACT": await _react(token)
         "KIND_SWITCH": await _switch(token)
         "KIND_TRICK": _trick()
         "KIND_MIX": await _mix(token)
-        _: _label("UNSUPPORTED_CHALLENGE"); _set_input_ready(true)
+        _: _label("UNSUPPORTED_CHALLENGE"); _set_input_ready(false)
 
-func _new_root()->void:
-    visual_root=VBoxContainer.new(); visual_root.add_theme_constant_override("separation",10)
-    visual_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT); visual_root.alignment=BoxContainer.ALIGNMENT_CENTER; add_child(visual_root)
+func _new_root() -> void:
+    visual_root = VBoxContainer.new()
+    visual_root.add_theme_constant_override("separation", 10)
+    visual_root.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+    visual_root.alignment = BoxContainer.ALIGNMENT_CENTER
+    add_child(visual_root)
 
 func _set_input_ready(v:bool)->void:
     input_ready=v; input_ready_changed.emit(v)
@@ -54,7 +62,7 @@ func _see(token:int)->void:
     if challenge_id=="speed_change": await _speed(token); return
     var shapes:=["●","▲","■","◆"]
     for i in 4:
-        var value:=shapes[i]
+        var value: String = shapes[i]
         if i==correct_index: value=["✦","◀","◐","✕"][abs(challenge_id.hash())%4]
         _card(value,52,82)
     _label("SEE_SELECT",24); _set_input_ready(true)
@@ -78,7 +86,7 @@ func _remember(token:int)->void:
 func _react(token:int)->void:
     _label("REACT_WAIT",30); _card("○",72,86); await get_tree().create_timer(0.5).timeout
     if token!=phase_token:return
-    var target:=REACT[correct_index]
+    var target: String = REACT[correct_index]
     if challenge_id=="second_signal" or challenge_id=="react_signal_two": target="SECOND"
     elif challenge_id=="only_x" or challenge_id=="react_x_only": target="X"
     elif challenge_id=="color_timer": target="GREEN"
@@ -99,7 +107,8 @@ func _switch_new()->String:
     return [tr("SWITCH_NEW_RULE"),tr("SWITCH_REVERSE"),tr("SWITCH_DIRECTION"),tr("SWITCH_ACTION")][abs(challenge_id.hash())%4]
 
 func _trick()->void:
-    var mode:=abs(challenge_id.hash())%4; var items:=[]
+    var mode: int = abs(challenge_id.hash()) % 4
+    var items: Array[String] = []
     for i in 4: items.append("EXCEPTION" if i==correct_index else ("SMALL" if mode==0 else "DECOY"))
     _card("   ".join(items),30,84); _label(["TRICK_SIZE","TRICK_FIRST_IS_DECOY","TRICK_DECOY","TRICK_LATEST"][mode],26); _set_input_ready(true)
 
@@ -111,4 +120,6 @@ func _mix(token:int)->void:
     clear_view(); _new_root(); _label("MIX_REACT",24); _card("WAIT → GO",42,76); _label("MIX_CHOOSE_SIGNAL",24); _card("FIRST  SECOND  THIRD  FOURTH",30,78); _set_input_ready(true)
 
 func clear_view()->void:
-    if visual_root: visual_root.queue_free(); visual_root=null
+    if visual_root:
+        visual_root.queue_free()
+        visual_root = null
