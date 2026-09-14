@@ -5,12 +5,12 @@ const ChallengeViewScript = preload("res://scripts/core/challenge_view_v2.gd")
 func _wait(seconds: float) -> void:
     await create_timer(seconds).timeout
 
-func _assert_ready(view: ChallengeViewV2, expected_id: String, expected_ready: bool) -> void:
+func _assert_ready(view: Control, expected_id: String, expected_ready: bool) -> void:
     assert(view.challenge_id == expected_id)
     assert(view.input_ready == expected_ready)
 
 func _init() -> void:
-    var view := ChallengeViewScript.new()
+    var view: Control = ChallengeViewScript.new()
     root.add_child(view)
     await process_frame
     var see := {"id":"see_change", "kind_key":"KIND_SEE", "correct":0}
