@@ -29,6 +29,8 @@ Finish the local/CI commercial-readiness pass without expanding the MVP scope, t
 - Added a headless audio feedback smoke test using the Dummy audio driver.
 - Removed a duplicate Android release preset option.
 - Added an end-to-end headless gameplay-loop smoke test covering main-scene boot, correct answer progression, persistence, input lock, timed readiness and wrong-answer retry behavior.
+- Fixed the gameplay smoke test's timing assumption: `answer_locked` is an immediate synchronous guard while the public answer handler completes its feedback/advance path asynchronously. The test now checks the immediate lock before waiting for the next challenge.
+- Added explicit scene cleanup to the gameplay smoke test so its own CanvasItem/ObjectDB lifecycle does not obscure real regressions with avoidable leak warnings.
 - Integrated compile, gameplay, localization fallback and audio gates into the main Android verification workflow.
 - Integrated the same gates into the unsigned AAB verification workflow.
 - Added release-readiness, artifact identity, signing-boundary, evidence-matrix and GO/NO-GO documentation.
@@ -38,9 +40,12 @@ Finish the local/CI commercial-readiness pass without expanding the MVP scope, t
 - Extended the audio smoke test to cover correct, wrong and timeout feedback.
 - Added a Google Play store listing draft with claims constrained to the current MVP design.
 - Added an engineering Data Safety review documenting the offline/local-data boundary and the owner-side Play Console boundary.
+- Added a physical Android QA checklist covering installation, portrait touch UX, all 100 levels, persistence, audio/haptics, localization, airplane mode and crash/ANR smoke.
+- Added an immutable physical Android QA record template requiring the tested APK SHA-256 and exact source commit SHA.
+- Extended release documentation tests so the physical QA evidence record itself is part of the release-documentation contract.
 
 ## Current verification target
-Current `main` head is the latest commit after the store-listing and data-safety documentation changes. GitHub Actions has been triggered for the current branch; the authoritative result must be read from the exact current SHA, not inherited from an older release-candidate SHA.
+Current `main` head is the latest hardening commit. GitHub Actions has been triggered for the current branch; the authoritative result must be read from the exact current SHA, not inherited from an older release-candidate SHA.
 
 The authoritative release gate requires the current SHA itself to pass critical compile, static integrity, release contract, catalog behavior, localization fallback, audio, main-scene boot, end-to-end gameplay, Debug APK export and unsigned Release AAB export.
 
@@ -58,6 +63,7 @@ The authoritative release gate requires the current SHA itself to pass critical 
 - Existing clean unsigned Release AAB run `34835983641`: PASS on the earlier verified release-candidate source.
 - New release contract gate is committed and is now part of the main Android verification workflow.
 - New timeout audio behavior and its smoke coverage are committed; current-head runtime verification remains pending until CI completes.
+- The previous current-head Android run failed only at the gameplay smoke assertion because the test expected the asynchronous answer handler to remain locked after its 350 ms feedback delay. That test contract has now been corrected to check the immediate synchronous lock and then verify the completed transition.
 - Current-head Android/AAB verification must not be described as GREEN until the new gate and all existing gates pass on the exact current SHA.
 - Physical Android QA: NOT VERIFIED in this environment.
 - Production signing: OWNER ACTION.
