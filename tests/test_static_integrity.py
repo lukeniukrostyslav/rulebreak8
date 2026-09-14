@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MANAGER = ROOT / "scripts/core/challenge_manager.gd"
 CATALOG = ROOT / "scripts/data/challenges.json"
 PRESETS = ROOT / "export_presets.cfg"
+PROJECT = ROOT / "project.godot"
 LOCALE_DIR = ROOT / "locale"
 
 EXPECTED_LOCALES = [
@@ -119,17 +120,40 @@ def main() -> None:
         if len(keys) != len(set(keys)):
             fail(f"{path.name}: duplicate translation key")
 
+    project = PROJECT.read_text(encoding="utf-8")
+    required_project_settings = [
+        'run/main_scene="res://main.tscn"',
+        'config/features=PackedStringArray("4.3")',
+        'window/size/viewport_width=1080',
+        'window/size/viewport_height=1920',
+        'window/stretch/mode="canvas_items"',
+        'locale/fallback="en"',
+        'renderer/rendering_method.mobile="gl_compatibility"',
+    ]
+    for setting in required_project_settings:
+        if setting not in project:
+            fail(f"project.godot missing required setting: {setting}")
+
     presets = PRESETS.read_text(encoding="utf-8")
-    if 'gradle_build/target_sdk="36"' not in presets:
-        fail("Android presets must target API 36 for current Google Play submission requirements")
-    if 'package/unique_name="com.rulebreak.game"' not in presets:
-        fail("Android package name missing")
-    if 'architectures/arm64-v8a=true' not in presets:
-        fail("Android presets must include arm64-v8a")
+    required_preset_settings = [
+        'gradle_build/min_sdk="24"',
+        'gradle_build/target_sdk="36"',
+        'package/unique_name="com.rulebreak.game"',
+        'package/name="RULEBREAK"',
+        'package/signed=false',
+        'architectures/arm64-v8a=true',
+    ]
+    for setting in required_preset_settings:
+        if setting not in presets:
+            fail(f"Android presets missing required setting: {setting}")
     if 'architectures/armeabi-v7a=false' not in presets or 'architectures/x86=false' not in presets or 'architectures/x86_64=false' not in presets:
         fail("Android presets must keep the locked arm64-only MVP ABI surface")
+    if 'name="Android Debug"' not in presets or 'name="Android Release AAB (Unsigned)"' not in presets:
+        fail("both debug APK and unsigned release AAB presets must remain defined")
+    if 'export_format=0' not in presets or 'export_format=1' not in presets:
+        fail("debug APK and release AAB export formats must both remain defined")
 
-    print("RULEBREAK static integrity: PASS — 100 unique levels, seed/runtime catalog contract, descriptions/correct-index contract, family distribution, 21 locales, Android API 36/arm64")
+    print("RULEBREAK static integrity: PASS — 100 unique levels, seed/runtime catalog contract, descriptions/correct-index contract, family distribution, 21 locales, Godot viewport/renderer config, Android API 36/arm64 release config")
 
 
 if __name__ == "__main__":
