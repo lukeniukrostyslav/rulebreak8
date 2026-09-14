@@ -21,6 +21,7 @@ func _ready() -> void:
     challenge_view.input_ready_changed.connect(_on_visual_input_ready)
     challenge_view.response_window_started.connect(_on_response_window_started)
     progression.load_state()
+    challenge_manager.index = progression.current_level
     _build_ui()
     _show_challenge()
 
@@ -141,10 +142,13 @@ func _on_choice(choice: int) -> void:
 
     if correct:
         feedback_label.text = "%s  ✓" % tr("CORRECT")
+        Input.vibrate_handheld(35)
         challenge_manager.next()
+        progression.set_current_level(challenge_manager.index)
         await get_tree().create_timer(0.35).timeout
     else:
         feedback_label.text = "%s  •  %s" % [tr("WRONG"), tr("TRY_AGAIN")]
+        Input.vibrate_handheld(55)
         await get_tree().create_timer(0.7).timeout
 
     _show_challenge()
