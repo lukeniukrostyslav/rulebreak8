@@ -317,7 +317,10 @@ func _on_choice(choice: int) -> void:
         feedback_label.add_theme_color_override("font_color", Color("FF8F8F"))
         _animate_feedback(false)
         Input.vibrate_handheld(55)
-        audio_feedback.play_wrong()
+        if reaction_timed_out:
+            audio_feedback.play_timeout()
+        else:
+            audio_feedback.play_wrong()
         streak_label.text = "%s  %d   •   %s  %d" % [tr("STREAK"), progression.streak, tr("BEST"), progression.best_streak]
         await get_tree().create_timer(0.7).timeout
 
