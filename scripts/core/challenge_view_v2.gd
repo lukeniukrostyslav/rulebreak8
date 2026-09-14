@@ -220,7 +220,7 @@ func _memory_sequence()->String:
         "order_memory": return "1  →  2  →  3"
         "sequence": return "▲  →  ●  →  ■"
         "reverse_sequence": return "■  →  ●  →  ▲"
-        _: return MEM[abs(challenge_id.hash())%MEM.size]
+        _: return MEM[abs(challenge_id.hash())%MEM.size()]
 
 func _react(token:int)->void:
     _label("REACT_WAIT",30)
