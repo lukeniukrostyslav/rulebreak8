@@ -47,26 +47,32 @@ Finish the local/CI commercial-readiness pass without expanding the MVP scope, t
 - Added a controller-side reaction-window watchdog keyed to the exact response-window timestamp/duration. A missed window now records a wrong attempt, updates streak/statistics, plays the distinct timeout sound, gives a distinct timeout haptic, shows localized timeout feedback and retries the same challenge.
 - Added an end-to-end gameplay regression that intentionally misses a REACT window and verifies the timeout is recorded without advancing the level.
 - Added localized `TIMEOUT` UI text across the existing supported locale columns.
+- Found and fixed a real MIX content gap: all five MIX catalog entries previously rendered through one generic SEE → SWITCH → REACT sequence despite having different composite descriptions.
+- Implemented differentiated MIX flows for `mix_memory_switch`, `mix_see_react`, `mix_trick_react`, `mix_switch_memory` and `mix_full`, with phase-token cancellation preserved between each asynchronous phase.
+- Added renderer regression coverage for all five MIX IDs, including final-phase readiness and visible phase markers.
+- Fixed the Android debug APK metadata pipeline to use a portable UTC timestamp expression instead of the unavailable `GITHUB_RUN_STARTED_AT` environment variable.
 
 ## Current verification target
-Current `main` head is the latest timeout-hardening commit. GitHub Actions has been triggered for the current branch; the authoritative result must be read from the exact current SHA, not inherited from an older release-candidate SHA.
+Current `main` head is the latest MIX/release-hardening commit. GitHub Actions has been triggered for the current branch; the authoritative result must be read from the exact current SHA, not inherited from an older release-candidate SHA.
 
 The authoritative release gate requires the current SHA itself to pass critical compile, static integrity, release contract, catalog behavior, localization fallback, audio, main-scene boot, end-to-end gameplay, Debug APK export and unsigned Release AAB export.
 
 ## Next safe work
 1. Inspect the current-head Android verification and unsigned AAB results; if any gate fails, diagnose from the exact current SHA and fix immediately.
-2. Continue production-quality visual/audio/haptic polish only where it can be validated without external device access.
-3. Harden release metadata and store-asset preparation without inventing owner-side evidence.
-4. Perform physical-device testing: touch, portrait layout, persistence/restart, haptics and all 100 levels.
-5. Prepare production signing and complete the Google Play readiness audit.
-6. Capture final store assets and run the signed AAB through an owner-side Play testing track.
+2. Audit SWITCH and TRICK renderer branches against every extended catalog ID and remove any remaining behavior that is only hash/generic fallback when a deterministic family-specific rule is available.
+3. Continue production-quality visual/audio/haptic polish only where it can be validated without external device access.
+4. Harden release metadata and store-asset preparation without inventing owner-side evidence.
+5. Perform physical-device testing: touch, portrait layout, persistence/restart, haptics and all 100 levels.
+6. Prepare production signing and complete the Google Play readiness audit.
+7. Capture final store assets and run the signed AAB through an owner-side Play testing track.
 
 ## Verification truth
 - Existing current-head UI contract run `34871385247`: PASS on its recorded source SHA.
 - Existing clean Android verification run `34835983629`: PASS on the earlier verified release-candidate source.
 - Existing clean unsigned Release AAB run `34835983641`: PASS on the earlier verified release-candidate source.
 - New release contract gate is committed and is now part of the main Android verification workflow.
-- Timeout audio behavior, controller-side missed-reaction handling and regression coverage are now committed; current-head runtime verification remains pending until CI completes.
+- Timeout audio behavior, controller-side missed-reaction handling and regression coverage are committed.
+- Differentiated MIX behavior and its regression suite are committed; current-head runtime verification remains pending until CI completes.
 - The previous current-head Android run failed only at the gameplay smoke assertion because the test expected the asynchronous answer handler to remain locked after its 350 ms feedback delay. That test contract was corrected, and a further real missed-reaction path was then hardened and covered.
 - Current-head Android/AAB verification must not be described as GREEN until the new gate and all existing gates pass on the exact current SHA.
 - Physical Android QA: NOT VERIFIED in this environment.
