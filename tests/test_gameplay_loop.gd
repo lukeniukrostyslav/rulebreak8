@@ -41,8 +41,8 @@ func _init() -> void:
 
     # The next REMEMBER challenge is not immediately answerable. A premature
     # input must therefore be ignored and must not mutate progression.
-    var before_level := game.challenge_manager.index
-    var before_correct := game.progression.total_correct
+    var before_level: int = game.challenge_manager.index
+    var before_correct: int = game.progression.total_correct
     game._on_choice(1)
     assert(game.challenge_manager.index == before_level)
     assert(game.progression.total_correct == before_correct)
