@@ -18,9 +18,19 @@ func _init() -> void:
     var manager = ChallengeManagerScript.new()
     assert(manager.challenges.size() == 100)
     for challenge in manager.challenges:
-        assert(view.supports_challenge(challenge), "renderer must support " + str(challenge.get("id", "")))
-        assert(int(challenge.get("correct", -1)) >= 0)
-        assert(int(challenge.get("correct", -1)) < 4)
+        var challenge_id := str(challenge.get("id", ""))
+        var correct := int(challenge.get("correct", -1))
+        var choices: Array = challenge.get("choices", [])
+        assert(view.supports_challenge(challenge), "renderer must support " + challenge_id)
+        assert(correct >= 0 and correct < 4, challenge_id + ": correct index out of range")
+        assert(choices.size() == 4, challenge_id + ": every challenge must expose four answer choices")
+        assert(choices[correct] != null and str(choices[correct]).strip_edges() != "", challenge_id + ": correct answer must be non-empty")
+        var normalized: Array[String] = []
+        for choice in choices:
+            normalized.append(str(choice).strip_edges())
+        assert(normalized[0] != normalized[1] and normalized[0] != normalized[2] and normalized[0] != normalized[3], challenge_id + ": duplicate choice")
+        assert(normalized[1] != normalized[2] and normalized[1] != normalized[3], challenge_id + ": duplicate choice")
+        assert(normalized[2] != normalized[3], challenge_id + ": duplicate choice")
 
     var see := {"id":"see_change", "kind_key":"KIND_SEE", "correct":0}
     view.show_challenge(see)
@@ -63,5 +73,5 @@ func _init() -> void:
     assert(not view.input_ready)
     await _wait(1.45)
     _assert_ready(view, "mixed", true)
-    print("RULEBREAK ChallengeView timing/state/content tests: PASS — 100-level renderer support contract")
+    print("RULEBREAK ChallengeView timing/state/content tests: PASS — 100-level renderer support + unique answer-choice contract")
     quit(0)
