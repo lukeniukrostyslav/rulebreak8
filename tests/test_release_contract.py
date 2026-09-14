@@ -91,6 +91,12 @@ def main() -> None:
 
     for expected in (
         "Export Android debug APK",
+        "Verify APK manifest identity",
+        'AAPT=\"$ANDROID_HOME/build-tools/36.0.0/aapt\"',
+        "package: name='com.rulebreak.game' versionCode='1' versionName='0.1.0'",
+        "sdkVersion:'24'",
+        "targetSdkVersion:'36'",
+        "native-code: 'arm64-v8a'",
         "Record APK checksum",
         "Upload Android debug APK",
         "Publish APK to GitHub Release",
@@ -132,7 +138,7 @@ def main() -> None:
     if "concurrency:" not in aab_workflow or "cancel-in-progress: true" not in aab_workflow:
         raise AssertionError("AAB verification workflow must prevent stale concurrent main-branch runs")
 
-    print("RELEASE CONTRACT PASS: project, Android presets, catalog, offline runtime boundaries, idempotent APK publication, prerelease safety and AAB verification pipeline verified")
+    print("RELEASE CONTRACT PASS: project, Android presets, catalog, offline runtime boundaries, APK manifest identity, idempotent APK publication, prerelease safety and AAB verification pipeline verified")
 
 
 if __name__ == "__main__":
