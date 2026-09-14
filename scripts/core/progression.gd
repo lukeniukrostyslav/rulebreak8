@@ -14,24 +14,24 @@ var current_level := 0
 var save_version := 1
 
 func load_state() -> void:
-    var primary := _read_valid_payload(SAVE_PATH)
+    var primary: Variant = _read_valid_payload(SAVE_PATH)
     if primary != null:
-        _apply_payload(primary)
+        _apply_payload(primary as Dictionary)
         return
 
-    var backup := _read_valid_payload(BACKUP_SAVE_PATH)
+    var backup: Variant = _read_valid_payload(BACKUP_SAVE_PATH)
     if backup != null:
         _restore_backup()
-        _apply_payload(backup)
+        _apply_payload(backup as Dictionary)
 
-func _read_valid_payload(path: String):
+func _read_valid_payload(path: String) -> Variant:
     if not FileAccess.file_exists(path):
         return null
     var file := FileAccess.open(path, FileAccess.READ)
     if file == null:
         return null
-    var parsed = JSON.parse_string(file.get_as_text())
-    if parsed is Dictionary and _is_valid_payload(parsed):
+    var parsed: Variant = JSON.parse_string(file.get_as_text())
+    if parsed is Dictionary and _is_valid_payload(parsed as Dictionary):
         return parsed
     return null
 
