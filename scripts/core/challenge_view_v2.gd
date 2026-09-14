@@ -51,7 +51,7 @@ func _new_root() -> void:
 func _set_input_ready(v:bool)->void:
     input_ready=v
     input_ready_changed.emit(v)
-    if v and (challenge_id.begins_with("react_") or challenge_id in ["color_timer","second_signal","only_x"]):
+    if v and (challenge_id.begins_with("react_") or challenge_id in ["color_timer","second_signal","only_x","mix_see_react","mix_trick_react","mix_full"]):
         response_window_started.emit(Time.get_ticks_msec(),response_duration_ms)
 
 func _label(key:String,size:int=30)->void:
@@ -223,8 +223,6 @@ func _memory_sequence()->String:
         _: return MEM[abs(challenge_id.hash())%MEM.size()]
 
 func _react(token:int)->void:
-    # A missed reaction is a retry, not a dead-end. Keep the challenge active
-    # until the player answers or a newer challenge invalidates this phase.
     while token==phase_token:
         _label("REACT_WAIT",30)
         _card("○",72,86)
@@ -254,7 +252,7 @@ func _react(token:int)->void:
 
 func _switch(token:int)->void:
     _label("SWITCH_RULE_ONE",24)
-    _card(tr("SWITCH_RULE"),40,72)
+    _card(_switch_old(),40,72)
     await get_tree().create_timer(0.6).timeout
     if token!=phase_token:return
     clear_view()
@@ -268,6 +266,26 @@ func _switch(token:int)->void:
     _label("SWITCH_CHOOSE",28)
     _card(_switch_choices_preview(),36,82)
     _set_input_ready(true)
+
+func _switch_old()->String:
+    match challenge_id:
+        "switch_color": return "BLUE"
+        "switch_direction", "switch_direction_two": return "UP"
+        "switch_number": return "1"
+        "switch_shape": return "●"
+        "switch_action": return "TAP"
+        "switch_timing": return "FAST"
+        "switch_reverse": return "FORWARD"
+        "switch_target": return "SHAPE"
+        "switch_after_two", "switch_after_three": return "FIRST RULE"
+        "switch_after_signal": return "OLD_RULE"
+        "switch_instruction": return "OLD INSTRUCTION"
+        "switch_second_rule": return "RULE ONE"
+        "switch_final": return "INTERMEDIATE RULE"
+        "sound_switch": return "KEEP OLD"
+        "no_repeat": return "ALLOW REPEAT"
+        "rule_switch": return tr("SWITCH_RULE")
+        _: return tr("SWITCH_RULE")
 
 func _react_target() -> String:
     match challenge_id:
@@ -287,20 +305,40 @@ func _react_target() -> String:
 
 func _switch_choices_preview() -> String:
     match challenge_id:
+        "switch_color": return "BLUE   RED   GREEN   YELLOW"
         "switch_direction", "switch_direction_two": return "UP   RIGHT   DOWN   LEFT"
         "switch_shape": return "●   ▲   ■   ◆"
         "switch_number": return "1   2   3   4"
         "switch_action": return "TAP   HOLD   SWIPE   WAIT"
+        "switch_timing": return "FAST   SLOW   NOW   WAIT"
+        "switch_reverse": return "FORWARD   REVERSE   SAME   NONE"
+        "switch_target": return "SHAPE   COLOR   NUMBER   DIRECTION"
         "switch_after_two", "switch_after_three": return "FIRST   SECOND   THIRD   FOURTH"
+        "switch_after_signal", "switch_instruction", "switch_final": return "OLD_RULE   NEW_RULE   IGNORE   WAIT"
+        "switch_second_rule": return "RULE_ONE   RULE_TWO   RULE_THREE   RULE_FOUR"
+        "sound_switch": return "KEEP_OLD   SWITCH_RULE   DO_NOTHING   TAP_TWICE"
+        "no_repeat": return "LEFT   RIGHT   UP   NONE"
+        "rule_switch": return "BLUE   RED   GREEN   YELLOW"
         _: return "BLUE   RED   GREEN   YELLOW"
 
 func _switch_new()->String:
     match challenge_id:
+        "switch_color": return "RED"
         "switch_direction", "switch_direction_two": return "SWITCH DIRECTION"
         "switch_shape": return "● → ▲"
         "switch_number": return "1 → 2"
         "switch_action": return "SWITCH ACTION"
-        "switch_after_two", "switch_after_three": return "FIRST → SECOND"
+        "switch_timing": return "SLOW"
+        "switch_reverse": return "REVERSE"
+        "switch_target": return "COLOR"
+        "switch_after_two", "switch_after_three": return "SECOND RULE"
+        "switch_after_signal": return "NEW_RULE"
+        "switch_instruction": return "FOLLOW NEW INSTRUCTION"
+        "switch_second_rule": return "RULE TWO"
+        "switch_final": return "FINAL RULE"
+        "sound_switch": return "SWITCH RULE"
+        "no_repeat": return "NO REPEAT"
+        "rule_switch": return tr("SWITCH_RULE")
         _: return tr("SWITCH_RULE")
 
 func _trick()->void:
@@ -344,19 +382,34 @@ func _trick()->void:
 
 func _mix(token:int)->void:
     match challenge_id:
+        "mixed":
+            _label("MIX_SEE",24)
+            _card("●   ▲   ◆   ●",42,72)
+            await get_tree().create_timer(0.35).timeout
+            if token!=phase_token:return
+            clear_view(); _new_root()
+            _label("KIND_SWITCH",24)
+            _card("RULE CHANGED",36,78)
+            await get_tree().create_timer(0.35).timeout
+            if token!=phase_token:return
+            clear_view(); _new_root()
+            _label("MIX_REACT",24)
+            _card("WAIT → GO",42,76)
+            _label("MIX_CHOOSE_SIGNAL",22)
+            _card("FIRST  SECOND  THIRD  FOURTH",30,78)
+            _set_input_ready(true)
+            return
         "mix_memory_switch":
             _label("KIND_REMEMBER",24)
             _card("●  →  ▲  →  ■",40,82)
             await get_tree().create_timer(0.65).timeout
             if token!=phase_token:return
-            clear_view()
-            _new_root()
+            clear_view(); _new_root()
             _label("KIND_SWITCH",24)
             _card("SHAPE → POSITION",36,78)
             await get_tree().create_timer(0.45).timeout
             if token!=phase_token:return
-            clear_view()
-            _new_root()
+            clear_view(); _new_root()
             _label("REMEMBER_CHOOSE",24)
             _card("FIRST  SECOND  THIRD  FOURTH",30,78)
             _set_input_ready(true)
@@ -367,8 +420,7 @@ func _mix(token:int)->void:
             _label("MIX_NOTICE",22)
             await get_tree().create_timer(0.45).timeout
             if token!=phase_token:return
-            clear_view()
-            _new_root()
+            clear_view(); _new_root()
             _label("MIX_REACT",24)
             _card("WAIT → GO",42,76)
             _label("MIX_CHOOSE_SIGNAL",24)
@@ -380,8 +432,7 @@ func _mix(token:int)->void:
             _card("DECOY   •   SIGNAL   •   DECOY   •   SAFE",27,84)
             await get_tree().create_timer(0.5).timeout
             if token!=phase_token:return
-            clear_view()
-            _new_root()
+            clear_view(); _new_root()
             _label("MIX_REACT",24)
             _card("IGNORE DECOY → GO",34,78)
             _label("MIX_CHOOSE_SIGNAL",24)
@@ -393,14 +444,12 @@ func _mix(token:int)->void:
             _card("RULE A",38,78)
             await get_tree().create_timer(0.45).timeout
             if token!=phase_token:return
-            clear_view()
-            _new_root()
+            clear_view(); _new_root()
             _label("SWITCH_RULE_CHANGED",24)
             _card("RULE B",38,78)
             await get_tree().create_timer(0.45).timeout
             if token!=phase_token:return
-            clear_view()
-            _new_root()
+            clear_view(); _new_root()
             _label("KIND_REMEMBER",24)
             _card("TARGET: SECOND",34,78)
             _label("REMEMBER_CHOOSE",22)
@@ -412,20 +461,17 @@ func _mix(token:int)->void:
             _card("●   ▲   ◆   ●",40,72)
             await get_tree().create_timer(0.35).timeout
             if token!=phase_token:return
-            clear_view()
-            _new_root()
+            clear_view(); _new_root()
             _label("KIND_REMEMBER",24)
             _card("● → ▲ → ■",36,78)
             await get_tree().create_timer(0.55).timeout
             if token!=phase_token:return
-            clear_view()
-            _new_root()
+            clear_view(); _new_root()
             _label("KIND_SWITCH",24)
             _card("RULE CHANGED",36,78)
             await get_tree().create_timer(0.45).timeout
             if token!=phase_token:return
-            clear_view()
-            _new_root()
+            clear_view(); _new_root()
             _label("MIX_REACT",24)
             _card("WAIT → GO",42,76)
             _label("MIX_CHOOSE_SIGNAL",22)
@@ -437,14 +483,12 @@ func _mix(token:int)->void:
             _card("●   ▲   ◆   ●",42,72)
             await get_tree().create_timer(0.4).timeout
             if token!=phase_token:return
-            clear_view()
-            _new_root()
+            clear_view(); _new_root()
             _label("KIND_SWITCH",24)
             _card(tr("SWITCH_RULE"),36,78)
             await get_tree().create_timer(0.4).timeout
             if token!=phase_token:return
-            clear_view()
-            _new_root()
+            clear_view(); _new_root()
             _label("MIX_REACT",24)
             _card("WAIT → GO",42,76)
             _label("MIX_CHOOSE_SIGNAL",24)
