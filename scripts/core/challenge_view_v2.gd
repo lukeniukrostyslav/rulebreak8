@@ -114,7 +114,7 @@ func _see(token:int)->void:
         return
     if challenge_id in ["see_direction","see_angle_change"]:
         for i in 4:
-            var value:=DIRECTIONS[i]
+            var value: String = DIRECTIONS[i]
             if i==correct_index:
                 value=DIRECTIONS[(i+1)%4]
             _card(value,58,82)
@@ -140,7 +140,7 @@ func _see(token:int)->void:
     if challenge_id in ["see_filled_shape","see_outline_break","see_missing_edge","mirrored"]:
         var values:= ["●","○","■","□"]
         for i in 4:
-            var value:=values[i]
+            var value: String = values[i]
             if challenge_id=="see_filled_shape" and i==correct_index:
                 value="◆"
             elif challenge_id=="see_outline_break" and i==correct_index:
