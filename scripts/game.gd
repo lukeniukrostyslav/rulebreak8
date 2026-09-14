@@ -100,10 +100,7 @@ func _show_challenge() -> void:
     var position := challenge_manager.index + 1
     var kind_key := str(challenge.get("kind_key", ""))
     challenge_label.text = "%s  %d / %d   •   %s" % [tr("CHALLENGE"), position, total, tr(kind_key)]
-    if str(challenge.get("id", "")) == "rule_switch":
-        rule_label.text = tr("RULE_SWITCH_WATCH")
-    else:
-        rule_label.text = tr(str(challenge.get("rule_key", "")))
+    rule_label.text = _localized_rule_text(challenge)
     streak_label.text = "%s  %d   •   %s  %d" % [tr("STREAK"), progression.streak, tr("BEST"), progression.best_streak]
     feedback_label.text = ""
     challenge_view.show_challenge(challenge)
@@ -112,6 +109,20 @@ func _show_challenge() -> void:
     for i in buttons.size():
         buttons[i].text = tr(str(choices[i])) if i < choices.size() else "—"
         buttons[i].disabled = not challenge_view.input_ready
+
+func _localized_rule_text(challenge: Dictionary) -> String:
+    var rule_key := str(challenge.get("rule_key", ""))
+    var translated := tr(rule_key)
+    if not rule_key.is_empty() and translated != rule_key:
+        return translated
+
+    var description := str(challenge.get("description", "")).strip_edges()
+    if not description.is_empty():
+        return description
+
+    if str(challenge.get("id", "")) == "rule_switch":
+        return tr("RULE_SWITCH_WATCH")
+    return translated
 
 func _on_visual_input_ready(ready: bool) -> void:
     if feedback_label:
