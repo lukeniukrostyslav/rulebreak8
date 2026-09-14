@@ -49,8 +49,14 @@ func _init() -> void:
     assert(manager.index == 0)
     manager.index = 99
     assert(str(manager.current().get("id")) == "mix_full")
-    manager.next()
-    assert(manager.index == 0)
+    manager.index = 1000
+    assert(str(manager.current().get("id")) == "mix_full")
+    assert(manager.index == 99)
+    manager.index = -50
     assert(str(manager.current().get("id")) == first_id)
-    print("RULEBREAK ChallengeManager tests: PASS — 100 levels + view contract")
+    assert(manager.index == 0)
+    manager.next()
+    assert(manager.index == 1)
+    assert(str(manager.current().get("id")) == "remember_positions")
+    print("RULEBREAK ChallengeManager tests: PASS — 100 levels + index invariants + view contract")
     quit(0)
