@@ -112,6 +112,7 @@ func _react_target() -> String:
         "react_third": return "THIRD"
         "react_fourth": return "FOURTH"
         "react_after_change": return "AFTER"
+        "react_late": return "LATE"
         "react_final": return "FINAL"
         _: return REACT[correct_index] if correct_index >= 0 and correct_index < REACT.size() else "GO"
 
