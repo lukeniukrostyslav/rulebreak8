@@ -9,6 +9,7 @@ const SOURCES := [
     "challenges",
     "extra_a",
     "extra_b",
+    "extra_c",
     "ui_translations"
 ]
 
