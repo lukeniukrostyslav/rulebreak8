@@ -56,10 +56,16 @@ func _init() -> void:
             _fail("challenge %s must expose exactly 4 choices, got %d" % [id, choices.size()])
             return
 
+        var seen_choices := {}
         for choice_index in choices.size():
-            if str(choices[choice_index]).strip_edges().is_empty():
+            var choice := str(choices[choice_index]).strip_edges()
+            if choice.is_empty():
                 _fail("challenge %s has an empty choice at index %d" % [id, choice_index])
                 return
+            if seen_choices.has(choice):
+                _fail("challenge %s repeats choice %s" % [id, choice])
+                return
+            seen_choices[choice] = true
 
         if correct < 0 or correct >= choices.size():
             _fail("challenge %s has invalid correct index %d" % [id, correct])
@@ -72,5 +78,5 @@ func _init() -> void:
             _fail("family %s expected %d entries, got %d" % [kind, expected, actual])
             return
 
-    print("RULEBREAK catalog contract: PASS — 100 unique entries, exact family distribution, four non-empty choices, valid answers")
+    print("RULEBREAK catalog contract: PASS — 100 unique entries, exact family distribution, four unique non-empty choices, valid answers")
     quit(0)
