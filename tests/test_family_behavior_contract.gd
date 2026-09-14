@@ -42,8 +42,6 @@ func _init() -> void:
             assert(choices != "BLUE   RED   GREEN   YELLOW", "%s still uses SWITCH generic choices" % id)
         assert(changed != tr("SWITCH_RULE"), "%s still uses SWITCH generic rule" % id)
 
-    # Every extended TRICK level must have four concrete choices, a valid answer,
-    # and a description that is consistent with its intended trick mechanic.
     var trick_ids := [
         "trick_smallest", "trick_second", "trick_hidden", "trick_word", "trick_color",
         "trick_reverse", "trick_forbidden", "trick_slowest", "trick_not_largest",
@@ -54,14 +52,33 @@ func _init() -> void:
         "smallest", "obvious", "hidden", "word", "color", "opposite", "forbidden",
         "slowest", "largest", "decoy", "mislead", "exception", "label", "second", "latest"
     ]
+    var expected_correct := {
+        "trick_smallest": 0, "trick_second": 1, "trick_hidden": 2, "trick_word": 0,
+        "trick_color": 1, "trick_reverse": 1, "trick_forbidden": 0, "trick_slowest": 2,
+        "trick_not_largest": 0, "trick_decoy": 1, "trick_mislead": 2, "trick_exception": 2,
+        "trick_wrong_label": 1, "trick_obvious_two": 2, "trick_contradiction": 1
+    }
+    var expected_choices := {
+        "trick_hidden": ["OBVIOUS", "DECOY", "EXCEPTION", "NONE"],
+        "trick_forbidden": ["FORBIDDEN", "SAFE", "WAIT", "NONE"],
+        "trick_slowest": ["FASTEST", "MIDDLE", "SLOWEST", "NONE"],
+        "trick_decoy": ["DECOY", "TARGET", "BOTH", "NONE"],
+        "trick_mislead": ["FOLLOW", "IGNORE", "REVERSE", "WAIT"],
+        "trick_exception": ["OBVIOUS", "DECOY", "EXCEPTION", "NONE"],
+        "trick_wrong_label": ["LABEL", "RULE", "BOTH", "NEITHER"],
+        "trick_contradiction": ["OLD", "LATEST", "BOTH", "NONE"]
+    }
     for i in trick_ids.size():
         var challenge := _find(manager, trick_ids[i])
         assert(not challenge.is_empty(), "%s missing from catalog" % trick_ids[i])
         var choices: Array = challenge.get("choices", [])
         var correct := int(challenge.get("correct", -1))
         assert(choices.size() == 4, "%s must expose exactly four choices" % trick_ids[i])
+        assert(correct == int(expected_correct[trick_ids[i]]), "%s correct answer drifted" % trick_ids[i])
         assert(correct >= 0 and correct < choices.size(), "%s has invalid correct index" % trick_ids[i])
         assert(str(challenge.get("description", "")).to_lower().contains(trick_keywords[i]), "%s description no longer documents its trick" % trick_ids[i])
+        if expected_choices.has(trick_ids[i]):
+            assert(choices == expected_choices[trick_ids[i]], "%s choices no longer match its documented trick" % trick_ids[i])
         view.show_challenge(challenge)
         await process_frame
         assert(view.input_ready, "%s did not become answerable" % trick_ids[i])
@@ -81,5 +98,5 @@ func _init() -> void:
     assert(view.visual_root != null)
 
     assert(manager.challenges.size() == 100)
-    print("RULEBREAK family behavior contract: PASS — SWITCH/TRICK catalog semantics and all MIX composite flows")
+    print("RULEBREAK family behavior contract: PASS — SWITCH/TRICK answer semantics and all MIX composite flows")
     quit(0)
