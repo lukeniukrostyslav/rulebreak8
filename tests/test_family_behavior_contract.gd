@@ -28,6 +28,19 @@ func _init() -> void:
     root.add_child(view)
     await process_frame
 
+    var react_targets := {
+        "react_circle": "●", "react_triangle": "▲", "react_star": "★",
+        "react_red": "RED", "react_blue": "BLUE", "react_yellow": "YELLOW"
+    }
+    for id in react_targets:
+        var challenge := _find(manager, id)
+        assert(not challenge.is_empty(), "%s missing from catalog" % id)
+        var choices: Array = challenge.get("choices", [])
+        var correct := int(challenge.get("correct", -1))
+        assert(choices.size() == 4, "%s must expose four choices" % id)
+        assert(correct >= 0 and correct < choices.size(), "%s has invalid correct index" % id)
+        assert(str(choices[correct]) == str(react_targets[id]), "%s correct choice does not match declared target" % id)
+
     var switch_ids := [
         "switch_color", "switch_direction", "switch_after_two", "switch_after_signal",
         "switch_reverse", "switch_number", "switch_shape", "switch_instruction",
@@ -69,7 +82,7 @@ func _init() -> void:
         "trick_contradiction": ["OLD", "LATEST", "BOTH", "NONE"]
     }
     for i in trick_ids.size():
-        var challenge := _find(manager, trick_ids[i])
+        challenge := _find(manager, trick_ids[i])
         assert(not challenge.is_empty(), "%s missing from catalog" % trick_ids[i])
         var choices: Array = challenge.get("choices", [])
         var correct := int(challenge.get("correct", -1))
@@ -98,5 +111,5 @@ func _init() -> void:
     assert(view.visual_root != null)
 
     assert(manager.challenges.size() == 100)
-    print("RULEBREAK family behavior contract: PASS — SWITCH/TRICK answer semantics and all MIX composite flows")
+    print("RULEBREAK family behavior contract: PASS — REACT target alignment, SWITCH/TRICK semantics and all MIX composite flows")
     quit(0)
