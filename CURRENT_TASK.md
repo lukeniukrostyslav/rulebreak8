@@ -32,29 +32,33 @@ Finish the local/CI commercial-readiness pass without expanding the MVP scope, t
 - Integrated compile, gameplay, localization fallback and audio gates into the main Android verification workflow.
 - Integrated the same gates into the unsigned AAB verification workflow.
 - Added release-readiness, artifact identity, signing-boundary, evidence-matrix and GO/NO-GO documentation.
-- Synchronized README, QA-gate documentation, build status and project state with the current engineering truth.
+- Added a repository-level release contract gate covering project identity, Android export settings, arm64-only release architecture, 100-level catalog integrity and offline runtime boundaries.
+- Integrated the release contract gate before the Android export stage in the main Godot verification workflow.
+- Added distinct timeout audio feedback so a missed timed challenge is acoustically different from an ordinary wrong answer.
+- Extended the audio smoke test to cover correct, wrong and timeout feedback.
+- Added a Google Play store listing draft with claims constrained to the current MVP design.
+- Added an engineering Data Safety review documenting the offline/local-data boundary and the owner-side Play Console boundary.
 
 ## Current verification target
-Current `main` head: `a8b13483bcd4e894e13155486957d890128e6d74`.
+Current `main` head is the latest commit after the store-listing and data-safety documentation changes. GitHub Actions has been triggered for the current branch; the authoritative result must be read from the exact current SHA, not inherited from an older release-candidate SHA.
 
-This head contains the release-evidence documentation and all previously committed gameplay hardening. The authoritative release gate requires the current SHA itself to pass critical compile, static integrity, catalog behavior, localization fallback, audio, main-scene boot, end-to-end gameplay, Debug APK export and unsigned Release AAB export.
+The authoritative release gate requires the current SHA itself to pass critical compile, static integrity, release contract, catalog behavior, localization fallback, audio, main-scene boot, end-to-end gameplay, Debug APK export and unsigned Release AAB export.
 
 ## Next safe work
 1. Inspect the current-head Android verification and unsigned AAB results; if any gate fails, diagnose from the exact current SHA and fix immediately.
 2. Continue production-quality visual/audio/haptic polish only where it can be validated without external device access.
-3. Perform physical-device testing: touch, portrait layout, persistence/restart, haptics and all 100 levels.
-4. Prepare production signing and complete the Google Play readiness audit.
-5. Capture final store assets and run the signed AAB through an owner-side Play testing track.
+3. Harden release metadata and store-asset preparation without inventing owner-side evidence.
+4. Perform physical-device testing: touch, portrait layout, persistence/restart, haptics and all 100 levels.
+5. Prepare production signing and complete the Google Play readiness audit.
+6. Capture final store assets and run the signed AAB through an owner-side Play testing track.
 
 ## Verification truth
-- Current-head UI contract run `34871385247`: PASS on `a8b13483bcd4e894e13155486957d890128e6d74`.
+- Existing current-head UI contract run `34871385247`: PASS on its recorded source SHA.
 - Existing clean Android verification run `34835983629`: PASS on the earlier verified release-candidate source.
 - Existing clean unsigned Release AAB run `34835983641`: PASS on the earlier verified release-candidate source.
-- Critical GDScript compile gate: PASS on corrected intermediate source `5352fe2571e8b5a85140c3b8026ea4799202fdbc`.
-- Main-scene boot gate: PASS on the current hardening chain before the latest gameplay-gate commits.
-- Catalog behavior gate: PASS on the current hardening chain before the latest gameplay-gate commits.
-- Audio feedback smoke gate: PASS on the current hardening chain before the latest gameplay-gate commits.
-- New end-to-end gameplay gate: COMMITTED; current-head authoritative Android/AAB result remains to be confirmed.
+- New release contract gate is committed and is now part of the main Android verification workflow.
+- New timeout audio behavior and its smoke coverage are committed; current-head runtime verification remains pending until CI completes.
+- Current-head Android/AAB verification must not be described as GREEN until the new gate and all existing gates pass on the exact current SHA.
 - Physical Android QA: NOT VERIFIED in this environment.
 - Production signing: OWNER ACTION.
 - Google Play Console release: OWNER ACTION.
