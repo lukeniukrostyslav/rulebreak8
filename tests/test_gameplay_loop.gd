@@ -42,12 +42,12 @@ func _init() -> void:
     # the manager and persist the next level.
     game._on_choice(0)
     await create_timer(0.45).timeout
-    await _wait_until_input_ready(game)
     assert(game.challenge_manager.index == 1)
     assert(game.progression.current_level == 1)
     assert(game.progression.streak == 1)
     assert(game.progression.total_correct == 1)
-    assert(not game.answer_locked)
+    assert(game.answer_locked)
+    assert(not game.challenge_view.input_ready)
 
     # The next REMEMBER challenge is not immediately answerable. A premature
     # input must therefore be ignored and must not mutate progression.
