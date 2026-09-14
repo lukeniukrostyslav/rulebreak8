@@ -50,6 +50,10 @@ jobs:
           test -s "$TEMPLATE_DIR/android_source.zip"
           test -s "$TEMPLATE_DIR/android_debug.apk"
           test -s "$TEMPLATE_DIR/android_release.apk"
+          rm -rf android/build
+          mkdir -p android/build
+          unzip -q /tmp/templates/templates/android_source.zip -d android/build
+          test -f android/build/build.gradle
           godot --version
       - name: Configure debug signing environment for Godot export
         run: |
