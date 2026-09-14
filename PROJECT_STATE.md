@@ -17,7 +17,7 @@ ENGINEERING / MVP BUILD — release candidate hardening
 Repository: `lukeniukrostyslav/rulebreak8`
 Default branch: `main`
 Latest previously verified release-candidate source: `34e218e0f8e4f338e70937029b58529eed8c4578`.
-Current hardening work has advanced `main` through additional parser, semantic QA, audio, Android preset and documentation changes; the current head is awaiting its full post-hardening Android verification cycle.
+Current hardening work has advanced `main` through additional parser, semantic QA, audio, Android preset, end-to-end gameplay and documentation changes; the current head is awaiting its full post-hardening Android verification cycle.
 GitHub Actions is the authoritative runtime/build verification layer for this environment.
 Current foundation: Godot 4.3 configuration, 100-level challenge catalog, canonical V2 runtime renderer, local progression, localization fallbacks, deterministic test gates and Android APK/AAB export pipelines targeting current Play requirements.
 
@@ -88,7 +88,7 @@ Rule Engine → Challenge Manager → Challenge Modules → Progression → UI �
 | Google Play readiness | 8% |
 | Release readiness | 25% |
 | Documentation / Project State | 100% |
-| Release-candidate hardening | 97% |
+| Release-candidate hardening | 98% |
 
 **Overall: approximately 75%** of the full commercial release target.
 
@@ -99,16 +99,18 @@ Percentages are management estimates against the complete product/release scope.
 - Repository-only static integrity verification was re-run successfully.
 - Obsolete duplicate `scripts/core/challenge_view.gd` was removed; V2 remains canonical.
 - Progression persistence was hardened with durable previous-save backup rotation and strict typed payload validation.
-- Malformed primary-save recovery is covered by regression tests.
+- Malformed primary-save recovery is covered by regression tests, including verification that the restored primary contains the backup state.
 - A Godot 4.3 parser issue in responsive grid spacing was found by an explicit compile gate and fixed with valid GDScript conditional syntax.
 - A dedicated critical-GDScript compile workflow now verifies the controller, renderer, progression and audio scripts.
 - All 100 catalog entries now have automated public-contract behavior coverage for accepted/rejected choices.
 - All 100 catalog entries now have explicit English description fallback coverage when a rule translation key is unavailable.
+- Direct rule rendering tests cover translated base rules, English extended fallback and the defensive `rule_switch` fallback.
 - Audio feedback initialization and tone dispatch are covered by a Dummy-driver runtime smoke test.
 - Android release preset duplicate configuration was cleaned up.
-- Main Android verification and unsigned AAB verification now include the critical compile and new semantic runtime gates.
-- README, QA-gate documentation and build-status documentation were synchronized with the current engineering truth.
-- Current `main` head is `cd8cd6ac3eca8a5bad049f142d77c888402d8c43`; its post-hardening Android verification is pending/completing in GitHub Actions.
+- A headless end-to-end gameplay smoke test now covers main-scene boot, correct answer advancement/persistence, timed input readiness and wrong-answer retry without advancing.
+- Main Android verification and unsigned AAB verification now include the critical compile, semantic runtime and end-to-end gameplay gates.
+- README, QA-gate documentation, CURRENT_TASK and project state are synchronized with the current engineering truth.
+- Current `main` head is `83da2f3a25e9c9bf486a5119ee13237aaad6bb52`; its post-hardening Android verification is pending/completing in GitHub Actions.
 
 ## Verification status — 2026-09-14
 - Clean Android verification run `34835983629` on source `34e218e0f8e4f338e70937029b58529eed8c4578` completed GREEN.
@@ -120,6 +122,7 @@ Percentages are management estimates against the complete product/release scope.
 - Debug APK artifact from that verified source: `rulebreak-android-debug`, 23,877,362 bytes, SHA-256 `c2b7623da1aa29412bf467eecb27e54518de4e595adf1a382aa0a4b4d2406863`.
 - The AAB is unsigned by design; this does not constitute production signing or Google Play readiness.
 - New compile/catalog/localization/audio gates have already produced successful isolated runs on the corrected source chain; the latest combined Android/AAB cycle is treated as authoritative for the current head only after it completes.
+- The new end-to-end gameplay gate is committed and is now part of both Android verification pipelines; its current-head result is not yet authoritative until CI completes.
 - Local execution environment still does not contain the Godot executable, so CI remains the authoritative runtime/build verification layer for this session.
 
 ## Release engineering
