@@ -113,11 +113,14 @@ func save_state() -> void:
     var temp_abs := ProjectSettings.globalize_path(TEMP_SAVE_PATH)
     var backup_abs := ProjectSettings.globalize_path(BACKUP_SAVE_PATH)
     var backup_temp_abs := ProjectSettings.globalize_path(BACKUP_TEMP_SAVE_PATH)
+    var backup_old_temp_abs := ProjectSettings.globalize_path(BACKUP_OLD_TEMP_SAVE_PATH)
 
-    # Keep the last known-good save as a recovery point. Rotate the current
-    # save only after the replacement file is fully written.
+    # Keep the last known-good save as a recovery point. Never delete the
+    # existing backup until the replacement backup is safely in place.
     if FileAccess.file_exists(backup_temp_abs):
         DirAccess.remove_absolute(backup_temp_abs)
+    if FileAccess.file_exists(backup_old_temp_abs):
+        DirAccess.remove_absolute(backup_old_temp_abs)
 
     var had_save := FileAccess.file_exists(SAVE_PATH)
     if had_save:
@@ -126,33 +129,29 @@ func save_state() -> void:
             return
 
     if DirAccess.rename_absolute(temp_abs, save_abs) != OK:
-        if had_save and FileAccess.file_exists(BACKUP_TEMP_SAVE_PATH):
+        if had_save and FileAccess.file_exists(backup_temp_abs):
             DirAccess.rename_absolute(backup_temp_abs, save_abs)
         return
 
     if had_save:
-        # Replace the previous recovery copy only after moving it to a second
-        # temporary path. This keeps a last-known-good backup available if the
-        # final backup rename fails.
-        var backup_old_temp_abs := ProjectSettings.globalize_path(BACKUP_OLD_TEMP_SAVE_PATH)
-        if FileAccess.file_exists(backup_old_temp_abs):
-            DirAccess.remove_absolute(backup_old_temp_abs)
-
+        # The old primary is now the newest recovery backup. Preserve the
+        # previous backup in a temporary slot until the new backup is safe.
         var had_backup := FileAccess.file_exists(BACKUP_SAVE_PATH)
-        if had_backup:
-            if DirAccess.rename_absolute(backup_abs, backup_old_temp_abs) != OK:
-                if FileAccess.file_exists(backup_temp_abs):
-                    DirAccess.remove_absolute(backup_temp_abs)
-                return
+        if had_backup and DirAccess.rename_absolute(backup_abs, backup_old_temp_abs) != OK:
+            # The primary save is valid even if backup rotation fails.
+            if FileAccess.file_exists(backup_temp_abs):
+                DirAccess.remove_absolute(backup_temp_abs)
+            return
 
         if DirAccess.rename_absolute(backup_temp_abs, backup_abs) != OK:
+            # Restore the previous recovery copy if replacing it failed.
             if had_backup and FileAccess.file_exists(backup_old_temp_abs):
                 DirAccess.rename_absolute(backup_old_temp_abs, backup_abs)
             if FileAccess.file_exists(backup_temp_abs):
                 DirAccess.remove_absolute(backup_temp_abs)
             return
 
-        if had_backup and FileAccess.file_exists(backup_old_temp_abs):
+        if FileAccess.file_exists(backup_old_temp_abs):
             DirAccess.remove_absolute(backup_old_temp_abs)
 
 func _try_restore_backup() -> void:
