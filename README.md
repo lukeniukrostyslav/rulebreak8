@@ -9,18 +9,21 @@ Android-first premium micro-puzzle game. MVP target: one-time purchase around �
 - Godot 4.3 project configuration
 - Portrait 1080×1920 mobile-first viewport
 - Live ChallengeManager + Progression game loop
-- 100 challenge catalog entries across six families with family-specific visual/timing implementations
-- ChallengeView implementations for SEE / REMEMBER / REACT / SWITCH / TRICK / MIX
-- Streak, best streak and local statistics persistence
+- Exactly 100 challenge catalog entries across six families with family-specific visual/timing implementations
+- ChallengeView V2 is the canonical renderer for SEE / REMEMBER / REACT / SWITCH / TRICK / MIX
+- Streak, best streak and local progression/statistics persistence with backup recovery
 - 21-locale localization infrastructure with English fallback for extended challenge rules
-- Deterministic ChallengeManager and ChallengeView tests
-- Build/test and release-gate documentation in `docs/BUILD_AND_TEST.md`
+- Deterministic catalog, renderer, localization, progression, audio and main-scene runtime gates
+- Android Debug APK and unsigned Release AAB verification pipelines
+- Release-candidate QA and build documentation in `docs/BUILD_AND_TEST.md` and `docs/QA_GATES.md`
 
 ## Product direction
 
 Short 5–30 second challenges. The player learns a simple rule, then must notice when the rule changes or when the obvious interpretation is wrong.
 
-Target content: 100 handcrafted challenges, building on the 100-level engineering catalog, then ENDLESS/STREAK, DAILY RULE and Challenge Friend.
+The engineering catalog contains 100 entries. The current 20 seed challenges are complemented by 80 extended entries built from reusable family-specific gameplay templates; the catalog is not falsely presented as 100 bespoke scenes.
+
+Future product ideas such as ENDLESS/STREAK, DAILY RULE and Challenge Friend are outside the current MVP release scope until explicitly promoted.
 
 ## Architecture
 
@@ -34,16 +37,21 @@ Google Play premium Android game. Initial target price around €1.99. No recurr
 
 ## Verification status
 
-- Research / concept / product direction: 100%
-- Architecture: 85%
-- Engineering: 50% estimate
-- Challenge content: 90% estimate
-- UX / visual: 78% estimate
-- Persistence: 70% estimate; code hardened, runtime restore not verified
-- Audio / feedback: 10% estimate
-- QA / testing: 15% — deterministic tests strengthened, runtime execution not verified in this environment
-- Android build: 10% infrastructure — debug APK workflow and unsigned release-AAB workflow are defined; no build executed in this environment
-- Google Play readiness: 0%
-- Release: 0%
+GitHub Actions is the authoritative runtime/build verification layer for the current engineering environment.
 
-> Percentages are management estimates, not claims of completed release readiness. Runtime gameplay, Android device testing and Google Play build/signing remain unverified until actually executed.
+- Repository integrity: verified by automated gates
+- Critical GDScript compilation: verified under Godot 4.3
+- Main-scene boot: verified headlessly
+- 100-level catalog behavior: verified through the public `ChallengeManager` contract
+- Renderer support: verified for all 100 catalog entries
+- Localization fallback coverage: verified for all 100 entries
+- Audio feedback generator/player path: verified under Godot's Dummy audio driver
+- Android Debug APK export: verified by CI
+- Android Release AAB export: verified by CI as an unsigned engineering artifact
+- Production signing: not configured by design
+- Physical Android device QA: not performed in this environment
+- Google Play Console submission/testing: not performed
+
+> CI verification is not a substitute for physical-device QA, production signing, or Play Console validation. Release readiness must only be claimed after those external gates are completed.
+
+See `PROJECT_STATE.md` for the detailed project state, progress estimates and current blockers.
