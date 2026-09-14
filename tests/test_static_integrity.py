@@ -3,7 +3,8 @@
 
 This gate intentionally uses only the Python standard library. It validates
 catalog structure, localization shape, Android configuration, touch/input
-contracts, and the current crash-resistant persistence implementation.
+contracts, audio feedback wiring, and the current crash-resistant persistence
+implementation.
 """
 from __future__ import annotations
 
@@ -20,6 +21,7 @@ PRESETS = ROOT / "export_presets.cfg"
 PROJECT = ROOT / "project.godot"
 GAME = ROOT / "scripts/game.gd"
 PROGRESSION = ROOT / "scripts/core/progression.gd"
+AUDIO = ROOT / "scripts/core/audio_feedback.gd"
 LOCALE_DIR = ROOT / "locale"
 
 EXPECTED_LOCALES = [
@@ -131,6 +133,11 @@ def main() -> None:
 
     game = GAME.read_text(encoding="utf-8")
     require_text(game, [
+        'const AudioFeedbackScript = preload("res://scripts/core/audio_feedback.gd")',
+        'var audio_feedback := AudioFeedbackScript.new()',
+        'add_child(audio_feedback)',
+        'audio_feedback.play_correct()',
+        'audio_feedback.play_wrong()',
         'b.custom_minimum_size = Vector2(0, 112)',
         'b.focus_mode = Control.FOCUS_NONE',
         '_style_choice_button(b)',
@@ -141,6 +148,16 @@ def main() -> None:
     ], "game.gd")
     if game.count('b.custom_minimum_size = Vector2(0, 112)') != 1:
         fail("choice touch target height must remain explicitly defined")
+
+    audio = AUDIO.read_text(encoding="utf-8")
+    require_text(audio, [
+        'class_name AudioFeedback',
+        'AudioStreamGenerator.new()',
+        'AudioStreamGeneratorPlayback',
+        'play_correct()',
+        'play_wrong()',
+        'playback.push_buffer(frames)',
+    ], "audio_feedback.gd")
 
     progression = PROGRESSION.read_text(encoding="utf-8")
     require_text(progression, [
@@ -176,8 +193,8 @@ def main() -> None:
     print(
         "RULEBREAK static integrity: PASS — 100 unique levels, seed/runtime catalog contract, "
         "English descriptions/correct-index contract, six-family distribution, 21 locales, "
-        "Android touch/input-lock contract, durable temp-backup persistence contract, "
-        "Godot 4.3 viewport/renderer config, Android API 36/arm64 release config"
+        "Android touch/input-lock contract, answer audio feedback contract, durable temp-backup "
+        "persistence contract, Godot 4.3 viewport/renderer config, Android API 36/arm64 release config"
     )
 
 
