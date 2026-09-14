@@ -267,6 +267,33 @@ func _on_visual_input_ready(ready: bool) -> void:
 func _on_response_window_started(started_at_ms: int, duration_ms: int) -> void:
     reaction_started_at_ms = started_at_ms
     reaction_duration_ms = duration_ms
+    _watch_reaction_timeout(started_at_ms, duration_ms)
+
+func _watch_reaction_timeout(started_at_ms: int, duration_ms: int) -> void:
+    await get_tree().create_timer(float(duration_ms) / 1000.0 + 0.08).timeout
+    if answer_locked:
+        return
+    if reaction_started_at_ms != started_at_ms:
+        return
+    if reaction_duration_ms != duration_ms:
+        return
+    if Time.get_ticks_msec() - started_at_ms < duration_ms:
+        return
+    answer_locked = true
+    challenge_view.input_ready = false
+    for b in buttons:
+        b.disabled = true
+    progression.record(false)
+    feedback_label.text = "%s  •  %s" % [tr("TIMEOUT"), tr("TRY_AGAIN")]
+    feedback_label.add_theme_color_override("font_color", Color("FFB36B"))
+    _animate_feedback(false)
+    Input.vibrate_handheld(75)
+    audio_feedback.play_timeout()
+    streak_label.text = "%s  %d   •   %s  %d" % [tr("STREAK"), progression.streak, tr("BEST"), progression.best_streak]
+    await get_tree().create_timer(0.7).timeout
+    if not is_inside_tree():
+        return
+    _show_challenge()
 
 func _animate_answer_button(choice: int) -> void:
     if choice < 0 or choice >= buttons.size():
