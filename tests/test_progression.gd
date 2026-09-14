@@ -13,7 +13,8 @@ func _cleanup_save_files() -> void:
     for path in [
         "user://rulebreak_save.json",
         "user://rulebreak_save.json.tmp",
-        "user://rulebreak_save.json.bak"
+        "user://rulebreak_save.json.bak",
+        "user://rulebreak_save.json.bak.tmp"
     ]:
         if FileAccess.file_exists(path):
             DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
@@ -91,7 +92,8 @@ func _init() -> void:
     assert(recovered.total_correct == 31)
     assert(recovered.total_wrong == 8)
     assert(recovered.current_level == 41)
-    assert(not FileAccess.file_exists("user://rulebreak_save.json.bak"))
+    assert(FileAccess.file_exists("user://rulebreak_save.json.bak"))
+    assert(not FileAccess.file_exists("user://rulebreak_save.json.bak.tmp"))
 
     # A malformed typed payload must be rejected rather than coerced into a
     # seemingly valid state.
@@ -118,6 +120,7 @@ func _init() -> void:
     assert(typed_recovered.total_correct == 40)
     assert(typed_recovered.total_wrong == 10)
     assert(typed_recovered.current_level == 12)
+    assert(FileAccess.file_exists("user://rulebreak_save.json.bak"))
 
     _cleanup_save_files()
     print("RULEBREAK Progression persistence/recovery/invariant tests: PASS")
