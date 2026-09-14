@@ -40,22 +40,38 @@ func _build_ui() -> void:
     bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     add_child(bg)
 
+    var viewport_size := get_viewport_rect().size
+    var compact := viewport_size.y < 1700.0 or viewport_size.x < 900.0
+    var outer_margin := 24 if compact else 42
+    var section_gap := 8 if compact else 12
+    var title_size := 34 if compact else 42
+    var rule_height := 96 if compact else 116
+    var rule_size := 32 if compact else 38
+    var challenge_height := 190 if compact else 230
+    var streak_size := 20 if compact else 22
+    var grid_height := 205 if compact else 250
+    var button_height := 92 if compact else 112
+    var button_size := 24 if compact else 27
+    var feedback_height := 48 if compact else 58
+    var feedback_size := 22 if compact else 25
+
     var margin := MarginContainer.new()
     margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-    margin.add_theme_constant_override("margin_left", 42)
-    margin.add_theme_constant_override("margin_right", 42)
-    margin.add_theme_constant_override("margin_top", 42)
-    margin.add_theme_constant_override("margin_bottom", 42)
+    margin.add_theme_constant_override("margin_left", outer_margin)
+    margin.add_theme_constant_override("margin_right", outer_margin)
+    margin.add_theme_constant_override("margin_top", outer_margin)
+    margin.add_theme_constant_override("margin_bottom", outer_margin)
     add_child(margin)
 
     var root := VBoxContainer.new()
-    root.add_theme_constant_override("separation", 12)
+    root.add_theme_constant_override("separation", section_gap)
+    root.size_flags_vertical = Control.SIZE_EXPAND_FILL
     margin.add_child(root)
 
     var title := Label.new()
     title.text = tr("GAME_TITLE")
     title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    title.add_theme_font_size_override("font_size", 42)
+    title.add_theme_font_size_override("font_size", title_size)
     title.add_theme_color_override("font_color", Color("F4F6FA"))
     root.add_child(title)
 
@@ -68,13 +84,13 @@ func _build_ui() -> void:
 
     challenge_label = Label.new()
     challenge_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    challenge_label.add_theme_font_size_override("font_size", 18)
+    challenge_label.add_theme_font_size_override("font_size", 18 if not compact else 16)
     challenge_label.add_theme_color_override("font_color", Color("AEB7C7"))
     challenge_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     root.add_child(challenge_label)
 
     var rule_panel := PanelContainer.new()
-    rule_panel.custom_minimum_size = Vector2(0, 116)
+    rule_panel.custom_minimum_size = Vector2(0, rule_height)
     _style_rule_panel(rule_panel)
     root.add_child(rule_panel)
 
@@ -82,38 +98,38 @@ func _build_ui() -> void:
     rule_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     rule_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
     rule_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-    rule_label.add_theme_font_size_override("font_size", 38)
+    rule_label.add_theme_font_size_override("font_size", rule_size)
     rule_label.add_theme_color_override("font_color", Color("FFFFFF"))
     rule_label.add_theme_constant_override("outline_size", 2)
     rule_label.add_theme_color_override("font_outline_color", Color("11151D"))
     rule_panel.add_child(rule_label)
 
-    challenge_view.custom_minimum_size = Vector2(0, 230)
+    challenge_view.custom_minimum_size = Vector2(0, challenge_height)
     challenge_view.size_flags_vertical = Control.SIZE_EXPAND_FILL
-    challenge_view.pivot_offset = Vector2(540, 115)
+    challenge_view.pivot_offset = Vector2(540, challenge_height * 0.5)
     root.add_child(challenge_view)
 
     streak_label = Label.new()
     streak_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    streak_label.add_theme_font_size_override("font_size", 22)
+    streak_label.add_theme_font_size_override("font_size", streak_size)
     streak_label.add_theme_color_override("font_color", Color("D5DBE6"))
     root.add_child(streak_label)
 
     var grid := GridContainer.new()
     grid.columns = 2
-    grid.custom_minimum_size.y = 250
-    grid.add_theme_constant_override("h_separation", 14)
-    grid.add_theme_constant_override("v_separation", 14)
+    grid.custom_minimum_size.y = grid_height
+    grid.add_theme_constant_override("h_separation", compact ? 10 : 14)
+    grid.add_theme_constant_override("v_separation", compact ? 10 : 14)
     root.add_child(grid)
 
     for i in 4:
         var b := Button.new()
-        b.add_theme_font_size_override("font_size", 27)
+        b.add_theme_font_size_override("font_size", button_size)
         b.add_theme_color_override("font_color", Color("F4F6FA"))
         b.add_theme_color_override("font_hover_color", Color("FFFFFF"))
         b.add_theme_color_override("font_pressed_color", Color("FFFFFF"))
         b.add_theme_color_override("font_disabled_color", Color("7E8798"))
-        b.custom_minimum_size = Vector2(0, 112)
+        b.custom_minimum_size = Vector2(0, button_height)
         b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
         b.focus_mode = Control.FOCUS_NONE
         b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
@@ -125,11 +141,11 @@ func _build_ui() -> void:
     feedback_label = Label.new()
     feedback_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     feedback_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-    feedback_label.add_theme_font_size_override("font_size", 25)
+    feedback_label.add_theme_font_size_override("font_size", feedback_size)
     feedback_label.add_theme_color_override("font_color", Color("C9D1DE"))
     feedback_label.add_theme_constant_override("outline_size", 2)
     feedback_label.add_theme_color_override("font_outline_color", Color("11151D"))
-    feedback_label.custom_minimum_size.y = 58
+    feedback_label.custom_minimum_size.y = feedback_height
     root.add_child(feedback_label)
 
 func _style_rule_panel(panel: PanelContainer) -> void:
