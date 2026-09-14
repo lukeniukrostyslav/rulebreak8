@@ -44,11 +44,61 @@ func _append_extended_levels() -> void:
         var choices: Array
         match family:
             "SEE": choices = ["A", "B", "C", "D"]
-            "REMEMBER": choices = ["1", "2", "3", "4"]
+            "REMEMBER": choices = _extended_remember_choices(challenge_id, int(spec[3]))
             "REACT": choices = _extended_react_choices(challenge_id)
             "SWITCH": choices = _extended_switch_choices(challenge_id)
+            "TRICK": choices = _extended_trick_choices(challenge_id, int(spec[3]))
             _: choices = ["FIRST", "SECOND", "THIRD", "FOURTH"]
         challenges.append({"id": challenge_id, "rule_key": "RULE_" + challenge_id.to_upper(), "description": spec[2], "choices": choices, "correct": int(spec[3]), "kind_key": "KIND_" + family})
+
+func _extended_remember_choices(challenge_id: String, correct_index: int) -> Array:
+    var correct := "1-2-3"
+    match challenge_id:
+        "remember_colors": correct = "RED-BLUE-GREEN"
+        "remember_shapes": correct = "●-▲-■"
+        "remember_numbers": correct = "7-2-9"
+        "remember_corners": correct = "TL-BR-TR"
+        "remember_direction": correct = "UP-RIGHT-DOWN"
+        "remember_pairs": correct = "A1-B2-C3"
+        "remember_lights": correct = "1-2-3"
+        "remember_symbols": correct = "★-◆-✦"
+        "remember_path": correct = "A-C-B-D"
+        "remember_slots": correct = "1-3-4"
+        "remember_tones": correct = "LOW-HIGH-LOW"
+        "remember_letters": correct = "A-D-B"
+        "remember_icons": correct = "★-◆-●"
+        "remember_positions_2": correct = "TOP-RIGHT-BOTTOM-LEFT"
+        "remember_order_2": correct = "1-3-2-4"
+        _: correct = "1-2-3"
+    var distractors := ["2-1-3", "3-2-1", "1-3-2"]
+    var choices: Array = ["1-2-3", "2-1-3", "3-2-1", "1-3-2"]
+    choices[correct_index] = correct
+    for i in 4:
+        if i != correct_index:
+            var candidate := distractors[(i + correct_index) % distractors.size()]
+            if candidate == correct:
+                candidate = "3-1-2"
+            choices[i] = candidate
+    return choices
+
+func _extended_trick_choices(challenge_id: String, correct_index: int) -> Array:
+    var choices := ["FIRST", "SECOND", "THIRD", "FOURTH"]
+    match challenge_id:
+        "trick_smallest": choices = ["SMALLEST", "LARGEST", "MIDDLE", "NONE"]
+        "trick_second": choices = ["FIRST", "SECOND", "THIRD", "FOURTH"]
+        "trick_hidden", "trick_exception": choices = ["OBVIOUS", "DECOY", "EXCEPTION", "NONE"]
+        "trick_word": choices = ["WORD", "COLOR", "BOTH", "NONE"]
+        "trick_color": choices = ["WORD", "COLOR", "BOTH", "NONE"]
+        "trick_reverse": choices = ["OBVIOUS", "OPPOSITE", "BOTH", "NONE"]
+        "trick_forbidden": choices = ["FORBIDDEN", "SAFE", "WAIT", "NONE"]
+        "trick_slowest": choices = ["FASTEST", "MIDDLE", "SLOWEST", "NONE"]
+        "trick_not_largest": choices = ["SMALLEST", "LARGEST", "MIDDLE", "NONE"]
+        "trick_decoy": choices = ["DECOY", "TARGET", "BOTH", "NONE"]
+        "trick_mislead": choices = ["FOLLOW", "IGNORE", "REVERSE", "WAIT"]
+        "trick_wrong_label": choices = ["LABEL", "RULE", "BOTH", "NEITHER"]
+        "trick_obvious_two": choices = ["FIRST", "SECOND", "THIRD", "FOURTH"]
+        "trick_contradiction": choices = ["OLD", "LATEST", "BOTH", "NONE"]
+    return choices
 
 func _extended_react_choices(challenge_id: String) -> Array:
     match challenge_id:
