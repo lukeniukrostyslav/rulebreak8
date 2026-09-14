@@ -142,7 +142,7 @@ def main() -> None:
         'b.focus_mode = Control.FOCUS_NONE',
         'b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND',
         '_style_choice_button(b)',
-        'b.disabled = not challenge_view.input_ready',
+        'buttons[i].disabled = not challenge_view.input_ready',
         'if answer_locked or not challenge_view.input_ready:',
         'answer_locked = true',
         'challenge_view.input_ready = false',
