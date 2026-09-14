@@ -28,7 +28,7 @@ jobs:
       - name: Install Android build packages
         run: |
           set -euo pipefail
-          sdkmanager --install "platform-tools" "platforms;android-34" "build-tools;34.0.0" "cmake;3.10.2.4988404" "ndk;23.2.8568313"
+          sdkmanager --install "platform-tools" "platforms;android-36" "build-tools;36.0.0" "cmake;3.10.2.4988404" "ndk;23.2.8568313"
           yes | sdkmanager --licenses >/dev/null || true
       - name: Install Godot 4.3 and export templates
         run: |
@@ -58,6 +58,10 @@ jobs:
           export/android/debug_keystore_user = "androiddebugkey"
           export/android/debug_keystore_pass = "android"
           EOF
+      - name: Validate repository integrity
+        run: |
+          set -euo pipefail
+          python3 tests/test_static_integrity.py
       - name: Run runtime gates
         run: |
           set -euo pipefail
