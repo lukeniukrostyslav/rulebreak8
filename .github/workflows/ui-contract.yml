@@ -1,0 +1,66 @@
+name: RULEBREAK UI contract
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rulebreak-ui-contract-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ui-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        run: python3 --version
+
+      - name: Run UI contract gate
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path("tests/test_ui_contract.gd")
+          text = path.read_text(encoding="utf-8")
+          required = [
+              'const GAME_PATH := "res://scripts/game.gd"',
+              'func _init() -> void:',
+              'RULEBREAK UI contract: PASS',
+          ]
+          missing = [item for item in required if item not in text]
+          if missing:
+              raise SystemExit(f"UI contract gate source is incomplete: {missing}")
+          print("UI contract source preflight: PASS")
+          PY
+
+      - name: Install Godot 4.3 stable
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/godot.zip \
+            "https://github.com/godotengine/godot-builds/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip"
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          mv /tmp/godot/Godot_v4.3-stable_linux.x86_64 /usr/local/bin/godot
+          chmod +x /usr/local/bin/godot
+          godot --version
+
+      - name: Run Godot UI contract
+        run: |
+          set -euo pipefail
+          timeout 60s godot --headless --path . --script tests/test_ui_contract.gd
+
+      - name: Verify no generated artifacts
+        run: |
+          set -euo pipefail
+          rm -rf .godot
+          git status --short
+          test -z "$(git status --short)"
