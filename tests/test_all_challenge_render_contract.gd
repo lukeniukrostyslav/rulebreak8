@@ -30,10 +30,17 @@ func _init() -> void:
         var challenge: Dictionary = manager.challenges[index]
         var id := str(challenge.get("id", ""))
         var family := str(challenge.get("kind_key", ""))
+        var choices: Array = challenge.get("choices", [])
         assert(not id.is_empty(), "challenge %d has empty id" % index)
         assert(not seen.has(id), "duplicate challenge id: %s" % id)
         seen[id] = true
-        assert(challenge.get("choices", []).size() == 4, "%s must have four choices" % id)
+        assert(choices.size() == 4, "%s must have four choices" % id)
+        var unique_choices := {}
+        for choice in choices:
+            var key := str(choice)
+            assert(not key.is_empty(), "%s has an empty choice" % id)
+            assert(not unique_choices.has(key), "%s contains duplicate answer choices: %s" % [id, key])
+            unique_choices[key] = true
         var correct := int(challenge.get("correct", -1))
         assert(correct >= 0 and correct < 4, "%s has invalid correct index" % id)
         family_counts[family] = int(family_counts.get(family, 0)) + 1
@@ -56,5 +63,5 @@ func _init() -> void:
     assert(int(family_counts.get("KIND_TRICK", 0)) == 19, "TRICK distribution drifted")
     assert(int(family_counts.get("KIND_MIX", 0)) == 6, "MIX distribution drifted")
 
-    print("RULEBREAK all-challenge render contract: PASS — 100 unique entries, four choices, valid answers, exact family distribution, all renderable")
+    print("RULEBREAK all-challenge render contract: PASS — 100 unique entries, unique four-choice sets, valid answers, exact family distribution, all renderable")
     quit(0)
