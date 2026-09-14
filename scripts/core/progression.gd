@@ -134,10 +134,27 @@ func _try_restore_backup() -> void:
         _restore_backup()
 
 func _restore_backup() -> void:
-    var save_abs := ProjectSettings.globalize_path(SAVE_PATH)
-    var backup_abs := ProjectSettings.globalize_path(BACKUP_SAVE_PATH)
-    if not _read_valid_payload(BACKUP_SAVE_PATH):
+    if _read_valid_payload(BACKUP_SAVE_PATH) == null:
         return
+
+    var source := FileAccess.open(BACKUP_SAVE_PATH, FileAccess.READ)
+    if source == null:
+        return
+
+    var restore_temp := FileAccess.open(BACKUP_TEMP_SAVE_PATH, FileAccess.WRITE)
+    if restore_temp == null:
+        return
+
+    restore_temp.store_buffer(source.get_buffer(source.get_length()))
+    restore_temp.flush()
+    restore_temp = null
+    source = null
+
+    var save_abs := ProjectSettings.globalize_path(SAVE_PATH)
+    var restore_temp_abs := ProjectSettings.globalize_path(BACKUP_TEMP_SAVE_PATH)
     if FileAccess.file_exists(SAVE_PATH):
         DirAccess.remove_absolute(save_abs)
-    DirAccess.rename_absolute(backup_abs, save_abs)
+
+    if DirAccess.rename_absolute(restore_temp_abs, save_abs) != OK:
+        if FileAccess.file_exists(BACKUP_TEMP_SAVE_PATH):
+            DirAccess.remove_absolute(restore_temp_abs)
