@@ -94,6 +94,14 @@ Rule Engine → Challenge Manager → Challenge Modules → Progression → UI �
 
 Percentages are management estimates against the complete product/release scope. They are not code-coverage measurements and must not be interpreted as physical-device verification.
 
+## Local hardening status — 2026-09-14
+- Owner-provided ZIP was used as the working source for this local pass.
+- Repository-only static integrity verification was re-run successfully.
+- Obsolete duplicate `scripts/core/challenge_view.gd` was removed; V2 remains canonical.
+- Progression persistence was hardened with durable previous-save backup rotation and strict typed payload validation.
+- Malformed primary-save recovery is now covered by regression tests.
+- The local completion changes from this pass have now been synchronized to the GitHub `main` branch at the owner's explicit request.
+
 ## Verification status — 2026-09-14
 - Clean Android verification run `34835983629` on source `34e218e0f8e4f338e70937029b58529eed8c4578` completed GREEN.
 - The run passed repository integrity, Godot 4.3 headless runtime tests, translation preparation, Android Debug APK export, APK upload and GitHub Release publication.
