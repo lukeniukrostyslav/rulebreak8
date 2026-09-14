@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
-"""Repository-level release contract checks for RULEBREAK.
-
-These checks intentionally run without Godot so obvious release regressions are
-caught before the slower Android export jobs.
-"""
+"""Repository-level release contract checks for RULEBREAK."""
 from __future__ import annotations
 
 import json
@@ -66,8 +62,13 @@ def main() -> None:
     manager = read("scripts/core/challenge_manager.gd")
     if manager.count('"choices":[') < 20:
         raise AssertionError("seed challenge choices appear incomplete")
-    if manager.count('challenges.append({') < 80:
-        raise AssertionError("extended challenge generation appears incomplete")
+    spec_rows = re.findall(
+        r'^\s+\["(?:SEE|REMEMBER|REACT|SWITCH|TRICK|MIX)",\s*"[^"]+",',
+        manager,
+        re.MULTILINE,
+    )
+    if len(spec_rows) != 80:
+        raise AssertionError(f"extended challenge specs must contain exactly 80 rows, found {len(spec_rows)}")
 
     forbidden = re.compile(r"(?:http://|https://)(?!localhost|127\.0\.0\.1)", re.I)
     runtime_files = [
