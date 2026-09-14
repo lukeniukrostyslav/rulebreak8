@@ -143,7 +143,7 @@ jobs:
           version_name=0.1.0
           version_code=2
           build_run=${GITHUB_RUN_ID}
-          build_timestamp=${GITHUB_RUN_STARTED_AT}
+          build_timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           signed=false
           verification=ci-verified-export
           EOF
