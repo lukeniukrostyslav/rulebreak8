@@ -76,6 +76,7 @@ jobs:
           python3 tests/test_static_integrity.py
           python3 tests/test_release_documentation.py
           python3 tests/test_release_contract.py
+          python3 tests/test_source_audit.py
           timeout 60s godot --headless --path . --check-only --script scripts/game.gd
           timeout 60s godot --headless --path . --check-only --script scripts/core/challenge_view_v2.gd
           timeout 60s godot --headless --path . --check-only --script scripts/core/progression.gd
