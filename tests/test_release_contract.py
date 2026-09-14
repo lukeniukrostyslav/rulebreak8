@@ -21,7 +21,8 @@ def require(text: str, needle: str, label: str) -> None:
 def main() -> None:
     project = read("project.godot")
     presets = read("export_presets.cfg")
-    workflow = read(".github/workflows/godot.yml")
+    apk_workflow = read(".github/workflows/godot.yml")
+    aab_workflow = read(".github/workflows/release-aab.yml")
     catalog = json.loads(read("scripts/data/challenges.json"))
 
     require(project, 'config/name="RULEBREAK"', "project identity")
@@ -90,10 +91,30 @@ def main() -> None:
         "gh release create",
         "build/android/rulebreak-debug.apk",
         "build/android/rulebreak-debug.apk.sha256",
+        "artifact_type=debug-apk",
+        "source_commit=${GITHUB_SHA}",
+        "signed=false",
     ):
-        require(workflow, expected, "APK release pipeline")
+        require(apk_workflow, expected, "APK release pipeline")
 
-    print("RELEASE CONTRACT PASS: project, Android presets, catalog, offline runtime boundaries and APK release pipeline verified")
+    for expected in (
+        "Export unsigned release AAB",
+        "Record AAB checksum and build metadata",
+        "build/android/rulebreak-release.aab",
+        "build/android/rulebreak-release.aab.sha256",
+        "build/android/rulebreak-release.aab.metadata.txt",
+        "artifact_type=unsigned-release-aab",
+        "source_commit=${GITHUB_SHA}",
+        "signed=false",
+        "verification=ci-verified-export",
+        "actions/upload-artifact@v4",
+    ):
+        require(aab_workflow, expected, "AAB release pipeline")
+
+    if "gh release create" in aab_workflow:
+        raise AssertionError("unsigned AAB workflow must not publish a misleading production release")
+
+    print("RELEASE CONTRACT PASS: project, Android presets, catalog, offline runtime boundaries, APK metadata and AAB verification pipeline verified")
 
 
 if __name__ == "__main__":
