@@ -31,12 +31,13 @@ Finish the local/CI commercial-readiness pass without expanding the MVP scope, t
 - Added an end-to-end headless gameplay-loop smoke test covering main-scene boot, correct answer progression, persistence, input lock, timed readiness and wrong-answer retry behavior.
 - Integrated compile, gameplay, localization fallback and audio gates into the main Android verification workflow.
 - Integrated the same gates into the unsigned AAB verification workflow.
+- Added release-readiness, artifact identity, signing-boundary, evidence-matrix and GO/NO-GO documentation.
 - Synchronized README, QA-gate documentation, build status and project state with the current engineering truth.
 
 ## Current verification target
-Current `main` head: `a68a929b17b6046db5802403db55517b69e8fae5`.
+Current `main` head: `a8b13483bcd4e894e13155486957d890128e6d74`.
 
-This head contains the end-to-end gameplay smoke gate and its integration into both Android verification pipelines. The current Android Debug and unsigned AAB runs must complete before this head becomes the next authoritative verified release-candidate source.
+This head contains the release-evidence documentation and all previously committed gameplay hardening. The authoritative release gate requires the current SHA itself to pass critical compile, static integrity, catalog behavior, localization fallback, audio, main-scene boot, end-to-end gameplay, Debug APK export and unsigned Release AAB export.
 
 ## Next safe work
 1. Inspect the current-head Android verification and unsigned AAB results; if any gate fails, diagnose from the exact current SHA and fix immediately.
@@ -46,13 +47,14 @@ This head contains the end-to-end gameplay smoke gate and its integration into b
 5. Capture final store assets and run the signed AAB through an owner-side Play testing track.
 
 ## Verification truth
+- Current-head UI contract run `34871385247`: PASS on `a8b13483bcd4e894e13155486957d890128e6d74`.
 - Existing clean Android verification run `34835983629`: PASS on the earlier verified release-candidate source.
 - Existing clean unsigned Release AAB run `34835983641`: PASS on the earlier verified release-candidate source.
 - Critical GDScript compile gate: PASS on corrected intermediate source `5352fe2571e8b5a85140c3b8026ea4799202fdbc`.
 - Main-scene boot gate: PASS on the current hardening chain before the latest gameplay-gate commits.
 - Catalog behavior gate: PASS on the current hardening chain before the latest gameplay-gate commits.
 - Audio feedback smoke gate: PASS on the current hardening chain before the latest gameplay-gate commits.
-- New end-to-end gameplay gate: COMMITTED; current-head CI result pending.
+- New end-to-end gameplay gate: COMMITTED; current-head authoritative Android/AAB result remains to be confirmed.
 - Physical Android QA: NOT VERIFIED in this environment.
 - Production signing: OWNER ACTION.
 - Google Play Console release: OWNER ACTION.
