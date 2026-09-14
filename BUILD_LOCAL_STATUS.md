@@ -3,9 +3,9 @@
 ## Scope
 
 This document records the owner-provided ZIP local completion pass on 2026-09-14.
-The local pass is authoritative for the files changed during this session. GitHub was not modified during the initial local work.
+The local pass was performed against the supplied repository snapshot.
 
-## Completed locally
+## Completed in the local pass
 
 - Re-audited the repository from the owner-provided ZIP.
 - Re-ran the repository-only static integrity gate successfully.
@@ -15,7 +15,7 @@ The local pass is authoritative for the files changed during this session. GitHu
 - Backup recovery now validates the backup before promoting it.
 - Added strict typed payload validation for persisted progression state.
 - Added regression coverage for malformed typed payload recovery and static enforcement of the canonical renderer.
-- Updated project state and continuation documentation to record the local hardening pass.
+- Updated project state and task documentation.
 
 ## Verification truth
 
@@ -23,7 +23,7 @@ The local pass is authoritative for the files changed during this session. GitHu
 - Python-only repository checks: PASS.
 - Godot runtime execution: NOT RUN locally because the Godot 4.3 executable is unavailable in this environment.
 - Physical Android device QA: NOT RUN in this environment.
-- Production signing: NOT performed; credentials are intentionally external.
+- Production signing: NOT performed; credentials remain external.
 - Google Play submission: NOT performed.
 
 ## Remaining external work
@@ -33,6 +33,8 @@ The local pass is authoritative for the files changed during this session. GitHu
 3. Google Play Console setup, store assets, policy declarations, testing track and release.
 4. Final audio/visual polish where device-side review identifies remaining issues.
 
-## GitHub state
+## GitHub synchronization
 
-The local changes from this pass were prepared without a GitHub write during the initial completion pass. If the owner explicitly requests synchronization, the local text/source changes can be committed to `main`; no remote synchronization is implicit.
+At the owner's explicit request, the source/documentation changes from this local hardening pass were synchronized to the GitHub `main` branch. No unrelated project reset or rebuild was performed.
+
+Binary ZIP archives are retained in the local workspace; the GitHub contents API used for synchronization handles the repository's text/source files rather than uploading the local ZIP as a repository source file.
