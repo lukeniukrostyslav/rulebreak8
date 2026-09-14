@@ -60,12 +60,14 @@ func _build_ui() -> void:
     progress_bar.custom_minimum_size = Vector2(0, 10)
     progress_bar.show_percentage = false
     progress_bar.max_value = challenge_manager.challenges.size()
+    _style_progress_bar(progress_bar)
     root.add_child(progress_bar)
 
     challenge_label = Label.new()
     challenge_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     challenge_label.add_theme_font_size_override("font_size", 18)
     challenge_label.add_theme_color_override("font_color", Color("AEB7C7"))
+    challenge_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     root.add_child(challenge_label)
 
     rule_label = Label.new()
@@ -100,9 +102,12 @@ func _build_ui() -> void:
         b.add_theme_color_override("font_color", Color("F4F6FA"))
         b.add_theme_color_override("font_hover_color", Color("FFFFFF"))
         b.add_theme_color_override("font_pressed_color", Color("FFFFFF"))
+        b.add_theme_color_override("font_disabled_color", Color("7E8798"))
         b.custom_minimum_size = Vector2(0, 112)
         b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
         b.focus_mode = Control.FOCUS_NONE
+        b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+        _style_choice_button(b)
         b.pressed.connect(_on_choice.bind(i))
         grid.add_child(b)
         buttons.append(b)
@@ -114,6 +119,44 @@ func _build_ui() -> void:
     feedback_label.add_theme_color_override("font_color", Color("C9D1DE"))
     feedback_label.custom_minimum_size.y = 58
     root.add_child(feedback_label)
+
+func _style_choice_button(button: Button) -> void:
+    var normal := StyleBoxFlat.new()
+    normal.bg_color = Color("171C25")
+    normal.border_color = Color("2C3545")
+    normal.set_border_width_all(2)
+    normal.set_corner_radius_all(18)
+    normal.content_margin_left = 18
+    normal.content_margin_right = 18
+    normal.content_margin_top = 14
+    normal.content_margin_bottom = 14
+
+    var hover := normal.duplicate()
+    hover.bg_color = Color("202838")
+    hover.border_color = Color("596A86")
+
+    var pressed := normal.duplicate()
+    pressed.bg_color = Color("273348")
+    pressed.border_color = Color("8A9AB5")
+
+    var disabled := normal.duplicate()
+    disabled.bg_color = Color("11151C")
+    disabled.border_color = Color("202632")
+
+    button.add_theme_stylebox_override("normal", normal)
+    button.add_theme_stylebox_override("hover", hover)
+    button.add_theme_stylebox_override("pressed", pressed)
+    button.add_theme_stylebox_override("disabled", disabled)
+
+func _style_progress_bar(bar: ProgressBar) -> void:
+    var background := StyleBoxFlat.new()
+    background.bg_color = Color("171C25")
+    background.set_corner_radius_all(5)
+    var fill := StyleBoxFlat.new()
+    fill.bg_color = Color("7C8FFF")
+    fill.set_corner_radius_all(5)
+    bar.add_theme_stylebox_override("background", background)
+    bar.add_theme_stylebox_override("fill", fill)
 
 func _show_challenge() -> void:
     reaction_started_at_ms = -1
