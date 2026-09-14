@@ -118,8 +118,8 @@ func _build_ui() -> void:
     var grid := GridContainer.new()
     grid.columns = 2
     grid.custom_minimum_size.y = grid_height
-    grid.add_theme_constant_override("h_separation", compact ? 10 : 14)
-    grid.add_theme_constant_override("v_separation", compact ? 10 : 14)
+    grid.add_theme_constant_override("h_separation", 10 if compact else 14)
+    grid.add_theme_constant_override("v_separation", 10 if compact else 14)
     root.add_child(grid)
 
     for i in 4:
