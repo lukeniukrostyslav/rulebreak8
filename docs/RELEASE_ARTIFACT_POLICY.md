@@ -21,6 +21,8 @@ Every published artifact record must contain:
 - verification status;
 - explicit statement of whether the artifact is signed.
 
+CI-produced APK and AAB artifacts therefore include a companion `.metadata.txt` file containing these fields. The checksum file and metadata are part of the evidence chain and must travel with the artifact when it is handed off for testing or release review.
+
 ## Integrity rule
 Do not compare artifacts only by version label. The source SHA and SHA-256 digest are the authoritative identity fields.
 
