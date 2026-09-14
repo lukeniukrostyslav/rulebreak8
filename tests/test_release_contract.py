@@ -42,10 +42,16 @@ def main() -> None:
         'architectures/armeabi-v7a=false',
         'architectures/x86=false',
         'architectures/x86_64=false',
+        'version/name="0.1.0"',
         'package/unique_name="com.rulebreak.game"',
         'package/signed=false',
     ):
         require(presets, expected, "Android export contract")
+
+    if presets.count("version/code=1") != 1:
+        raise AssertionError("debug APK must retain version code 1")
+    if presets.count("version/code=2") != 1:
+        raise AssertionError("unsigned release AAB must retain version code 2")
 
     if re.search(r"(?:password|secret|token|api[_-]?key)\s*[=:]\s*['\"]?[^\s#'\"]+", presets, re.I):
         raise AssertionError("export presets appear to contain a secret")
@@ -90,6 +96,7 @@ def main() -> None:
         "Publish APK to GitHub Release",
         "gh release create",
         "gh release upload",
+        "--prerelease",
         "--clobber",
         "build/android/rulebreak-debug.apk",
         "build/android/rulebreak-debug.apk.sha256",
@@ -98,6 +105,11 @@ def main() -> None:
         "signed=debug-keystore",
     ):
         require(apk_workflow, expected, "APK release pipeline")
+
+    if "permissions:\n  contents: write" not in apk_workflow:
+        raise AssertionError("APK publication workflow must explicitly request contents: write")
+    if "concurrency:" not in apk_workflow or "cancel-in-progress: true" not in apk_workflow:
+        raise AssertionError("APK publication workflow must prevent stale concurrent main-branch runs")
 
     for expected in (
         "Export unsigned release AAB",
@@ -115,8 +127,12 @@ def main() -> None:
 
     if "gh release create" in aab_workflow:
         raise AssertionError("unsigned AAB workflow must not publish a misleading production release")
+    if "permissions:\n  contents: read" not in aab_workflow:
+        raise AssertionError("unsigned AAB verification workflow must remain read-only")
+    if "concurrency:" not in aab_workflow or "cancel-in-progress: true" not in aab_workflow:
+        raise AssertionError("AAB verification workflow must prevent stale concurrent main-branch runs")
 
-    print("RELEASE CONTRACT PASS: project, Android presets, catalog, offline runtime boundaries, idempotent APK publication and AAB verification pipeline verified")
+    print("RELEASE CONTRACT PASS: project, Android presets, catalog, offline runtime boundaries, idempotent APK publication, prerelease safety and AAB verification pipeline verified")
 
 
 if __name__ == "__main__":
