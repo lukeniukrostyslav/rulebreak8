@@ -8,8 +8,10 @@ func _init() -> void:
     root.add_child(localization)
     assert(localization.load_translations())
 
+    # Exercise the pure rule-rendering helper without entering the gameplay
+    # scene lifecycle. This keeps the contract test independent from the
+    # Localization autoload and from runtime UI construction.
     var game = GameScript.new()
-    root.add_child(game)
 
     TranslationServer.set_locale("es")
 
