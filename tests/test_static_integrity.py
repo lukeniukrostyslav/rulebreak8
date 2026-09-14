@@ -83,7 +83,7 @@ def main() -> None:
     require_text(game, [
         'const AudioFeedbackScript = preload("res://scripts/core/audio_feedback.gd")',
         'var audio_feedback := AudioFeedbackScript.new()', 'add_child(audio_feedback)',
-        'audio_feedback.play_correct()', 'audio_feedback.play_wrong()',
+        'audio_feedback.play_correct()', 'audio_feedback.play_wrong()', 'audio_feedback.play_timeout()',
         'var button_height := 92 if compact else 112', 'b.custom_minimum_size = Vector2(0, 112)',
         'if compact:', 'b.custom_minimum_size.y = button_height',
         'b.focus_mode = Control.FOCUS_NONE', '_style_choice_button(b)',
@@ -100,7 +100,7 @@ def main() -> None:
         fail("choice touch target must apply the compact responsive height")
 
     audio = AUDIO.read_text(encoding="utf-8")
-    require_text(audio, ['class_name AudioFeedback', 'AudioStreamGenerator.new()', 'AudioStreamGeneratorPlayback', 'play_correct()', 'play_wrong()', 'playback.push_buffer(frames)'], "audio_feedback.gd")
+    require_text(audio, ['class_name AudioFeedback', 'AudioStreamGenerator.new()', 'AudioStreamGeneratorPlayback', 'play_correct()', 'play_wrong()', 'play_timeout()', 'playback.push_buffer(frames)'], "audio_feedback.gd")
 
     progression = PROGRESSION.read_text(encoding="utf-8")
     require_text(progression, ['const TEMP_SAVE_PATH := "user://rulebreak_save.json.tmp"', 'const BACKUP_SAVE_PATH := "user://rulebreak_save.json.bak"', 'const BACKUP_TEMP_SAVE_PATH := "user://rulebreak_save.json.bak.tmp"', 'temp.flush()', 'DirAccess.rename_absolute(save_abs, backup_temp_abs)', 'DirAccess.rename_absolute(temp_abs, save_abs)', 'DirAccess.rename_absolute(backup_temp_abs, backup_abs)', '_restore_backup()', 'func _is_valid_payload(parsed: Dictionary) -> bool:', 'required_keys := ['], "progression.gd")
@@ -110,7 +110,7 @@ def main() -> None:
     if 'export_format=0' not in presets or 'export_format=1' not in presets:
         fail("debug APK and release AAB export formats must both be defined")
 
-    print("RULEBREAK static integrity: PASS — 100 unique levels, six-family distribution, 21 locales, localized rule fallback, responsive Android touch/input lock, audio feedback, durable persistence recovery, Godot 4.3 config, Android API 36/arm64 release config")
+    print("RULEBREAK static integrity: PASS — 100 unique levels, six-family distribution, 21 locales, localized rule fallback, responsive Android touch/input lock, correct/wrong/timeout audio feedback, durable persistence recovery, Godot 4.3 config, Android API 36/arm64 release config")
 
 
 if __name__ == "__main__":
