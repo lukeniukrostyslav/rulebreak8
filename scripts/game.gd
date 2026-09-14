@@ -132,6 +132,7 @@ func _build_ui() -> void:
         b.custom_minimum_size = Vector2(0, 112)
         if compact:
             b.custom_minimum_size = Vector2(0, button_height)
+            b.custom_minimum_size.y = button_height
         b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
         b.focus_mode = Control.FOCUS_NONE
         b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
