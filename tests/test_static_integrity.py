@@ -18,6 +18,8 @@ MANAGER = ROOT / "scripts/core/challenge_manager.gd"
 CATALOG = ROOT / "scripts/data/challenges.json"
 PRESETS = ROOT / "export_presets.cfg"
 PROJECT = ROOT / "project.godot"
+GAME = ROOT / "scripts/game.gd"
+PROGRESSION = ROOT / "scripts/core/progression.gd"
 LOCALE_DIR = ROOT / "locale"
 
 EXPECTED_LOCALES = [
@@ -134,6 +136,36 @@ def main() -> None:
         if setting not in project:
             fail(f"project.godot missing required setting: {setting}")
 
+    game = GAME.read_text(encoding="utf-8")
+    required_touch_contracts = [
+        'b.custom_minimum_size = Vector2(0, 112)',
+        'b.focus_mode = Control.FOCUS_NONE',
+        'b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND',
+        '_style_choice_button(b)',
+        'b.disabled = not challenge_view.input_ready',
+        'if answer_locked or not challenge_view.input_ready:',
+        'answer_locked = true',
+        'challenge_view.input_ready = false',
+    ]
+    for contract in required_touch_contracts:
+        if contract not in game:
+            fail(f"game.gd missing Android interaction contract: {contract}")
+    if game.count('b.custom_minimum_size = Vector2(0, 112)') != 1:
+        fail("choice touch target height must remain explicitly defined")
+
+    progression = PROGRESSION.read_text(encoding="utf-8")
+    required_persistence_contracts = [
+        'const TEMP_SAVE_PATH := "user://rulebreak_save.json.tmp"',
+        'const BACKUP_SAVE_PATH := "user://rulebreak_save.json.bak"',
+        'temp.flush()',
+        'DirAccess.rename_absolute(save_abs, backup_abs)',
+        'DirAccess.rename_absolute(temp_abs, save_abs)',
+        '_try_restore_backup()',
+    ]
+    for contract in required_persistence_contracts:
+        if contract not in progression:
+            fail(f"progression.gd missing persistence recovery contract: {contract}")
+
     presets = PRESETS.read_text(encoding="utf-8")
     required_preset_settings = [
         'gradle_build/min_sdk="24"',
@@ -153,7 +185,7 @@ def main() -> None:
     if 'export_format=0' not in presets or 'export_format=1' not in presets:
         fail("debug APK and release AAB export formats must both remain defined")
 
-    print("RULEBREAK static integrity: PASS — 100 unique levels, seed/runtime catalog contract, descriptions/correct-index contract, family distribution, 21 locales, Godot viewport/renderer config, Android API 36/arm64 release config")
+    print("RULEBREAK static integrity: PASS — 100 unique levels, seed/runtime catalog contract, descriptions/correct-index contract, family distribution, 21 locales, Android touch/input-lock contract, crash-resistant progression persistence, Godot viewport/renderer config, Android API 36/arm64 release config")
 
 
 if __name__ == "__main__":
