@@ -76,6 +76,7 @@ jobs:
           python3 tests/test_static_integrity.py
           python3 tests/test_release_documentation.py
           python3 tests/test_release_contract.py
+          python3 tests/test_source_audit.py
       - name: Compile critical GDScript
         run: |
           set -euo pipefail
