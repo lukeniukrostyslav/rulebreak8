@@ -90,6 +90,9 @@ def main() -> None:
         'buttons[i].disabled = not challenge_view.input_ready',
         'if answer_locked or not challenge_view.input_ready:', 'answer_locked = true',
         'challenge_view.input_ready = false',
+        'func _localized_rule_text(challenge: Dictionary) -> String:',
+        'if not rule_key.is_empty() and translated != rule_key:',
+        'if not description.is_empty():',
     ], "game.gd")
     if game.count('b.custom_minimum_size = Vector2(0, 112)') != 1:
         fail("choice touch target must retain one explicit full-size 112px contract")
@@ -107,7 +110,7 @@ def main() -> None:
     if 'export_format=0' not in presets or 'export_format=1' not in presets:
         fail("debug APK and release AAB export formats must both be defined")
 
-    print("RULEBREAK static integrity: PASS — 100 unique levels, six-family distribution, 21 locales, responsive Android touch/input lock, audio feedback, durable persistence recovery, Godot 4.3 config, Android API 36/arm64 release config")
+    print("RULEBREAK static integrity: PASS — 100 unique levels, six-family distribution, 21 locales, localized rule fallback, responsive Android touch/input lock, audio feedback, durable persistence recovery, Godot 4.3 config, Android API 36/arm64 release config")
 
 
 if __name__ == "__main__":
