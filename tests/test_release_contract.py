@@ -86,7 +86,7 @@ def main() -> None:
     for expected in (
         "workflow_dispatch:", "physical_qa_ready", "Run final automated gates", "Export Android debug APK",
         "Verify APK manifest identity", "package: name='com.rulebreak.game' versionCode='1' versionName='0.1.0'",
-        "sdkVersion:'24'", "targetSdkVersion:'36'", "native-code: 'arm64-v8a'", "Record APK checksum",
+        "sdkVersion:'24'", "targetSdkVersion:'36'", "lib/arm64-v8a/", "lib/(armeabi-v7a|x86|x86_64)/", "Record APK checksum",
         "actions/upload-artifact@v4", "build/android/rulebreak-debug.apk", "build/android/rulebreak-debug.apk.sha256",
         "artifact_type=debug-apk", "source_commit=${GITHUB_SHA}", "signed=debug-keystore",
     ):
