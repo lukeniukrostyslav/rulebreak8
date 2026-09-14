@@ -165,11 +165,18 @@ jobs:
           unzip -t build/android/rulebreak-debug.apk >/dev/null
           unzip -l build/android/rulebreak-debug.apk | grep -F 'lib/arm64-v8a/libgodot_android.so'
           unzip -l build/android/rulebreak-debug.apk | grep -F 'AndroidManifest.xml'
+      - name: Record APK checksum
+        run: |
+          set -euo pipefail
+          sha256sum build/android/rulebreak-debug.apk | tee build/android/rulebreak-debug.apk.sha256
+          test -s build/android/rulebreak-debug.apk.sha256
       - name: Upload Android debug APK
         uses: actions/upload-artifact@v4
         with:
           name: rulebreak-android-debug
-          path: build/android/rulebreak-debug.apk
+          path: |
+            build/android/rulebreak-debug.apk
+            build/android/rulebreak-debug.apk.sha256
           if-no-files-found: error
       - name: Publish APK to GitHub Release
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -178,4 +185,4 @@ jobs:
         run: |
           set -euo pipefail
           TAG="v0.1.0-debug.${GITHUB_RUN_NUMBER}"
-          gh release create "$TAG" build/android/rulebreak-debug.apk --title "RULEBREAK Android Debug $TAG" --notes "Verified Godot 4.3 Android debug APK built from commit ${GITHUB_SHA}. This is a development/debug build, not a Google Play signed AAB."
+          gh release create "$TAG" build/android/rulebreak-debug.apk build/android/rulebreak-debug.apk.sha256 --title "RULEBREAK Android Debug $TAG" --notes "Verified Godot 4.3 Android debug APK built from commit ${GITHUB_SHA}. SHA-256 is recorded in the accompanying checksum file. This is a development/debug build, not a Google Play signed AAB."
