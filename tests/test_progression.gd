@@ -21,7 +21,8 @@ func _cleanup_save_files() -> void:
         "user://rulebreak_save.json",
         "user://rulebreak_save.json.tmp",
         "user://rulebreak_save.json.bak",
-        "user://rulebreak_save.json.bak.tmp"
+        "user://rulebreak_save.json.bak.tmp",
+        "user://rulebreak_save.json.bak.old.tmp"
     ]:
         if FileAccess.file_exists(path):
             DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
@@ -62,6 +63,7 @@ func _init() -> void:
     assert(current_save.get("streak", -1) == 0)
     assert(current_save.get("best_streak", -1) == 2)
     assert(_read_json("user://rulebreak_save.json.bak").get("streak", -1) == 2)
+    assert(not FileAccess.file_exists("user://rulebreak_save.json.bak.old.tmp"))
 
     progression.set_current_level(57)
     assert(progression.current_level == 57)

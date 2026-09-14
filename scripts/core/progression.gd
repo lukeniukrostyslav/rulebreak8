@@ -5,6 +5,7 @@ const SAVE_PATH := "user://rulebreak_save.json"
 const TEMP_SAVE_PATH := "user://rulebreak_save.json.tmp"
 const BACKUP_SAVE_PATH := "user://rulebreak_save.json.bak"
 const BACKUP_TEMP_SAVE_PATH := "user://rulebreak_save.json.bak.tmp"
+const BACKUP_OLD_TEMP_SAVE_PATH := "user://rulebreak_save.json.bak.old.tmp"
 
 var streak := 0
 var best_streak := 0
@@ -130,15 +131,29 @@ func save_state() -> void:
         return
 
     if had_save:
-        # The old primary is now the newest recovery backup. Remove the older
-        # backup only after the new primary is safely in place.
-        if FileAccess.file_exists(BACKUP_SAVE_PATH):
-            DirAccess.remove_absolute(backup_abs)
+        # Replace the previous recovery copy only after moving it to a second
+        # temporary path. This keeps a last-known-good backup available if the
+        # final backup rename fails.
+        var backup_old_temp_abs := ProjectSettings.globalize_path(BACKUP_OLD_TEMP_SAVE_PATH)
+        if FileAccess.file_exists(backup_old_temp_abs):
+            DirAccess.remove_absolute(backup_old_temp_abs)
+
+        var had_backup := FileAccess.file_exists(BACKUP_SAVE_PATH)
+        if had_backup:
+            if DirAccess.rename_absolute(backup_abs, backup_old_temp_abs) != OK:
+                if FileAccess.file_exists(backup_temp_abs):
+                    DirAccess.remove_absolute(backup_temp_abs)
+                return
+
         if DirAccess.rename_absolute(backup_temp_abs, backup_abs) != OK:
-            # The primary save is valid even if backup rotation fails. Do not
-            # roll it back merely because the secondary recovery copy failed.
-            if FileAccess.file_exists(BACKUP_TEMP_SAVE_PATH):
+            if had_backup and FileAccess.file_exists(backup_old_temp_abs):
+                DirAccess.rename_absolute(backup_old_temp_abs, backup_abs)
+            if FileAccess.file_exists(backup_temp_abs):
                 DirAccess.remove_absolute(backup_temp_abs)
+            return
+
+        if had_backup and FileAccess.file_exists(backup_old_temp_abs):
+            DirAccess.remove_absolute(backup_old_temp_abs)
 
 func _try_restore_backup() -> void:
     if _read_valid_payload(BACKUP_SAVE_PATH) != null:
