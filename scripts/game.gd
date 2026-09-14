@@ -3,10 +3,12 @@ extends Control
 const ChallengeManagerScript = preload("res://scripts/core/challenge_manager.gd")
 const ProgressionScript = preload("res://scripts/core/progression.gd")
 const ChallengeViewV2Script = preload("res://scripts/core/challenge_view_v2.gd")
+const AudioFeedbackScript = preload("res://scripts/core/audio_feedback.gd")
 
 var challenge_manager := ChallengeManagerScript.new()
 var progression := ProgressionScript.new()
 var challenge_view := ChallengeViewV2Script.new()
+var audio_feedback := AudioFeedbackScript.new()
 
 var buttons: Array[Button] = []
 var rule_label: Label
@@ -26,6 +28,7 @@ func _ready() -> void:
         TranslationServer.set_locale(localization.select_system_locale())
     challenge_view.input_ready_changed.connect(_on_visual_input_ready)
     challenge_view.response_window_started.connect(_on_response_window_started)
+    add_child(audio_feedback)
     progression.load_state()
     challenge_manager.index = progression.current_level
     _build_ui()
@@ -244,6 +247,7 @@ func _on_choice(choice: int) -> void:
         feedback_label.text = "%s  ✓" % tr("CORRECT")
         feedback_label.add_theme_color_override("font_color", Color("77E0A2"))
         Input.vibrate_handheld(35)
+        audio_feedback.play_correct()
         challenge_manager.next()
         progression.set_current_level(challenge_manager.index)
         streak_label.text = "%s  %d   •   %s  %d" % [tr("STREAK"), progression.streak, tr("BEST"), progression.best_streak]
@@ -252,6 +256,7 @@ func _on_choice(choice: int) -> void:
         feedback_label.text = "%s  •  %s" % [tr("WRONG"), tr("TRY_AGAIN")]
         feedback_label.add_theme_color_override("font_color", Color("FF8F8F"))
         Input.vibrate_handheld(55)
+        audio_feedback.play_wrong()
         streak_label.text = "%s  %d   •   %s  %d" % [tr("STREAK"), progression.streak, tr("BEST"), progression.best_streak]
         await get_tree().create_timer(0.7).timeout
 
