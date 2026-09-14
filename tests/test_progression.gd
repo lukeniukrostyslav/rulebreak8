@@ -93,6 +93,32 @@ func _init() -> void:
     assert(recovered.current_level == 41)
     assert(not FileAccess.file_exists("user://rulebreak_save.json.bak"))
 
+    # A malformed typed payload must be rejected rather than coerced into a
+    # seemingly valid state.
+    _write_json("user://rulebreak_save.json", {
+        "version": 1,
+        "streak": "not-an-int",
+        "best_streak": 99,
+        "total_correct": 99,
+        "total_wrong": 0,
+        "current_level": 12
+    })
+    _write_json("user://rulebreak_save.json.bak", {
+        "version": 1,
+        "streak": 6,
+        "best_streak": 8,
+        "total_correct": 40,
+        "total_wrong": 10,
+        "current_level": 12
+    })
+    var typed_recovered = ProgressionScript.new()
+    typed_recovered.load_state()
+    assert(typed_recovered.streak == 6)
+    assert(typed_recovered.best_streak == 8)
+    assert(typed_recovered.total_correct == 40)
+    assert(typed_recovered.total_wrong == 10)
+    assert(typed_recovered.current_level == 12)
+
     _cleanup_save_files()
     print("RULEBREAK Progression persistence/recovery/invariant tests: PASS")
     quit(0)
