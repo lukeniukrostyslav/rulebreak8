@@ -1,28 +1,38 @@
-# RULEBREAK — Build Status
+# RULEBREAK — LOCAL COMPLETION STATUS
 
-## Local ZIP hardening checkpoint
+## Scope
 
-This working copy was inspected and modified locally before repository publication.
+This document records the owner-provided ZIP local completion pass on 2026-09-14.
+The local pass is authoritative for the files changed during this session. GitHub was not modified during the initial local work.
 
-### Proven in the local working copy
-- Godot project structure is present and internally consistent.
-- `tests/test_static_integrity.py` passes:
-  - 100 unique challenge IDs
-  - 20 seed + 80 extension entries
-  - locked family distribution
-  - 21 locale CSV headers and duplicate-key checks
-  - Android API 36 target configuration
-- The CI/Godot type-inference failures in `ChallengeViewV2` were hardened with explicit types for the affected locals.
-- Progression now persists the current level and remains backward-compatible with older saves.
-- Correct/wrong answer feedback now requests short Android haptic feedback.
-- Android export presets and CI gates target API 36, matching the current Google Play submission requirement for new apps/updates.
+## Completed locally
 
-### Not locally provable
-- Godot 4.3 executable is not installed in this execution environment.
-- A real Godot headless runtime test cannot be honestly marked PASS here.
-- Android APK/AAB export cannot be honestly marked PASS here.
-- Physical Android device QA is unavailable here.
-- Production signing and Play Console submission require owner-side credentials/access.
+- Re-audited the repository from the owner-provided ZIP.
+- Re-ran the repository-only static integrity gate successfully.
+- Confirmed `ChallengeViewV2` as the canonical renderer and removed the obsolete duplicate renderer.
+- Strengthened `Progression` save recovery: the previous primary save is retained as a recovery backup across successful writes instead of deleting the backup before replacement.
+- Added a temporary backup rotation path so a failed replacement can restore the previous primary without sacrificing the existing recovery copy.
+- Backup recovery now validates the backup before promoting it.
+- Added strict typed payload validation for persisted progression state.
+- Added regression coverage for malformed typed payload recovery and static enforcement of the canonical renderer.
+- Updated project state and continuation documentation to record the local hardening pass.
 
-### Required external verification
-GitHub Actions should run the Godot runtime tests and Android exports after these changes are pushed. A successful workflow is the authoritative build evidence for this environment; device QA remains separate.
+## Verification truth
+
+- Static repository integrity: PASS in the local environment.
+- Python-only repository checks: PASS.
+- Godot runtime execution: NOT RUN locally because the Godot 4.3 executable is unavailable in this environment.
+- Physical Android device QA: NOT RUN in this environment.
+- Production signing: NOT performed; credentials are intentionally external.
+- Google Play submission: NOT performed.
+
+## Remaining external work
+
+1. Physical Android validation: touch, portrait layout, persistence/restart, haptics and all 100 levels.
+2. Production signing with owner-controlled release credentials.
+3. Google Play Console setup, store assets, policy declarations, testing track and release.
+4. Final audio/visual polish where device-side review identifies remaining issues.
+
+## GitHub state
+
+The local changes from this pass were prepared without a GitHub write during the initial completion pass. If the owner explicitly requests synchronization, the local text/source changes can be committed to `main`; no remote synchronization is implicit.
