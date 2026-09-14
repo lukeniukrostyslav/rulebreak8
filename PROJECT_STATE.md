@@ -16,7 +16,8 @@ ENGINEERING / MVP BUILD — release candidate hardening
 ## Current repository state
 Repository: `lukeniukrostyslav/rulebreak8`
 Default branch: `main`
-Latest hardening source is on `main`; GitHub Actions is the authoritative runtime/build verification layer for this environment.
+Latest verified hardening source: `397ac07084db3a6bd6c1bef5f233d37d54cf59c3`.
+GitHub Actions is the authoritative runtime/build verification layer for this environment.
 Current foundation: Godot 4.3 configuration, 100-level challenge catalog, canonical V2 runtime renderer, local progression, localization fallbacks, deterministic test gates and Android APK/AAB export pipelines targeting current Play requirements.
 
 ## Product rules
@@ -34,7 +35,8 @@ SEE / REMEMBER / REACT / SWITCH / TRICK / MIX
 - Exactly 100 entries: 20 seed entries + 80 extended entries.
 - Distribution: SEE 18, REMEMBER 20, REACT 18, SWITCH 19, TRICK 19, MIX 6.
 - Extended choices are family-aware.
-- `ChallengeManager` and `ChallengeViewV2` have an explicit support contract exercised by tests.
+- `ChallengeManager` and `ChallengeViewV2` have an explicit support contract exercised by runtime tests for all 100 catalog entries.
+- Seed IDs/families/choice-count/correct-index semantics are statically cross-checked against `scripts/data/challenges.json`.
 - Extended rule descriptions have an English fallback so raw `RULE_*` keys are not intentionally shown.
 - Important quality caveat: the 100-entry catalog is not 100 bespoke hand-authored scenes; extended entries use reusable family-specific gameplay templates.
 
@@ -55,40 +57,60 @@ Rule Engine → Challenge Manager → Challenge Modules → Progression → UI �
 ## Detailed progress (management estimates)
 | Major block | Progress |
 |---|---:|
-| Research / Product concept | 100% |
-| Game design / core loop | 100% |
+| Concept / positioning | 100% |
+| Core gameplay / loop | 100% |
 | Visual direction | 78% |
 | Architecture | 92% |
-| Challenge system | 94% |
-| 100-level content catalog | 87% |
+| Rule Engine | 92% |
+| Challenge Manager | 95% |
+| Challenge Modules | 91% |
+| 100-level content catalog | 88% |
+| SEE | 92% |
+| REMEMBER | 90% |
+| REACT | 92% |
+| SWITCH | 90% |
+| TRICK | 85% |
+| MIX | 82% |
 | UI / UX | 78% |
-| Progression / local save | 80% |
-| Localization infrastructure | 92% |
+| Android-first adaptation | 85% |
+| Local Save / Progression | 87% |
+| Localization | 92% |
+| Fallback / language resilience | 95% |
 | Audio / haptics / feedback | 20% |
-| Automated QA / deterministic tests | 62% |
-| Android build pipeline | 95% |
-| Android device QA | 0% |
-| Monetization model | 90% |
+| Static Integrity Tests | 98% |
+| Runtime Tests | 90% |
+| Automated QA | 90% |
+| Android APK pipeline | 98% |
+| Android AAB pipeline | 95% |
 | Production signing | 0% |
+| Physical Android QA | 0% |
 | Google Play readiness | 5% |
-| Release readiness | 5% |
+| Release readiness | 15% |
+| Documentation / Project State | 95% |
+| Release-candidate hardening | 84% |
 
-**Overall: approximately 66%** of the full commercial release target.
+**Overall: approximately 70%** of the full commercial release target.
 
-Percentages are management estimates against the complete product/release scope. They are not code-coverage measurements and must not be interpreted as runtime/device verification.
+Percentages are management estimates against the complete product/release scope. They are not code-coverage measurements and must not be interpreted as physical-device verification.
 
-## Verification status
-- Latest hardening commit `32cadfef545c62cb494bb9a07b9502ab21a2510f` passed the `Godot 4.3 verification` GitHub Actions job.
-- The GREEN verification job passed repository integrity, Godot headless ChallengeManager/ChallengeView/localization tests, translation generation, Android Debug APK export, APK integrity checks, artifact upload and GitHub Release publication.
-- The same commit passed the independent `Android release artifact verification` job, including repository integrity, runtime gates, translation generation and unsigned Android Release AAB export/integrity checks.
-- The CI-produced AAB is unsigned by design; this does not constitute production signing or Google Play readiness.
+## Verification status — 2026-09-14
+- Commit `397ac07084db3a6bd6c1bef5f233d37d54cf59c3` passed `Godot 4.3 verification` run `34822314605` GREEN.
+- Static integrity passed the 100-level catalog contract, seed/runtime semantic synchronization, family distribution, 21 locale headers and Android API 36/arm64 configuration.
+- Headless runtime gates passed ChallengeManager, ChallengeView, localization, extended rule fallback and Progression persistence/invariant tests.
+- ChallengeView runtime coverage now verifies renderer support for all 100 catalog entries and explicit extended REACT/SWITCH contracts.
+- Android Debug APK export passed, artifact upload passed, and GitHub Release publication passed.
+- Debug APK artifact: `rulebreak-android-debug`, 23,860,042 bytes, SHA-256 `d620b0f6fd299215d3945608c8498bae4296f255bc1a18257bf78dce2464eb9d`.
+- Independent `Android release artifact verification` run `34822314449` also completed GREEN.
+- Unsigned Android Release AAB export, archive validation and artifact upload passed.
+- AAB artifact: `rulebreak-android-release-aab`, 40,602,420 bytes, SHA-256 `aa7c8ebb454ddbf2eb10ee26bcdfd8d08d07d5c8468a707bbc941064f590a497`.
+- The AAB is unsigned by design; this does not constitute production signing or Google Play readiness.
 - Local execution environment still does not contain the Godot executable, so CI remains the authoritative runtime/build verification layer for this session.
 
 ## Release engineering
 - `main.tscn` points directly to the canonical `scripts/game.gd` controller.
 - `scripts/game.gd` directly instantiates `ChallengeViewV2`.
 - Obsolete `game_bootstrap.gd` and duplicate `extended_localization.gd` were removed.
-- Progression persists the current challenge level while remaining compatible with older save files.
+- Progression persists the current challenge level while remaining compatible with older save files and enforces streak/current-level invariants.
 - Answer feedback requests short Android haptic feedback.
 - Android Debug APK workflow is bounded with job/runtime/export timeouts.
 - Unsigned Android Release AAB workflow is present and bounded with runtime/export timeouts.
@@ -97,9 +119,9 @@ Percentages are management estimates against the complete product/release scope.
 - Production signing is intentionally not embedded in the repository.
 
 ## Next safe work
-1. Inspect the newly produced CI APK/AAB artifacts as release evidence.
-2. Strengthen any remaining automated catalog/rendering contract checks without expanding MVP scope.
-3. Device-test all 100 levels, touch targets, portrait layout and persistence/restart behavior.
+1. Inspect/download the verified CI APK/AAB artifacts as release evidence where useful.
+2. Continue automated semantic catalog/rendering checks only where they improve confidence without expanding MVP scope.
+3. Perform physical-device testing: touch, portrait layout, persistence/restart and all 100 levels.
 4. Finish production-quality audio/haptics/feedback and visual polish.
 5. Prepare production signing and complete the Google Play readiness audit.
 
