@@ -201,4 +201,4 @@ jobs:
         run: |
           set -euo pipefail
           TAG="v0.1.0-debug.${GITHUB_RUN_NUMBER}"
-          gh release create "$TAG" build/android/rulebreak-debug.apk build/android/rulebreak-debug.apk.sha256 build/android/rulebreak-debug.apk.metadata.txt --title "RULEBREAK Android Debug $TAG" --notes "Verified Godot 4.3 Android debug APK built from commit ${GITHUB_SHA}. SHA-256 and authoritative build metadata are attached. This is a development/debug build, not a Google Play signed AAB."
+          gh release create "$TAG" build/android/rulebreak-debug.apk build/android/rulebreak-debug.apk.sha256 build/android/rulebreak-debug.apk.metadata.txt --title "RULEBREAK Android Debug $TAG" --prerelease --notes "Verified Godot 4.3 Android debug APK built from commit ${GITHUB_SHA}. SHA-256 and authoritative build metadata are attached. This is a development/debug build, not a Google Play signed AAB."
