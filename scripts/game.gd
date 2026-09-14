@@ -3,6 +3,7 @@ extends Control
 const ChallengeManagerScript = preload("res://scripts/core/challenge_manager.gd")
 const ProgressionScript = preload("res://scripts/core/progression.gd")
 const ChallengeViewV2Script = preload("res://scripts/core/challenge_view_v2.gd")
+const LocalizationScript = preload("res://scripts/core/localization.gd")
 
 var challenge_manager := ChallengeManagerScript.new()
 var progression := ProgressionScript.new()
@@ -17,11 +18,11 @@ var reaction_started_at_ms := -1
 var reaction_duration_ms := 0
 
 func _ready() -> void:
-    # Localization is repository-owned and loaded by the Localization autoload.
-    # Keep this guard so the scene remains safe if autoload initialization is delayed.
-    if not Localization.loaded:
-        Localization.load_translations()
-    TranslationServer.set_locale(Localization.select_system_locale())
+    var localization := get_node_or_null("/root/Localization")
+    if localization != null:
+        if not localization.loaded:
+            localization.load_translations()
+        TranslationServer.set_locale(localization.select_system_locale())
     challenge_view.input_ready_changed.connect(_on_visual_input_ready)
     challenge_view.response_window_started.connect(_on_response_window_started)
     progression.load_state()
