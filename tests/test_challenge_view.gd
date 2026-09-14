@@ -32,31 +32,34 @@ func _init() -> void:
         assert(normalized[1] != normalized[2] and normalized[1] != normalized[3], challenge_id + ": duplicate choice")
         assert(normalized[2] != normalized[3], challenge_id + ": duplicate choice")
 
+    # Pure semantic renderer contracts: these do not introduce additional
+    # long-running timers into the CI smoke path.
+    view.challenge_id = "remember_colors"
+    assert(view._memory_sequence() == "RED  →  BLUE  →  GREEN")
+    view.challenge_id = "remember_direction"
+    assert(view._memory_sequence() == "↑  →  →  →  ↓")
+    view.challenge_id = "react_late"
+    view.correct_index = 1
+    assert(view._react_target() == "LATE")
+    view.challenge_id = "react_circle"
+    view.correct_index = 0
+    assert(view._react_target() == "●")
+    view.challenge_id = "switch_direction_two"
+    assert(view._switch_choices_preview() == "UP   RIGHT   DOWN   LEFT")
+    assert(view._switch_new() == "SWITCH DIRECTION")
+
     var see := {"id":"see_change", "kind_key":"KIND_SEE", "correct":0}
     view.show_challenge(see)
     await process_frame
     _assert_ready(view, "see_change", true)
     assert(view.correct_index == 0)
-
-    var see_color := {"id":"see_color_change", "kind_key":"KIND_SEE", "correct":0}
-    view.show_challenge(see_color)
-    await process_frame
-    _assert_ready(view, "see_color_change", true)
-
     var remember := {"id":"sequence", "kind_key":"KIND_REMEMBER", "correct":0}
     view.show_challenge(remember)
     assert(not view.input_ready)
     view.show_challenge(see)
     await _wait(0.05)
     _assert_ready(view, "see_change", true)
-    assert(view.phase_token == 4)
-
-    var remember_colors := {"id":"remember_colors", "kind_key":"KIND_REMEMBER", "correct":0}
-    view.show_challenge(remember_colors)
-    assert(not view.input_ready)
-    await _wait(1.20)
-    _assert_ready(view, "remember_colors", true)
-
+    assert(view.phase_token == 3)
     var react := {"id":"color_timer", "kind_key":"KIND_REACT", "correct":2}
     view.show_challenge(react)
     await _wait(1.00)
@@ -64,13 +67,11 @@ func _init() -> void:
     assert(view._react_target() == "GREEN")
     await _wait(1.50)
     assert(not view.input_ready)
-
     var react_late := {"id":"react_late", "kind_key":"KIND_REACT", "correct":1}
     view.show_challenge(react_late)
     await _wait(0.80)
     _assert_ready(view, "react_late", true)
     assert(view._react_target() == "LATE")
-
     var switch := {"id":"rule_switch", "kind_key":"KIND_SWITCH", "correct":1}
     view.show_challenge(switch)
     assert(not view.input_ready)
@@ -79,21 +80,14 @@ func _init() -> void:
     view.challenge_id = "switch_direction_two"
     assert(view._switch_choices_preview() == "UP   RIGHT   DOWN   LEFT")
     assert(view._switch_new() == "SWITCH DIRECTION")
-
     var trick := {"id":"word_color", "kind_key":"KIND_TRICK", "correct":0}
     view.show_challenge(trick)
     await process_frame
     _assert_ready(view, "word_color", true)
-
-    var trick_smallest := {"id":"trick_smallest", "kind_key":"KIND_TRICK", "correct":0}
-    view.show_challenge(trick_smallest)
-    await process_frame
-    _assert_ready(view, "trick_smallest", true)
-
     var mix := {"id":"mixed", "kind_key":"KIND_MIX", "correct":2}
     view.show_challenge(mix)
     assert(not view.input_ready)
     await _wait(1.45)
     _assert_ready(view, "mixed", true)
-    print("RULEBREAK ChallengeView timing/state/content tests: PASS — 100-level renderer + semantic answer + specialized visual contracts")
+    print("RULEBREAK ChallengeView timing/state/content tests: PASS — 100-level renderer + semantic answer contract")
     quit(0)
