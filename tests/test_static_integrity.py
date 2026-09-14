@@ -58,6 +58,15 @@ def main() -> None:
     if len(extension_rows) != 80:
         fail(f"ChallengeManager extension entries: expected 80, got {len(extension_rows)}")
 
+    for family, challenge_id, description, correct in extension_rows:
+        if not challenge_id:
+            fail(f"{family}: extension challenge has empty ID")
+        if not description.strip():
+            fail(f"{challenge_id}: extension challenge has empty English description")
+        correct_index = int(correct)
+        if not 0 <= correct_index < 4:
+            fail(f"{challenge_id}: correct choice index must be in [0, 3], got {correct_index}")
+
     ids = base_ids + [row[1] for row in extension_rows]
     if len(ids) != 100 or len(ids) != len(set(ids)):
         fail("ChallengeManager must contain exactly 100 unique challenge IDs")
@@ -98,8 +107,12 @@ def main() -> None:
         fail("Android presets must target API 36 for current Google Play submission requirements")
     if 'package/unique_name="com.rulebreak.game"' not in presets:
         fail("Android package name missing")
+    if 'architectures/arm64-v8a=true' not in presets:
+        fail("Android presets must include arm64-v8a")
+    if 'architectures/armeabi-v7a=false' not in presets or 'architectures/x86=false' not in presets or 'architectures/x86_64=false' not in presets:
+        fail("Android presets must keep the locked arm64-only MVP ABI surface")
 
-    print("RULEBREAK static integrity: PASS — 100 unique levels, family distribution, 21 locales, Android API 36")
+    print("RULEBREAK static integrity: PASS — 100 unique levels, descriptions/correct-index contract, family distribution, 21 locales, Android API 36/arm64")
 
 
 if __name__ == "__main__":
