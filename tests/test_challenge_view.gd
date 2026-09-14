@@ -1,6 +1,7 @@
 extends SceneTree
 
 const ChallengeViewScript = preload("res://scripts/core/challenge_view_v2.gd")
+const ChallengeManagerScript = preload("res://scripts/core/challenge_manager.gd")
 
 func _wait(seconds: float) -> void:
     await create_timer(seconds).timeout
@@ -13,6 +14,14 @@ func _init() -> void:
     var view = ChallengeViewScript.new()
     root.add_child(view)
     await process_frame
+
+    var manager = ChallengeManagerScript.new()
+    assert(manager.challenges.size() == 100)
+    for challenge in manager.challenges:
+        assert(view.supports_challenge(challenge), "renderer must support " + str(challenge.get("id", "")))
+        assert(int(challenge.get("correct", -1)) >= 0)
+        assert(int(challenge.get("correct", -1)) < 4)
+
     var see := {"id":"see_change", "kind_key":"KIND_SEE", "correct":0}
     view.show_challenge(see)
     await process_frame
@@ -42,6 +51,9 @@ func _init() -> void:
     assert(not view.input_ready)
     await _wait(1.25)
     _assert_ready(view, "rule_switch", true)
+    view.challenge_id = "switch_direction_two"
+    assert(view._switch_choices_preview() == "UP   RIGHT   DOWN   LEFT")
+    assert(view._switch_new() == "SWITCH DIRECTION")
     var trick := {"id":"word_color", "kind_key":"KIND_TRICK", "correct":0}
     view.show_challenge(trick)
     await process_frame
@@ -51,5 +63,5 @@ func _init() -> void:
     assert(not view.input_ready)
     await _wait(1.45)
     _assert_ready(view, "mixed", true)
-    print("RULEBREAK ChallengeView timing/state/content tests: PASS")
+    print("RULEBREAK ChallengeView timing/state/content tests: PASS — 100-level renderer support contract")
     quit(0)
