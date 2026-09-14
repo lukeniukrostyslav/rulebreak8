@@ -25,6 +25,12 @@ func _init() -> void:
         family_counts[kind] = int(family_counts.get(kind, 0)) + 1
         assert(choices.size() == 4)
         assert(correct >= 0 and correct < choices.size())
+        var unique_choices := {}
+        for choice in choices:
+            var key := str(choice)
+            assert(not key.is_empty())
+            assert(not unique_choices.has(key))
+            unique_choices[key] = true
 
     assert(seen_families.has("KIND_SEE"))
     assert(seen_families.has("KIND_REMEMBER"))
@@ -43,6 +49,8 @@ func _init() -> void:
     assert(manager.index == 0)
     assert(manager.check(0))
     assert(not manager.check(1))
+    assert(not manager.check(-1))
+    assert(not manager.check(4))
     var first_id := str(manager.current().get("id"))
     for _i in manager.challenges.size(): manager.next()
     assert(str(manager.current().get("id")) == first_id)
@@ -58,5 +66,5 @@ func _init() -> void:
     manager.next()
     assert(manager.index == 1)
     assert(str(manager.current().get("id")) == "remember_positions")
-    print("RULEBREAK ChallengeManager tests: PASS — 100 levels + index invariants + view contract")
+    print("RULEBREAK ChallengeManager tests: PASS — 100 levels + unique choices + index invariants + view contract")
     quit(0)
