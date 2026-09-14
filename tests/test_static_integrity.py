@@ -41,15 +41,32 @@ def main() -> None:
     if metadata["generated_extension_levels"] != 80:
         fail("catalog metadata generated_extension_levels must be 80")
 
-    seed_ids = [item["id"] for item in metadata["mvp_seed"]]
+    seed_items = metadata["mvp_seed"]
+    seed_ids = [item["id"] for item in seed_items]
     if len(seed_ids) != 20 or len(seed_ids) != len(set(seed_ids)):
         fail("mvp_seed must contain 20 unique IDs")
 
-    base_ids = re.findall(r'\{"id":"([^"]+)"', manager)
-    if len(base_ids) != 20:
-        fail(f"ChallengeManager base catalog entries: expected 20, got {len(base_ids)}")
+    base_rows = re.findall(
+        r'\{"id":"([^"]+)","rule_key":"([^"]+)","choices":\[([^\]]+)\],"correct":(\d+),"kind_key":"KIND_([^"]+)"\}',
+        manager,
+    )
+    if len(base_rows) != 20:
+        fail(f"ChallengeManager base catalog entries: expected 20, got {len(base_rows)}")
+
+    base_ids = [row[0] for row in base_rows]
     if base_ids != seed_ids:
         fail("ChallengeManager seed IDs differ from scripts/data/challenges.json")
+
+    for row, seed in zip(base_rows, seed_items):
+        challenge_id, _rule_key, choices_blob, correct, family = row
+        if family != str(seed["family"]):
+            fail(f"{challenge_id}: seed family mismatch")
+        choice_count = len(re.findall(r'"(?:[^"\\]|\\.)*"', choices_blob))
+        if choice_count != 4:
+            fail(f"{challenge_id}: expected exactly 4 choices, got {choice_count}")
+        correct_index = int(correct)
+        if not 0 <= correct_index < 4:
+            fail(f"{challenge_id}: correct choice index must be in [0, 3], got {correct_index}")
 
     extension_rows = re.findall(
         r'\["(SEE|REMEMBER|REACT|SWITCH|TRICK|MIX)",\s*"([^"]+)",\s*"([^"]+)",\s*(\d+)\]',
@@ -73,7 +90,7 @@ def main() -> None:
 
     families = [row[0] for row in extension_rows]
     family_counts = Counter(families)
-    seed_family_counts = Counter(item["family"] for item in metadata["mvp_seed"])
+    seed_family_counts = Counter(item["family"] for item in seed_items)
     final_counts = seed_family_counts + family_counts
     expected_counts = {
         "SEE": 18, "REMEMBER": 20, "REACT": 18,
@@ -112,7 +129,7 @@ def main() -> None:
     if 'architectures/armeabi-v7a=false' not in presets or 'architectures/x86=false' not in presets or 'architectures/x86_64=false' not in presets:
         fail("Android presets must keep the locked arm64-only MVP ABI surface")
 
-    print("RULEBREAK static integrity: PASS — 100 unique levels, descriptions/correct-index contract, family distribution, 21 locales, Android API 36/arm64")
+    print("RULEBREAK static integrity: PASS — 100 unique levels, seed/runtime catalog contract, descriptions/correct-index contract, family distribution, 21 locales, Android API 36/arm64")
 
 
 if __name__ == "__main__":
