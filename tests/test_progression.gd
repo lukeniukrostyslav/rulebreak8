@@ -9,6 +9,13 @@ func _write_json(path: String, payload: Dictionary) -> void:
     file.flush()
     file = null
 
+func _read_json(path: String) -> Dictionary:
+    var file := FileAccess.open(path, FileAccess.READ)
+    assert(file != null)
+    var parsed: Variant = JSON.parse_string(file.get_as_text())
+    assert(parsed is Dictionary)
+    return parsed as Dictionary
+
 func _cleanup_save_files() -> void:
     for path in [
         "user://rulebreak_save.json",
@@ -35,17 +42,26 @@ func _init() -> void:
     assert(progression.total_correct == 1)
     assert(progression.total_wrong == 0)
     assert(not FileAccess.file_exists("user://rulebreak_save.json.tmp"))
+    assert(_read_json("user://rulebreak_save.json").get("current_level", -1) == 0)
 
     progression.record(true)
     assert(progression.streak == 2)
     assert(progression.best_streak == 2)
     assert(progression.total_correct == 2)
+    assert(FileAccess.file_exists("user://rulebreak_save.json.bak"))
+    var rotated_backup := _read_json("user://rulebreak_save.json.bak")
+    assert(rotated_backup.get("streak", -1) == 1)
+    assert(rotated_backup.get("total_correct", -1) == 1)
 
     progression.record(false)
     assert(progression.streak == 0)
     assert(progression.best_streak == 2)
     assert(progression.total_correct == 2)
     assert(progression.total_wrong == 1)
+    var current_save := _read_json("user://rulebreak_save.json")
+    assert(current_save.get("streak", -1) == 0)
+    assert(current_save.get("best_streak", -1) == 2)
+    assert(_read_json("user://rulebreak_save.json.bak").get("streak", -1) == 2)
 
     progression.set_current_level(57)
     assert(progression.current_level == 57)
@@ -53,6 +69,7 @@ func _init() -> void:
     assert(progression.current_level == 0)
     progression.set_current_level(1000)
     assert(progression.current_level == 99)
+    assert(_read_json("user://rulebreak_save.json").get("current_level", -1) == 99)
 
     # A deliberately inconsistent legacy/corrupt state must not violate the
     # derived invariant when loaded.
@@ -94,6 +111,11 @@ func _init() -> void:
     assert(recovered.current_level == 41)
     assert(FileAccess.file_exists("user://rulebreak_save.json.bak"))
     assert(not FileAccess.file_exists("user://rulebreak_save.json.bak.tmp"))
+    var restored_primary := _read_json("user://rulebreak_save.json")
+    assert(restored_primary.get("streak", -1) == 4)
+    assert(restored_primary.get("best_streak", -1) == 7)
+    assert(restored_primary.get("total_correct", -1) == 31)
+    assert(restored_primary.get("current_level", -1) == 41)
 
     # A malformed typed payload must be rejected rather than coerced into a
     # seemingly valid state.
@@ -121,7 +143,11 @@ func _init() -> void:
     assert(typed_recovered.total_wrong == 10)
     assert(typed_recovered.current_level == 12)
     assert(FileAccess.file_exists("user://rulebreak_save.json.bak"))
+    var typed_primary := _read_json("user://rulebreak_save.json")
+    assert(typed_primary.get("streak", -1) == 6)
+    assert(typed_primary.get("best_streak", -1) == 8)
+    assert(typed_primary.get("total_correct", -1) == 40)
 
     _cleanup_save_files()
-    print("RULEBREAK Progression persistence/recovery/invariant tests: PASS")
+    print("RULEBREAK Progression persistence/recovery/invariant tests: PASS — primary save rotation, backup restoration, typed payload rejection and bounded level state")
     quit(0)
