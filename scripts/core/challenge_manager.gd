@@ -220,6 +220,9 @@ func next() -> void:
 func previous() -> void:
     index = (index - 1 + challenges.size()) % challenges.size()
 
+func reset() -> void:
+    index = 0
+
 func _normalize_index() -> void:
     if challenges.is_empty():
         index = 0
