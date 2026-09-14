@@ -26,7 +26,6 @@ func _init() -> void:
     var game = packed.instantiate()
     root.add_child(game)
 
-    # Let the main controller finish _ready() and the first SEE challenge.
     await process_frame
     await process_frame
     await create_timer(0.25).timeout
@@ -38,8 +37,6 @@ func _init() -> void:
     assert(game.challenge_view.input_ready)
     assert(not game.answer_locked)
 
-    # Correct answer: the public gameplay path must lock input immediately,
-    # then record progress, advance the manager and persist the next level.
     game._on_choice(0)
     assert(game.answer_locked)
     assert(not game.challenge_view.input_ready)
@@ -50,8 +47,6 @@ func _init() -> void:
     assert(game.progression.total_correct == 1)
     assert(not game.answer_locked)
 
-    # The next REMEMBER challenge is not immediately answerable. A premature
-    # input must therefore be ignored and must not mutate progression.
     var before_level: int = game.challenge_manager.index
     var before_correct: int = game.progression.total_correct
     game._on_choice(1)
@@ -61,16 +56,16 @@ func _init() -> void:
     await _wait_until_input_ready(game)
     assert(not game.answer_locked)
 
-    # Reaction challenges must remain retryable after a missed response window.
-    # This is a source-level contract here; the headless runtime gate covers
-    # the actual timer/retry loop under Godot.
     var view_source := FileAccess.get_file_as_string("res://scripts/core/challenge_view_v2.gd")
     assert(view_source.contains("A missed reaction is a retry, not a dead-end."))
     assert(view_source.contains("while token==phase_token:"))
 
-    # The current REMEMBER challenge must reject a wrong option without
-    # advancing. The test only requires the selected option to be non-correct.
-    var correct_index: int = game.challenge_manager.get_current().correct_index
+    # ChallengeManager exposes its catalog through `challenges`; keep the
+    # gameplay smoke test aligned with that public contract rather than
+    # depending on a nonexistent get_current() helper.
+    var current_challenge: Dictionary = game.challenge_manager.challenges[game.challenge_manager.index]
+    var correct_index: int = int(current_challenge.get("correct", -1))
+    assert(correct_index >= 0 and correct_index < 4)
     var wrong_index: int = 0 if correct_index != 0 else 1
     game._on_choice(wrong_index)
     await create_timer(0.80).timeout
@@ -81,8 +76,6 @@ func _init() -> void:
     assert(game.progression.total_wrong == 1)
     assert(not game.answer_locked)
 
-    # Explicitly free the instantiated scene so the smoke test does not leave
-    # CanvasItem/ObjectDB resources behind and mask real lifecycle regressions.
     game.queue_free()
     await process_frame
     _cleanup_save_files()
