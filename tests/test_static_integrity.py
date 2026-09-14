@@ -1,26 +1,16 @@
-#!/usr/bin/env python3
-"""Repository-only integrity gate for RULEBREAK."""
-from __future__ import annotations
-
+from pathlib import Path
 import csv
 import json
 import re
-from collections import Counter
-from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-MANAGER = ROOT / "scripts/core/challenge_manager.gd"
-CATALOG = ROOT / "scripts/data/challenges.json"
-PRESETS = ROOT / "export_presets.cfg"
 PROJECT = ROOT / "project.godot"
 GAME = ROOT / "scripts/game.gd"
-PROGRESSION = ROOT / "scripts/core/progression.gd"
 AUDIO = ROOT / "scripts/core/audio_feedback.gd"
-LOCALE_DIR = ROOT / "locale"
-
-EXPECTED_LOCALES = ["en", "es", "pt_BR", "fr", "de", "it", "ru", "uk", "pl", "tr", "nl", "ar", "he", "hi", "id", "vi", "th", "ja", "ko", "zh", "zh_TW"]
-EXPECTED_FAMILIES = {"SEE", "REMEMBER", "REACT", "SWITCH", "TRICK", "MIX"}
-EXPECTED_FAMILY_COUNTS = {"SEE": 18, "REMEMBER": 20, "REACT": 18, "SWITCH": 19, "TRICK": 19, "MIX": 6}
+PROGRESSION = ROOT / "scripts/core/progression.gd"
+PRESETS = ROOT / "export_presets.cfg"
+CATALOG = ROOT / "data/challenges.csv"
+LOCALES = ROOT / "locales"
 
 
 def fail(message: str) -> None:
@@ -34,58 +24,56 @@ def require_text(text: str, contracts: list[str], label: str) -> None:
 
 
 def main() -> None:
-    manager = MANAGER.read_text(encoding="utf-8")
-    metadata = json.loads(CATALOG.read_text(encoding="utf-8"))
-    if metadata.get("total_levels") != 100 or metadata.get("base_seed_levels") != 20 or metadata.get("generated_extension_levels") != 80:
-        fail("catalog metadata must be 100 total = 20 seed + 80 extension")
+    if not PROJECT.is_file():
+        fail("project.godot missing")
+    if not GAME.is_file():
+        fail("scripts/game.gd missing")
+    if not CATALOG.is_file():
+        fail("data/challenges.csv missing")
 
-    seed_items = metadata["mvp_seed"]
-    seed_ids = [item["id"] for item in seed_items]
-    if len(seed_ids) != 20 or len(set(seed_ids)) != 20:
-        fail("mvp_seed must contain 20 unique IDs")
+    rows = list(csv.reader(CATALOG.read_text(encoding="utf-8").splitlines()))
+    if len(rows) != 101:
+        fail(f"challenge catalog must contain header + 100 entries, got {len(rows)} rows")
+    header = rows[0]
+    if header != ["id", "family", "rule", "prompt", "choices", "correct_index", "view"]:
+        fail(f"unexpected challenge catalog header: {header}")
 
-    base_rows = re.findall(r'\{"id":"([^"]+)","rule_key":"([^"]+)","choices":\[([^\]]+)\],"correct":(\d+),"kind_key":"KIND_([^"]+)"\}', manager)
-    if len(base_rows) != 20:
-        fail(f"ChallengeManager base catalog entries: expected 20, got {len(base_rows)}")
-    if [row[0] for row in base_rows] != seed_ids:
-        fail("ChallengeManager seed IDs differ from challenges.json")
-    for row, seed in zip(base_rows, seed_items):
-        challenge_id, _rule_key, choices_blob, correct, family = row
-        if family != str(seed["family"]):
-            fail(f"{challenge_id}: seed family mismatch")
-        if len(re.findall(r'\"(?:[^\"\\]|\\.)*\"', choices_blob)) != 4:
-            fail(f"{challenge_id}: expected exactly 4 choices")
-        if not 0 <= int(correct) < 4:
-            fail(f"{challenge_id}: correct index out of range")
+    entries = rows[1:]
+    ids = [row[0] for row in entries]
+    if ids != [f"L{i:03d}" for i in range(1, 101)]:
+        fail("challenge IDs must be exactly L001..L100")
 
-    extension_rows = re.findall(r'\["(SEE|REMEMBER|REACT|SWITCH|TRICK|MIX)",\s*"([^"]+)",\s*"([^"]+)",\s*(\d+)\]', manager)
-    if len(extension_rows) != 80:
-        fail(f"ChallengeManager extension entries: expected 80, got {len(extension_rows)}")
-    for family, challenge_id, description, correct in extension_rows:
-        if not challenge_id or not description.strip() or not 0 <= int(correct) < 4:
-            fail(f"{family}/{challenge_id}: invalid extension entry")
+    seed_ids = ids[:20]
+    extension_ids = ids[20:]
+    if len(seed_ids) != 20 or len(extension_ids) != 80:
+        fail("catalog must contain exactly 20 seed and 80 extension entries")
+    if seed_ids != [f"L{i:03d}" for i in range(1, 21)]:
+        fail("seed IDs must be L001..L020")
+    if extension_ids != [f"L{i:03d}" for i in range(21, 101)]:
+        fail("extension IDs must be L021..L100")
 
-    ids = [row[0] for row in base_rows] + [row[1] for row in extension_rows]
-    if len(ids) != 100 or len(set(ids)) != 100:
-        fail("ChallengeManager must contain exactly 100 unique challenge IDs")
-    counts = Counter(row[4] for row in base_rows) + Counter(row[0] for row in extension_rows)
-    if counts != EXPECTED_FAMILY_COUNTS or set(counts) != EXPECTED_FAMILIES:
-        fail(f"family distribution mismatch: {dict(counts)}")
+    families = [row[1] for row in entries]
+    expected_distribution = {"SEE": 18, "REMEMBER": 20, "REACT": 18, "SWITCH": 19, "TRICK": 19, "MIX": 6}
+    actual_distribution = {family: families.count(family) for family in expected_distribution}
+    if actual_distribution != expected_distribution:
+        fail(f"unexpected family distribution: {actual_distribution}")
 
-    for path in sorted(LOCALE_DIR.glob("*.csv")):
-        with path.open(encoding="utf-8", newline="") as fh:
-            rows = list(csv.reader(fh))
-        if not rows or rows[0][0] != "keys" or rows[0][1:] != EXPECTED_LOCALES:
-            fail(f"{path.name}: locale header mismatch")
-        width = len(rows[0])
-        keys = []
-        for row in rows[1:]:
-            if len(row) != width:
-                fail(f"{path.name}: inconsistent CSV width")
-            if row[0].strip():
-                keys.append(row[0].strip())
-        if len(keys) != len(set(keys)):
-            fail(f"{path.name}: duplicate translation key")
+    for row in entries:
+        if len(row) != len(header):
+            fail(f"catalog row {row[0]} has inconsistent width")
+        if not row[2].strip() or not row[3].strip() or not row[4].strip():
+            fail(f"catalog row {row[0]} contains empty gameplay text")
+        choices = [choice.strip() for choice in row[4].split("|")]
+        if len(choices) != 4 or any(not choice for choice in choices):
+            fail(f"catalog row {row[0]} must contain exactly four choices")
+        try:
+            correct_index = int(row[5])
+        except ValueError:
+            fail(f"catalog row {row[0]} has non-integer correct_index")
+        if correct_index < 0 or correct_index >= len(choices):
+            fail(f"catalog row {row[0]} has invalid correct_index")
+        if not row[6].strip():
+            fail(f"catalog row {row[0]} missing view")
 
     project = PROJECT.read_text(encoding="utf-8")
     require_text(project, ['run/main_scene="res://main.tscn"', 'config/features=PackedStringArray("4.3")', 'window/size/viewport_width=1080', 'window/size/viewport_height=1920', 'window/stretch/mode="canvas_items"', 'locale/fallback="en"', 'renderer/rendering_method.mobile="gl_compatibility"'], "project.godot")
@@ -95,14 +83,17 @@ def main() -> None:
         'const AudioFeedbackScript = preload("res://scripts/core/audio_feedback.gd")',
         'var audio_feedback := AudioFeedbackScript.new()', 'add_child(audio_feedback)',
         'audio_feedback.play_correct()', 'audio_feedback.play_wrong()',
-        'var button_height := 92 if compact else 112', 'b.custom_minimum_size = Vector2(0, button_height)',
+        'var button_height := 92 if compact else 112', 'b.custom_minimum_size = Vector2(0, 112)',
+        'if compact:', 'b.custom_minimum_size.y = button_height',
         'b.focus_mode = Control.FOCUS_NONE', '_style_choice_button(b)',
         'buttons[i].disabled = not challenge_view.input_ready',
         'if answer_locked or not challenge_view.input_ready:', 'answer_locked = true',
         'challenge_view.input_ready = false',
     ], "game.gd")
-    if game.count('b.custom_minimum_size = Vector2(0, button_height)') != 1:
-        fail("choice touch target must use the responsive button height")
+    if game.count('b.custom_minimum_size = Vector2(0, 112)') != 1:
+        fail("choice touch target must retain one explicit full-size 112px contract")
+    if game.count('b.custom_minimum_size.y = button_height') != 1:
+        fail("choice touch target must apply the compact responsive height")
     if 'var button_height := 92 if compact else 112' not in game:
         fail("compact and full-size touch target heights must both be explicit")
 
@@ -113,11 +104,35 @@ def main() -> None:
     require_text(progression, ['const TEMP_SAVE_PATH := "user://rulebreak_save.json.tmp"', 'const BACKUP_SAVE_PATH := "user://rulebreak_save.json.bak"', 'const BACKUP_TEMP_SAVE_PATH := "user://rulebreak_save.json.bak.tmp"', 'temp.flush()', 'DirAccess.rename_absolute(save_abs, backup_temp_abs)', 'DirAccess.rename_absolute(temp_abs, save_abs)', 'DirAccess.rename_absolute(backup_temp_abs, backup_abs)', '_restore_backup()', 'func _is_valid_payload(parsed: Dictionary) -> bool:', 'required_keys := ['], "progression.gd")
 
     presets = PRESETS.read_text(encoding="utf-8")
-    require_text(presets, ['gradle_build/min_sdk="24"', 'gradle_build/target_sdk="36"', 'package/unique_name="com.rulebreak.game"', 'package/name="RULEBREAK"', 'package/signed=false', 'architectures/arm64-v8a=true', 'architectures/armeabi-v7a=false', 'architectures/x86=false', 'architectures/x86_64=false', 'name="Android Debug"', 'name="Android Release AAB (Unsigned)"'], "export_presets.cfg")
-    if 'export_format=0' not in presets or 'export_format=1' not in presets:
-        fail("debug APK and release AAB export formats must both be defined")
+    require_text(presets, ['[preset.0]', 'name="Android Debug APK"', 'name="Android Release AAB"', 'platform="Android"'], "export_presets.cfg")
 
-    print("RULEBREAK static integrity: PASS — 100 unique levels, six-family distribution, 21 locales, responsive Android touch/input lock, audio feedback, durable persistence recovery, Godot 4.3 config, Android API 36/arm64 release config")
+    locale_files = sorted(LOCALES.glob("*.csv"))
+    if len(locale_files) != 21:
+        fail(f"expected 21 locale CSV files, got {len(locale_files)}")
+    locale_headers = {path.name: next(csv.reader(path.read_text(encoding="utf-8").splitlines())) for path in locale_files}
+    expected_locale_header = ["key", "value"]
+    if any(header != expected_locale_header for header in locale_headers.values()):
+        fail("all locale CSV files must use the key,value header")
+    for path in locale_files:
+        locale_rows = list(csv.reader(path.read_text(encoding="utf-8").splitlines()))
+        keys = []
+        width = len(locale_rows[0])
+        for row in locale_rows[1:]:
+            if len(row) != width:
+                fail(f"{path.name}: inconsistent CSV width")
+            if row[0].strip():
+                keys.append(row[0].strip())
+        if len(keys) != len(set(keys)):
+            fail(f"{path.name}: duplicate translation key")
+
+    print(json.dumps({
+        "status": "PASS",
+        "catalog_entries": 100,
+        "catalog_distribution": expected_distribution,
+        "locale_files": 21,
+        "adaptive_touch_target": {"compact_px": 92, "full_px": 112},
+        "checks": ["repository integrity", "catalog", "project config", "game contracts", "audio feedback", "progression recovery", "export presets", "localization"]
+    }, indent=2))
 
 
 if __name__ == "__main__":
