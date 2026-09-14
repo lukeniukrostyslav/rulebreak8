@@ -372,6 +372,42 @@ func _trick()->void:
             _card("OBVIOUS   •   EXCEPTION   •   DECOY   •   SAFE",26,90)
             _set_input_ready(true)
             return
+        "trick_slowest":
+            _label("TRICK_SLOWEST",26)
+            _card("FAST   •   MEDIUM   •   SLOW   •   FAST",32,86)
+            _label("TRICK_CHOOSE",24)
+            _set_input_ready(true)
+            return
+        "trick_decoy":
+            _label("TRICK_DECOY",26)
+            _card("DECOY   •   TARGET   •   DECOY   •   DECOY",30,86)
+            _label("TRICK_CHOOSE_TARGET",24)
+            _set_input_ready(true)
+            return
+        "trick_mislead":
+            _label("TRICK_MISLEAD",26)
+            _card("FOLLOW   •   IGNORE   •   REVERSE   •   WAIT",28,86)
+            _label("TRICK_LATEST_RULE",24)
+            _set_input_ready(true)
+            return
+        "trick_exception":
+            _label("TRICK_EXCEPTION",26)
+            _card("OBVIOUS   •   DECOY   •   EXCEPTION   •   NONE",28,86)
+            _label("TRICK_CHOOSE_EXCEPTION",24)
+            _set_input_ready(true)
+            return
+        "trick_wrong_label":
+            _label("TRICK_WRONG_LABEL",26)
+            _card("LABEL   •   RULE   •   BOTH   •   NEITHER",30,86)
+            _label("TRICK_FOLLOW_RULE",24)
+            _set_input_ready(true)
+            return
+        "trick_contradiction":
+            _label("TRICK_LATEST",26)
+            _card("OLD   •   LATEST   •   BOTH   •   NONE",30,86)
+            _label("TRICK_FOLLOW_LATEST",24)
+            _set_input_ready(true)
+            return
     var mode: int = abs(challenge_id.hash()) % 4
     var items: Array[String] = []
     for i in 4:
