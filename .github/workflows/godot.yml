@@ -106,6 +106,10 @@ jobs:
         run: |
           set -euo pipefail
           python3 tests/test_release_contract.py
+      - name: Audit runtime source before tests
+        run: |
+          set -euo pipefail
+          python3 tests/test_source_audit.py
       - name: Compile critical GDScript
         run: |
           set -euo pipefail
