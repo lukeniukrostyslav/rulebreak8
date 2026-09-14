@@ -169,6 +169,17 @@ jobs:
           unzip -t build/android/rulebreak-debug.apk >/dev/null
           unzip -l build/android/rulebreak-debug.apk | grep -F 'lib/arm64-v8a/libgodot_android.so'
           unzip -l build/android/rulebreak-debug.apk | grep -F 'AndroidManifest.xml'
+      - name: Verify APK manifest identity
+        run: |
+          set -euo pipefail
+          AAPT="$ANDROID_HOME/build-tools/36.0.0/aapt"
+          test -x "$AAPT"
+          BADGING="$($AAPT dump badging build/android/rulebreak-debug.apk)"
+          printf '%s\n' "$BADGING"
+          grep -F "package: name='com.rulebreak.game' versionCode='1' versionName='0.1.0'" <<<"$BADGING"
+          grep -F "sdkVersion:'24'" <<<"$BADGING"
+          grep -F "targetSdkVersion:'36'" <<<"$BADGING"
+          grep -F "native-code: 'arm64-v8a'" <<<"$BADGING"
       - name: Record APK checksum and build metadata
         run: |
           set -euo pipefail
