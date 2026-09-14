@@ -16,7 +16,8 @@ ENGINEERING / MVP BUILD — release candidate hardening
 ## Current repository state
 Repository: `lukeniukrostyslav/rulebreak8`
 Default branch: `main`
-Latest verified release-candidate source: `9552250f769f361967f831c0de6bb99bc86cb92f`.
+Latest verified release-candidate source: `34e218e0f8e4f338e70937029b58529eed8c4578`.
+A subsequent repository-cleanup commit `3c33eef2487a13504869abddf1f40241029542e2` removed the temporary GDScript fixer workflow; no gameplay/source files were changed by that cleanup.
 GitHub Actions is the authoritative runtime/build verification layer for this environment.
 Current foundation: Godot 4.3 configuration, 100-level challenge catalog, canonical V2 runtime renderer, local progression, localization fallbacks, deterministic test gates and Android APK/AAB export pipelines targeting current Play requirements.
 
@@ -60,7 +61,7 @@ Rule Engine → Challenge Manager → Challenge Modules → Progression → UI �
 | Concept / positioning | 100% |
 | Core gameplay / loop | 100% |
 | Visual direction | 78% |
-| Architecture | 93% |
+| Architecture | 94% |
 | Rule Engine | 92% |
 | Challenge Manager | 97% |
 | Challenge Modules | 91% |
@@ -71,48 +72,48 @@ Rule Engine → Challenge Manager → Challenge Modules → Progression → UI �
 | SWITCH | 90% |
 | TRICK | 85% |
 | MIX | 82% |
-| UI / UX | 79% |
-| Android-first adaptation | 86% |
-| Local Save / Progression | 87% |
+| UI / UX | 80% |
+| Android-first adaptation | 89% |
+| Local Save / Progression | 93% |
 | Localization | 92% |
 | Fallback / language resilience | 95% |
 | Audio / haptics / feedback | 25% |
 | Static Integrity Tests | 99% |
-| Runtime Tests | 92% |
-| Automated QA | 92% |
-| Android APK pipeline | 98% |
-| Android AAB pipeline | 97% |
+| Runtime Tests | 96% |
+| Automated QA | 95% |
+| Android APK pipeline | 99% |
+| Android AAB pipeline | 99% |
 | Production signing | 0% |
 | Physical Android QA | 0% |
 | Google Play readiness | 8% |
-| Release readiness | 20% |
-| Documentation / Project State | 98% |
-| Release-candidate hardening | 88% |
+| Release readiness | 22% |
+| Documentation / Project State | 99% |
+| Release-candidate hardening | 94% |
 
-**Overall: approximately 71%** of the full commercial release target.
+**Overall: approximately 73%** of the full commercial release target.
 
 Percentages are management estimates against the complete product/release scope. They are not code-coverage measurements and must not be interpreted as physical-device verification.
 
 ## Verification status — 2026-09-14
-- Release-candidate source `9552250f769f361967f831c0de6bb99bc86cb92f` passed the latest Android release artifact verification run `34823905675` GREEN.
-- The latest release verification passed repository integrity, all runtime gates, translation generation, unsigned Release AAB export and artifact upload.
-- Static integrity now additionally protects the Godot 4.3 main scene, 1080×1920 portrait viewport, canvas-item stretching, English fallback, mobile compatibility renderer, min SDK 24, target SDK 36, package identity, unsigned release boundary, arm64-only ABI and both APK/AAB presets.
-- `ChallengeManager` now normalizes invalid runtime indexes before reads/advances, preventing corrupted/out-of-range state from causing an array access failure. Runtime tests cover high and negative invalid indexes.
-- Gameplay answer handling now locks the logical `ChallengeViewV2.input_ready` state immediately after accepting an answer, preventing rapid duplicate taps from recording multiple answers during the feedback delay.
-- `docs/PLAY_READINESS_CHECKLIST.md` now separates repository-verifiable release gates from owner-side Play Console/signing work.
-- AAB artifact from run `34823905675`: `rulebreak-android-release-aab`, 40,602,844 bytes, SHA-256 `58fc5c4c1a4281e8a2710c4b7f8501c0fd5377ddca3ff557a7cf23621e3c783b`. The downloaded artifact hash independently matches GitHub's reported digest.
-- Previous verified Debug APK remains available from the earlier GREEN source checkpoint: `rulebreak-android-debug`, 23,860,042 bytes, SHA-256 `d620b0f6fd299215d3945608c8498bae4296f255bc1a18257bf78dce2464eb9d`.
-- Previous independent Android release artifact verification also passed GREEN.
+- Clean Android verification run `34835983629` on source `34e218e0f8e4f338e70937029b58529eed8c4578` completed GREEN.
+- The run passed repository integrity, Godot 4.3 headless runtime tests, translation preparation, Android Debug APK export, APK upload and GitHub Release publication.
+- The runtime gate now directly verifies the hardened progression persistence/recovery contract, including rejection of structurally truncated primary saves in favor of a known-good backup.
+- Clean Android release artifact verification run `34835983641` on the same source completed GREEN.
+- The AAB run passed repository integrity, runtime gates, translation preparation, unsigned Release AAB export and artifact upload.
+- Release AAB artifact: `rulebreak-android-release-aab`, 40,619,392 bytes, SHA-256 `3952a941cacf914e3bf5a36c2359c294cc8c9e647a31dc1d937e8060b1769549`.
+- Debug APK artifact: `rulebreak-android-debug`, 23,877,362 bytes, SHA-256 `c2b7623da1aa29412bf467eecb27e54518de4e595adf1a382aa0a4b4d2406863`.
+- Both artifacts are attached to the corresponding successful GitHub Actions runs.
 - The AAB is unsigned by design; this does not constitute production signing or Google Play readiness.
+- The temporary GDScript type-fix workflow has been removed after the permanent source fix was verified by the clean Android runs.
 - Local execution environment still does not contain the Godot executable, so CI remains the authoritative runtime/build verification layer for this session.
 
 ## Release engineering
 - `main.tscn` points directly to the canonical `scripts/game.gd` controller.
 - `scripts/game.gd` directly instantiates `ChallengeViewV2`.
 - Obsolete `game_bootstrap.gd` and duplicate `extended_localization.gd` were removed.
-- Progression persists the current challenge level while remaining compatible with older save files and enforces streak/current-level invariants.
+- Progression persists the current challenge level while remaining compatible with version-1 saves, validates the required save structure, recovers from a structurally invalid primary save using the backup, and enforces streak/current-level invariants.
 - Answer feedback requests short Android haptic feedback.
-- Answer handling now rejects a second rapid answer at the logical input-state level, not only by disabling the visual buttons.
+- Answer handling rejects a second rapid answer at the logical input-state level, not only by disabling the visual buttons.
 - Android Debug APK workflow is bounded with job/runtime/export timeouts.
 - Unsigned Android Release AAB workflow is present and bounded with runtime/export timeouts.
 - Verification workflows use concurrency cancellation to prevent stale runs from accumulating.
