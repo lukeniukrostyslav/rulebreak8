@@ -23,6 +23,7 @@ def main() -> None:
     presets = read("export_presets.cfg")
     apk_workflow = read(".github/workflows/godot.yml")
     aab_workflow = read(".github/workflows/release-aab.yml")
+    final_build_policy = read("docs/FINAL_BUILD_POLICY.md")
     catalog = json.loads(read("scripts/data/challenges.json"))
 
     require(project, 'config/name="RULEBREAK"', "project identity")
@@ -56,7 +57,8 @@ def main() -> None:
     if re.search(r"(?:password|secret|token|api[_-]?key)\s*[=:]\s*['\"]?[^\s#'\"]+", presets, re.I):
         raise AssertionError("export presets appear to contain a secret")
 
-    if catalog.get("version") != 2:
+    catalog_version = catalog.get("version")
+    if catalog_version != 2:
         raise AssertionError("challenge catalog version must be 2")
     if catalog.get("total_levels") != 100:
         raise AssertionError("challenge catalog must declare exactly 100 levels")
@@ -90,7 +92,23 @@ def main() -> None:
             raise AssertionError(f"runtime file unexpectedly contains a network URL: {path}")
 
     for expected in (
-        "Export Android debug APK",
+        "Close all gameplay/content/UX/data/persistence/localization/audio/haptics/security/offline blocks.",
+        "Close all automated compile, runtime, family-behavior, catalog, localization, save/recovery and release-contract checks.",
+        "Only then create the final APK for physical Android QA.",
+        "After physical QA passes, perform production signing and create the final AAB.",
+        "Only after signed AAB verification proceed to Google Play Console testing/release.",
+    ):
+        require(final_build_policy, expected, "final build policy")
+
+    runtime_gate_marker = "Validate project through headless runtime tests"
+    apk_export_marker = "Export Android debug APK"
+    if apk_workflow.find(runtime_gate_marker) < 0 or apk_workflow.find(apk_export_marker) < 0:
+        raise AssertionError("APK workflow must contain both runtime gate and APK export")
+    if apk_workflow.find(runtime_gate_marker) > apk_workflow.find(apk_export_marker):
+        raise AssertionError("APK export must occur only after the automated runtime gate")
+
+    for expected in (
+        apk_export_marker,
         "Verify APK manifest identity",
         'AAPT=\"$ANDROID_HOME/build-tools/36.0.0/aapt\"',
         "package: name='com.rulebreak.game' versionCode='1' versionName='0.1.0'",
@@ -131,6 +149,13 @@ def main() -> None:
     ):
         require(aab_workflow, expected, "AAB release pipeline")
 
+    aab_runtime_marker = "Run runtime gates"
+    aab_export_marker = "Export unsigned release AAB"
+    if aab_workflow.find(aab_runtime_marker) < 0 or aab_workflow.find(aab_export_marker) < 0:
+        raise AssertionError("AAB workflow must contain both runtime gates and AAB export")
+    if aab_workflow.find(aab_runtime_marker) > aab_workflow.find(aab_export_marker):
+        raise AssertionError("AAB export must occur only after runtime gates")
+
     if "gh release create" in aab_workflow:
         raise AssertionError("unsigned AAB workflow must not publish a misleading production release")
     if "permissions:\n  contents: read" not in aab_workflow:
@@ -138,7 +163,7 @@ def main() -> None:
     if "concurrency:" not in aab_workflow or "cancel-in-progress: true" not in aab_workflow:
         raise AssertionError("AAB verification workflow must prevent stale concurrent main-branch runs")
 
-    print("RELEASE CONTRACT PASS: project, Android presets, catalog, offline runtime boundaries, APK manifest identity, idempotent APK publication, prerelease safety and AAB verification pipeline verified")
+    print("RELEASE CONTRACT PASS: final-build order, project identity, Android presets, catalog, offline runtime boundaries, APK manifest identity, idempotent APK publication, prerelease safety and AAB verification pipeline verified")
 
 
 if __name__ == "__main__":
