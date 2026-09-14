@@ -3,7 +3,6 @@ extends Control
 const ChallengeManagerScript = preload("res://scripts/core/challenge_manager.gd")
 const ProgressionScript = preload("res://scripts/core/progression.gd")
 const ChallengeViewV2Script = preload("res://scripts/core/challenge_view_v2.gd")
-const LocalizationScript = preload("res://scripts/core/localization.gd")
 
 var challenge_manager := ChallengeManagerScript.new()
 var progression := ProgressionScript.new()
@@ -14,8 +13,10 @@ var rule_label: Label
 var streak_label: Label
 var feedback_label: Label
 var challenge_label: Label
+var progress_bar: ProgressBar
 var reaction_started_at_ms := -1
 var reaction_duration_ms := 0
+var answer_locked := false
 
 func _ready() -> void:
     var localization := get_node_or_null("/root/Localization")
@@ -32,88 +33,116 @@ func _ready() -> void:
 
 func _build_ui() -> void:
     var bg := ColorRect.new()
-    bg.color = Color("111217")
+    bg.color = Color("0D0F14")
     bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     add_child(bg)
 
     var margin := MarginContainer.new()
     margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-    margin.add_theme_constant_override("margin_left", 48)
-    margin.add_theme_constant_override("margin_right", 48)
-    margin.add_theme_constant_override("margin_top", 54)
-    margin.add_theme_constant_override("margin_bottom", 54)
+    margin.add_theme_constant_override("margin_left", 42)
+    margin.add_theme_constant_override("margin_right", 42)
+    margin.add_theme_constant_override("margin_top", 42)
+    margin.add_theme_constant_override("margin_bottom", 42)
     add_child(margin)
 
     var root := VBoxContainer.new()
-    root.add_theme_constant_override("separation", 14)
+    root.add_theme_constant_override("separation", 12)
     margin.add_child(root)
 
     var title := Label.new()
     title.text = tr("GAME_TITLE")
     title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     title.add_theme_font_size_override("font_size", 42)
+    title.add_theme_color_override("font_color", Color("F4F6FA"))
     root.add_child(title)
+
+    progress_bar = ProgressBar.new()
+    progress_bar.custom_minimum_size = Vector2(0, 10)
+    progress_bar.show_percentage = false
+    progress_bar.max_value = challenge_manager.challenges.size()
+    progress_bar.add_theme_icon_override("background", null)
+    root.add_child(progress_bar)
 
     challenge_label = Label.new()
     challenge_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    challenge_label.add_theme_font_size_override("font_size", 20)
+    challenge_label.add_theme_font_size_override("font_size", 18)
+    challenge_label.add_theme_color_override("font_color", Color("AEB7C7"))
     root.add_child(challenge_label)
 
     rule_label = Label.new()
     rule_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
     rule_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-    rule_label.add_theme_font_size_override("font_size", 42)
+    rule_label.add_theme_font_size_override("font_size", 38)
+    rule_label.add_theme_color_override("font_color", Color("FFFFFF"))
     rule_label.custom_minimum_size.y = 105
     root.add_child(rule_label)
 
     challenge_view.custom_minimum_size = Vector2(0, 230)
     challenge_view.size_flags_vertical = Control.SIZE_EXPAND_FILL
+    challenge_view.pivot_offset = Vector2(540, 115)
     root.add_child(challenge_view)
 
     streak_label = Label.new()
     streak_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    streak_label.add_theme_font_size_override("font_size", 24)
+    streak_label.add_theme_font_size_override("font_size", 22)
+    streak_label.add_theme_color_override("font_color", Color("D5DBE6"))
     root.add_child(streak_label)
 
     var grid := GridContainer.new()
     grid.columns = 2
     grid.custom_minimum_size.y = 250
-    grid.add_theme_constant_override("h_separation", 16)
-    grid.add_theme_constant_override("v_separation", 16)
+    grid.add_theme_constant_override("h_separation", 14)
+    grid.add_theme_constant_override("v_separation", 14)
     root.add_child(grid)
 
     for i in 4:
         var b := Button.new()
-        b.add_theme_font_size_override("font_size", 28)
-        b.custom_minimum_size = Vector2(0, 115)
+        b.add_theme_font_size_override("font_size", 27)
+        b.add_theme_color_override("font_color", Color("F4F6FA"))
+        b.add_theme_color_override("font_hover_color", Color("FFFFFF"))
+        b.add_theme_color_override("font_pressed_color", Color("FFFFFF"))
+        b.custom_minimum_size = Vector2(0, 112)
         b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+        b.focus_mode = Control.FOCUS_NONE
         b.pressed.connect(_on_choice.bind(i))
         grid.add_child(b)
         buttons.append(b)
 
     feedback_label = Label.new()
     feedback_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-    feedback_label.add_theme_font_size_override("font_size", 28)
-    feedback_label.custom_minimum_size.y = 55
+    feedback_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+    feedback_label.add_theme_font_size_override("font_size", 25)
+    feedback_label.add_theme_color_override("font_color", Color("C9D1DE"))
+    feedback_label.custom_minimum_size.y = 58
     root.add_child(feedback_label)
 
 func _show_challenge() -> void:
     reaction_started_at_ms = -1
     reaction_duration_ms = 0
+    answer_locked = false
     var challenge: Dictionary = challenge_manager.current()
     var total := challenge_manager.challenges.size()
     var position := challenge_manager.index + 1
     var kind_key := str(challenge.get("kind_key", ""))
     challenge_label.text = "%s  %d / %d   •   %s" % [tr("CHALLENGE"), position, total, tr(kind_key)]
+    progress_bar.max_value = total
+    progress_bar.value = position - 1
     rule_label.text = _localized_rule_text(challenge)
     streak_label.text = "%s  %d   •   %s  %d" % [tr("STREAK"), progression.streak, tr("BEST"), progression.best_streak]
     feedback_label.text = ""
+    feedback_label.add_theme_color_override("font_color", Color("C9D1DE"))
     challenge_view.show_challenge(challenge)
+    challenge_view.scale = Vector2(0.985, 0.985)
+    challenge_view.modulate.a = 0.0
+    var intro := create_tween().set_parallel(true)
+    intro.tween_property(challenge_view, "scale", Vector2.ONE, 0.18).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+    intro.tween_property(challenge_view, "modulate:a", 1.0, 0.18)
 
     var choices: Array = challenge.get("choices", [])
     for i in buttons.size():
         buttons[i].text = tr(str(choices[i])) if i < choices.size() else "—"
         buttons[i].disabled = not challenge_view.input_ready
+        buttons[i].scale = Vector2.ONE
 
 func _localized_rule_text(challenge: Dictionary) -> String:
     var rule_key := str(challenge.get("rule_key", ""))
@@ -130,6 +159,8 @@ func _localized_rule_text(challenge: Dictionary) -> String:
     return translated
 
 func _on_visual_input_ready(ready: bool) -> void:
+    if answer_locked:
+        return
     if feedback_label:
         if ready:
             feedback_label.text = ""
@@ -142,13 +173,20 @@ func _on_response_window_started(started_at_ms: int, duration_ms: int) -> void:
     reaction_started_at_ms = started_at_ms
     reaction_duration_ms = duration_ms
 
+func _animate_answer_button(choice: int) -> void:
+    if choice < 0 or choice >= buttons.size():
+        return
+    var button := buttons[choice]
+    var tween := create_tween()
+    tween.tween_property(button, "scale", Vector2(0.96, 0.96), 0.05)
+    tween.tween_property(button, "scale", Vector2.ONE, 0.10)
+
 func _on_choice(choice: int) -> void:
-    if not challenge_view.input_ready:
+    if answer_locked or not challenge_view.input_ready:
         return
 
-    # Disable the logical input state immediately, not only the visual
-    # buttons, so rapid double-taps cannot record two answers while the
-    # feedback delay is awaiting its timer.
+    _animate_answer_button(choice)
+    answer_locked = true
     challenge_view.input_ready = false
     var reaction_timed_out := false
     if reaction_started_at_ms >= 0:
@@ -162,13 +200,17 @@ func _on_choice(choice: int) -> void:
 
     if correct:
         feedback_label.text = "%s  ✓" % tr("CORRECT")
+        feedback_label.add_theme_color_override("font_color", Color("77E0A2"))
         Input.vibrate_handheld(35)
         challenge_manager.next()
         progression.set_current_level(challenge_manager.index)
+        streak_label.text = "%s  %d   •   %s  %d" % [tr("STREAK"), progression.streak, tr("BEST"), progression.best_streak]
         await get_tree().create_timer(0.35).timeout
     else:
         feedback_label.text = "%s  •  %s" % [tr("WRONG"), tr("TRY_AGAIN")]
+        feedback_label.add_theme_color_override("font_color", Color("FF8F8F"))
         Input.vibrate_handheld(55)
+        streak_label.text = "%s  %d   •   %s  %d" % [tr("STREAK"), progression.streak, tr("BEST"), progression.best_streak]
         await get_tree().create_timer(0.7).timeout
 
     _show_challenge()
