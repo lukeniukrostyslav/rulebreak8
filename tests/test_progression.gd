@@ -2,7 +2,24 @@ extends SceneTree
 
 const ProgressionScript = preload("res://scripts/core/progression.gd")
 
+func _write_json(path: String, payload: Dictionary) -> void:
+    var file := FileAccess.open(path, FileAccess.WRITE)
+    assert(file != null)
+    file.store_string(JSON.stringify(payload))
+    file.flush()
+    file = null
+
+func _cleanup_save_files() -> void:
+    for path in [
+        "user://rulebreak_save.json",
+        "user://rulebreak_save.json.tmp",
+        "user://rulebreak_save.json.bak"
+    ]:
+        if FileAccess.file_exists(path):
+            DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+
 func _init() -> void:
+    _cleanup_save_files()
     var progression = ProgressionScript.new()
 
     assert(progression.streak == 0)
@@ -16,6 +33,7 @@ func _init() -> void:
     assert(progression.best_streak == 1)
     assert(progression.total_correct == 1)
     assert(progression.total_wrong == 0)
+    assert(not FileAccess.file_exists("user://rulebreak_save.json.tmp"))
 
     progression.record(true)
     assert(progression.streak == 2)
@@ -37,18 +55,14 @@ func _init() -> void:
 
     # A deliberately inconsistent legacy/corrupt state must not violate the
     # derived invariant when loaded.
-    var save_path := "user://rulebreak_save.json"
-    var file := FileAccess.open(save_path, FileAccess.WRITE)
-    assert(file != null)
-    file.store_string(JSON.stringify({
+    _write_json("user://rulebreak_save.json", {
         "version": 1,
         "streak": 9,
         "best_streak": 2,
         "total_correct": 12,
         "total_wrong": 4,
         "current_level": 150
-    }))
-    file = null
+    })
 
     var restored = ProgressionScript.new()
     restored.load_state()
@@ -58,6 +72,27 @@ func _init() -> void:
     assert(restored.total_wrong == 4)
     assert(restored.current_level == 99)
 
-    DirAccess.remove_absolute(ProjectSettings.globalize_path(save_path))
-    print("RULEBREAK Progression persistence/invariant tests: PASS")
+    # If a primary save is truncated during a replacement, a known-good backup
+    # must win instead of silently resetting progress to defaults.
+    _write_json("user://rulebreak_save.json.bak", {
+        "version": 1,
+        "streak": 4,
+        "best_streak": 7,
+        "total_correct": 31,
+        "total_wrong": 8,
+        "current_level": 41
+    })
+    _write_json("user://rulebreak_save.json", {"truncated": true})
+
+    var recovered = ProgressionScript.new()
+    recovered.load_state()
+    assert(recovered.streak == 4)
+    assert(recovered.best_streak == 7)
+    assert(recovered.total_correct == 31)
+    assert(recovered.total_wrong == 8)
+    assert(recovered.current_level == 41)
+    assert(not FileAccess.file_exists("user://rulebreak_save.json.bak"))
+
+    _cleanup_save_files()
+    print("RULEBREAK Progression persistence/recovery/invariant tests: PASS")
     quit(0)
