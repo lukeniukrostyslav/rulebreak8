@@ -80,6 +80,36 @@ jobs:
           timeout 90s godot --headless --path . --script tests/test_challenge_manager.gd
           timeout 90s godot --headless --path . --script tests/test_challenge_view.gd
           timeout 90s godot --headless --path . --script tests/test_localization.gd
+      - name: Prepare translations without Godot CSV importer
+        run: |
+          set -euo pipefail
+          cat > /tmp/generate_translations.gd <<'GDSCRIPT'
+          extends SceneTree
+          const LocalizationScript = preload("res://scripts/core/localization.gd")
+          const LOCALES := ["en", "es", "pt_BR", "fr", "de", "it", "ru", "uk", "pl", "tr", "nl", "ar", "he", "hi", "id", "vi", "th", "ja", "ko", "zh", "zh_TW"]
+          const SOURCES := ["challenges", "extra_a", "extra_b", "ui_translations"]
+          func _init() -> void:
+              var localization = LocalizationScript.new()
+              for locale in LOCALES:
+                  for source in SOURCES:
+                      var translation = localization._build_translation_from_csv(source, locale)
+                      if translation == null:
+                          push_error("Failed to generate %s.%s.translation" % [source, locale])
+                          quit(1)
+                          return
+                      var path = "res://locale/%s.%s.translation" % [source, locale]
+                      var err = ResourceSaver.save(translation, path)
+                      if err != OK:
+                          push_error("Failed to save %s: %s" % [path, err])
+                          quit(1)
+                          return
+              quit(0)
+          GDSCRIPT
+          timeout 90s godot --headless --path . --script /tmp/generate_translations.gd
+          test -s locale/challenges.en.translation
+          test -s locale/ui_translations.ru.translation
+          rm -f locale/*.csv
+          test -z "$(find locale -maxdepth 1 -name '*.csv' -print -quit)"
       - name: Export unsigned release AAB
         run: |
           set -euo pipefail
