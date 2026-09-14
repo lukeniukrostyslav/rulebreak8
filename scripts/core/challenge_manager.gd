@@ -182,7 +182,15 @@ func _build_extended_choices(family: String, challenge_id: String, correct: int)
 
 func _place_correct(choices: Array, correct: int, value: String) -> Array:
     var result: Array = choices.duplicate()
+    var original: String = str(result[correct])
+    var existing_index := -1
+    for i in result.size():
+        if i != correct and str(result[i]) == value:
+            existing_index = i
+            break
     result[correct] = value
+    if existing_index >= 0:
+        result[existing_index] = original
     return result
 
 func _normalize_index() -> void:
