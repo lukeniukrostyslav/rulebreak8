@@ -51,7 +51,7 @@ func _new_root() -> void:
 func _set_input_ready(v:bool)->void:
     input_ready=v
     input_ready_changed.emit(v)
-    if v and challenge_id in ["color_timer","second_signal","only_x"]:
+    if v and (challenge_id.begins_with("react_") or challenge_id in ["color_timer","second_signal","only_x"]):
         response_window_started.emit(Time.get_ticks_msec(),response_duration_ms)
 
 func _label(key:String,size:int=30)->void:
@@ -223,26 +223,36 @@ func _memory_sequence()->String:
         _: return MEM[abs(challenge_id.hash())%MEM.size()]
 
 func _react(token:int)->void:
-    _label("REACT_WAIT",30)
-    _card("○",72,86)
-    await get_tree().create_timer(0.5).timeout
-    if token!=phase_token:return
-    var target: String = _react_target()
-    clear_view()
-    _new_root()
-    _label("REACT_WATCH",26)
-    _card(target,58,92)
-    await get_tree().create_timer(0.25).timeout
-    if token!=phase_token:return
-    clear_view()
-    _new_root()
-    _label("REACT_NOW",28)
-    _pulse(_card(target,64,96))
-    _set_input_ready(true)
-    await get_tree().create_timer(float(response_duration_ms)/1000.0).timeout
-    if token==phase_token and input_ready:
-        _set_input_ready(false)
-        _label("TOO_SLOW",26)
+    # A missed reaction is a retry, not a dead-end. Keep the challenge active
+    # until the player answers or a newer challenge invalidates this phase.
+    while token==phase_token:
+        _label("REACT_WAIT",30)
+        _card("○",72,86)
+        await get_tree().create_timer(0.5).timeout
+        if token!=phase_token:return
+        var target: String = _react_target()
+        clear_view()
+        _new_root()
+        _label("REACT_WATCH",26)
+        _card(target,58,92)
+        await get_tree().create_timer(0.25).timeout
+        if token!=phase_token:return
+        clear_view()
+        _new_root()
+        _label("REACT_NOW",28)
+        _pulse(_card(target,64,96))
+        _set_input_ready(true)
+        await get_tree().create_timer(float(response_duration_ms)/1000.0).timeout
+        if token!=phase_token:return
+        if input_ready:
+            _set_input_ready(false)
+            _label("TOO_SLOW",26)
+            await get_tree().create_timer(0.45).timeout
+            if token!=phase_token:return
+        else:
+            # _on_choice consumed the response window. The game controller
+            # owns the result and will advance/re-render as appropriate.
+            return
 
 func _switch(token:int)->void:
     _label("SWITCH_RULE_ONE",24)

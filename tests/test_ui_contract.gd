@@ -59,6 +59,8 @@ func _init() -> void:
 
     _require(view, "signal input_ready_changed", "challenge input readiness signal")
     _require(view, "signal response_window_started", "timed-response signal")
+    _require(view, 'if v and (challenge_id.begins_with("react_") or challenge_id in ["color_timer","second_signal","only_x"]):', "all reaction challenges receive a response window")
+    _require(view, "A missed reaction is a retry, not a dead-end.", "reaction timeout retry behavior")
     _require(view, "func supports_challenge", "renderer support contract")
     _require(view, "func show_challenge", "renderer entry point")
 

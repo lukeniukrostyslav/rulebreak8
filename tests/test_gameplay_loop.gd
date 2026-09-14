@@ -60,6 +60,13 @@ func _init() -> void:
     await _wait_until_input_ready(game)
     assert(not game.answer_locked)
 
+    # Reaction challenges must remain retryable after a missed response window.
+    # This is a source-level contract here; the headless runtime gate covers
+    # the actual timer/retry loop under Godot.
+    var view_source := FileAccess.get_file_as_string("res://scripts/core/challenge_view_v2.gd")
+    assert(view_source.contains("A missed reaction is a retry, not a dead-end."))
+    assert(view_source.contains("while token==phase_token:"))
+
     # The current REMEMBER challenge must reject a wrong option without
     # advancing. The test only requires the selected option to be non-correct.
     var correct_index: int = game.challenge_manager.get_current().correct_index
