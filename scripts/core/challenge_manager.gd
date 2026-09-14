@@ -40,14 +40,35 @@ func _append_extended_levels() -> void:
     ]
     for spec in specs:
         var family := str(spec[0])
+        var challenge_id := str(spec[1])
         var choices: Array
         match family:
             "SEE": choices = ["A", "B", "C", "D"]
             "REMEMBER": choices = ["1", "2", "3", "4"]
-            "REACT": choices = ["RED", "BLUE", "GREEN", "YELLOW"]
-            "SWITCH": choices = ["BLUE", "RED", "GREEN", "YELLOW"]
+            "REACT": choices = _extended_react_choices(challenge_id)
+            "SWITCH": choices = _extended_switch_choices(challenge_id)
             _: choices = ["FIRST", "SECOND", "THIRD", "FOURTH"]
-        challenges.append({"id": spec[1], "rule_key": "RULE_" + str(spec[1]).to_upper(), "description": spec[2], "choices": choices, "correct": int(spec[3]), "kind_key": "KIND_" + family})
+        challenges.append({"id": challenge_id, "rule_key": "RULE_" + challenge_id.to_upper(), "description": spec[2], "choices": choices, "correct": int(spec[3]), "kind_key": "KIND_" + family})
+
+func _extended_react_choices(challenge_id: String) -> Array:
+    match challenge_id:
+        "react_circle": return ["●", "▲", "■", "◆"]
+        "react_triangle": return ["●", "▲", "■", "◆"]
+        "react_star": return ["●", "▲", "★", "◆"]
+        "react_even", "react_third", "react_fourth", "react_signal_two", "react_final": return ["FIRST", "SECOND", "THIRD", "FOURTH"]
+        "react_after_change": return ["BEFORE", "AFTER", "DURING", "NEVER"]
+        "react_green_twice": return ["FIRST", "SECOND", "THIRD", "FOURTH"]
+        "react_x_only": return ["X", "O", "△", "□"]
+        _: return ["RED", "BLUE", "GREEN", "YELLOW"]
+
+func _extended_switch_choices(challenge_id: String) -> Array:
+    match challenge_id:
+        "switch_direction", "switch_direction_two": return ["UP", "RIGHT", "DOWN", "LEFT"]
+        "switch_shape": return ["●", "▲", "■", "◆"]
+        "switch_number": return ["1", "2", "3", "4"]
+        "switch_action": return ["TAP", "HOLD", "SWIPE", "WAIT"]
+        "switch_after_two", "switch_after_three": return ["FIRST", "SECOND", "THIRD", "FOURTH"]
+        _: return ["BLUE", "RED", "GREEN", "YELLOW"]
 
 func current() -> Dictionary:
     return challenges[index]
