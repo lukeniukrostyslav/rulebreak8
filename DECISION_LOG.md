@@ -34,6 +34,16 @@ ONE MOVE was rejected because research showed multiple direct competitors and in
 ## Scope discipline
 Do not add infrastructure merely because it could be useful later. Every new dependency must justify its impact on build time, maintenance, privacy, offline behavior, or commercial readiness.
 
+## Verified checkpoint — 2026-09-14
+- Commit `32cadfef545c62cb494bb9a07b9502ab21a2510f` is the current verified hardening source.
+- GitHub Actions `Godot 4.3 verification` completed GREEN.
+- Its headless runtime gates passed for ChallengeManager, ChallengeView and localization.
+- Repository integrity validation passed for the 100-level catalog, family distribution, 21 locales and Android API 36 configuration.
+- Android arm64 Debug APK export passed and the artifact was uploaded/published by CI.
+- Independent `Android release artifact verification` completed GREEN.
+- Unsigned Android Release AAB export and archive validation passed.
+- This checkpoint proves reproducible CI/runtime/build verification for the current source; it does not prove physical-device behavior, production signing or Google Play submission readiness.
+
 ## Change protocol
 A locked decision can change only after documenting:
 1. what changed;
