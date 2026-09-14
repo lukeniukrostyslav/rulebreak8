@@ -74,6 +74,13 @@ jobs:
         run: |
           set -euo pipefail
           python3 tests/test_static_integrity.py
+      - name: Compile critical GDScript
+        run: |
+          set -euo pipefail
+          timeout 60s godot --headless --path . --check-only --script scripts/game.gd
+          timeout 60s godot --headless --path . --check-only --script scripts/core/challenge_view_v2.gd
+          timeout 60s godot --headless --path . --check-only --script scripts/core/progression.gd
+          timeout 60s godot --headless --path . --check-only --script scripts/core/audio_feedback.gd
       - name: Run runtime gates
         run: |
           set -euo pipefail
@@ -81,6 +88,8 @@ jobs:
           timeout 90s godot --headless --path . --script tests/test_challenge_view.gd
           timeout 90s godot --headless --path . --script tests/test_localization.gd
           timeout 90s godot --headless --path . --script tests/test_game_rule_fallback.gd
+          timeout 90s godot --headless --path . --script tests/test_localization_fallback_coverage.gd
+          timeout 90s godot --headless --path . --audio-driver Dummy --script tests/test_audio_feedback.gd
           timeout 90s godot --headless --path . --script tests/test_progression.gd
       - name: Prepare translations without Godot CSV importer
         run: |
