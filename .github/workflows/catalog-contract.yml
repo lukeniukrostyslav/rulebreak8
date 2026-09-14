@@ -1,0 +1,42 @@
+name: RULEBREAK catalog contract
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: rulebreak-catalog-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  catalog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Godot 4.3 stable
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/godot.zip \
+            "https://github.com/godotengine/godot-builds/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip"
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          mv /tmp/godot/Godot_v4.3-stable_linux.x86_64 /usr/local/bin/godot
+          chmod +x /usr/local/bin/godot
+          godot --version
+
+      - name: Run catalog contract
+        run: |
+          set -euo pipefail
+          timeout 60s godot --headless --path . --script tests/test_catalog_contract.gd
+
+      - name: Verify no test generated artifacts
+        run: |
+          set -euo pipefail
+          test ! -d .godot || rm -rf .godot
+          git status --short
+          test -z "$(git status --short)"
