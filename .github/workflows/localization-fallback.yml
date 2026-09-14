@@ -1,0 +1,30 @@
+name: RULEBREAK localization fallback
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: localization-fallback-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fallback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Godot 4.3
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/godot.zip "https://github.com/godotengine/godot-builds/releases/download/4.3-stable/Godot_v4.3-stable_linux.x86_64.zip"
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          install -m 0755 /tmp/godot/Godot_v4.3-stable_linux.x86_64 /usr/local/bin/godot
+          godot --version
+      - name: Validate localization fallback coverage
+        run: |
+          set -euo pipefail
+          timeout 90s godot --headless --path . --script tests/test_localization_fallback_coverage.gd
