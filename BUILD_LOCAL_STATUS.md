@@ -1,11 +1,11 @@
-# RULEBREAK — LOCAL COMPLETION STATUS
+# RULEBREAK — LOCAL / CI COMPLETION STATUS
 
 ## Scope
 
-This document records the owner-provided ZIP local completion pass on 2026-09-14.
-The local pass was performed against the supplied repository snapshot.
+This document records the owner-provided ZIP local completion pass on 2026-09-14 and the subsequent GitHub synchronization/hardening work.
+The local pass was performed against the supplied repository snapshot; GitHub `main` is now the synchronized engineering source for continued verification.
 
-## Completed in the local pass
+## Completed in the hardening pass
 
 - Re-audited the repository from the owner-provided ZIP.
 - Re-ran the repository-only static integrity gate successfully.
@@ -15,13 +15,25 @@ The local pass was performed against the supplied repository snapshot.
 - Backup recovery now validates the backup before promoting it.
 - Added strict typed payload validation for persisted progression state.
 - Added regression coverage for malformed typed payload recovery and static enforcement of the canonical renderer.
-- Updated project state and task documentation.
+- Fixed a Godot 4.3 GDScript parser issue in the responsive grid spacing expression and added an explicit critical-script compile gate.
+- Added 100-level catalog behavior verification through the public `ChallengeManager.check()` contract.
+- Added English localization fallback coverage for all 100 catalog entries.
+- Added headless audio feedback initialization/tone smoke coverage using Godot's Dummy audio driver.
+- Removed a duplicate Android release preset option.
+- Synchronized README, QA-gate documentation and release-engineering documentation with the verified engineering state.
 
 ## Verification truth
 
-- Static repository integrity: PASS in the local environment.
-- Python-only repository checks: PASS.
-- Godot runtime execution: NOT RUN locally because the Godot 4.3 executable is unavailable in this environment.
+- Repository static integrity: PASS through GitHub Actions.
+- Critical GDScript compilation: PASS under Godot 4.3 in GitHub Actions after the parser fix.
+- Main-scene boot: PASS under Godot 4.3 headlessly.
+- 100-level catalog behavior: PASS through the public manager contract.
+- Renderer support: PASS for all 100 catalog entries.
+- Localization fallback coverage: PASS for all 100 catalog entries.
+- Audio feedback smoke: PASS under the Dummy audio driver.
+- Android Debug APK export: previously PASS in GitHub Actions; current source continues through the same release pipeline.
+- Android Release AAB export: previously PASS in GitHub Actions as an unsigned engineering artifact; current source is re-verified after hardening.
+- Local Godot executable: NOT available in this execution environment, so local native Godot execution is not claimed.
 - Physical Android device QA: NOT RUN in this environment.
 - Production signing: NOT performed; credentials remain external.
 - Google Play submission: NOT performed.
@@ -35,6 +47,6 @@ The local pass was performed against the supplied repository snapshot.
 
 ## GitHub synchronization
 
-At the owner's explicit request, the source/documentation changes from this local hardening pass were synchronized to the GitHub `main` branch. No unrelated project reset or rebuild was performed.
+At the owner's explicit request, the source/documentation changes from the hardening pass were synchronized to the GitHub `main` branch. No unrelated project reset or rebuild was performed.
 
 Binary ZIP archives are retained in the local workspace; the GitHub contents API used for synchronization handles the repository's text/source files rather than uploading the local ZIP as a repository source file.
