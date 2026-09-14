@@ -56,7 +56,7 @@ def main() -> None:
     manager = read("scripts/core/challenge_manager.gd")
     if manager.count('"choices":[') < 20:
         raise AssertionError("seed challenge choices appear incomplete")
-    spec_rows = re.findall(r'^\s+\["(?:SEE|REMEMBER|REACT|SWITCH|TRICK|MIX)",\s*"[^"]+",', manager, re.MULTILINE)
+    spec_rows = re.findall(r'\["(?:SEE|REMEMBER|REACT|SWITCH|TRICK|MIX)",\s*"[^"]+",', manager)
     if len(spec_rows) != 80:
         raise AssertionError(f"extended challenge specs must contain exactly 80 rows, found {len(spec_rows)}")
 
@@ -77,8 +77,7 @@ def main() -> None:
     runtime_marker = "Validate project through headless runtime tests"
     if verification_workflow.find(runtime_marker) < 0:
         raise AssertionError("routine verification workflow must run runtime gates")
-    forbidden_export = ("Export Android debug APK", "Export unsigned release AAB", "gh release create", "gh release upload")
-    if any(marker in verification_workflow for marker in forbidden_export):
+    if any(marker in verification_workflow for marker in ("Export Android debug APK", "Export unsigned release AAB", "gh release create", "gh release upload")):
         raise AssertionError("routine verification workflow must not build or publish release artifacts")
     require(verification_workflow, "permissions:\n  contents: read", "routine verification permissions")
     require(verification_workflow, "concurrency:", "routine verification concurrency")
@@ -99,7 +98,7 @@ def main() -> None:
     require(final_apk_workflow, "permissions:\n  contents: read", "final APK permissions")
 
     for expected in (
-        "workflow_dispatch:", "physical_qa_passed", "Export unsigned release AAB", "Record AAB checksum and build metadata",
+        "workflow_dispatch:", "physical_qa_passed", "Run runtime gates", "Export unsigned release AAB", "Record AAB checksum and build metadata",
         "build/android/rulebreak-release.aab", "build/android/rulebreak-release.aab.sha256", "build/android/rulebreak-release.aab.metadata.txt",
         "artifact_type=unsigned-release-aab", "source_commit=${GITHUB_SHA}", "signed=false", "verification=ci-verified-export",
         "actions/upload-artifact@v4",
