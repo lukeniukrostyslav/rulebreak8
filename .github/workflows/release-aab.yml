@@ -91,6 +91,7 @@ jobs:
           timeout 90s godot --headless --path . --script tests/test_localization_fallback_coverage.gd
           timeout 90s godot --headless --path . --audio-driver Dummy --script tests/test_audio_feedback.gd
           timeout 90s godot --headless --path . --script tests/test_progression.gd
+          timeout 90s godot --headless --path . --script tests/test_gameplay_loop.gd
       - name: Prepare translations without Godot CSV importer
         run: |
           set -euo pipefail
