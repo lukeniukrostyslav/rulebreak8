@@ -29,8 +29,14 @@ func _init() -> void:
     view.show_challenge(react)
     await _wait(1.00)
     _assert_ready(view, "color_timer", true)
+    assert(view._react_target() == "GREEN")
     await _wait(1.50)
     assert(not view.input_ready)
+    var react_late := {"id":"react_late", "kind_key":"KIND_REACT", "correct":1}
+    view.show_challenge(react_late)
+    await _wait(0.80)
+    _assert_ready(view, "react_late", true)
+    assert(view._react_target() == "LATE")
     var switch := {"id":"rule_switch", "kind_key":"KIND_SWITCH", "correct":1}
     view.show_challenge(switch)
     assert(not view.input_ready)
@@ -45,5 +51,5 @@ func _init() -> void:
     assert(not view.input_ready)
     await _wait(1.45)
     _assert_ready(view, "mixed", true)
-    print("RULEBREAK ChallengeView timing/state tests: PASS")
+    print("RULEBREAK ChallengeView timing/state/content tests: PASS")
     quit(0)
