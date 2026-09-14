@@ -37,7 +37,12 @@ func _play_tone_delayed(frequency: float, duration: float, amplitude: float, del
 func _push_tone(frequency: float, duration: float, amplitude: float) -> void:
     if playback == null:
         return
-    var frame_count := maxi(1, int(SAMPLE_RATE * duration))
+    var requested_frames := maxi(1, int(SAMPLE_RATE * duration))
+    var available_frames := playback.get_frames_available()
+    var frame_count := mini(requested_frames, available_frames)
+    if frame_count <= 0:
+        return
+
     var frames := PackedVector2Array()
     frames.resize(frame_count)
     for i in frame_count:
