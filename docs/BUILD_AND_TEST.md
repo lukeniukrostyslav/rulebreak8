@@ -10,13 +10,13 @@ Run it with a Godot 4.3 editor binary from the project root:
 godot --headless --path . --script tests/test_challenge_manager.gd
 ```
 
-Expected output:
+Expected output begins with:
 
 ```text
-RULEBREAK ChallengeManager tests: PASS
+RULEBREAK ChallengeManager tests: PASS — 100 levels + index invariants + view contract
 ```
 
-This test checks the 20 seed challenges, unique IDs, four-choice shape, valid correct indexes, all six challenge families, answer checking, reset behavior and full 100-level catalog wraparound.
+This test checks the 20 seed challenges, unique IDs, four-choice shape, valid correct indexes, all six challenge families, answer checking, reset behavior, full 100-level catalog wraparound and recovery from invalid positive/negative manager indexes.
 
 A passing smoke test is not a substitute for runtime gameplay QA.
 
@@ -29,8 +29,8 @@ The workflow:
 1. Checks out the repository.
 2. Downloads the pinned Godot 4.3 stable Linux binary.
 3. Installs the pinned Android SDK/API 36, build-tools, NDK and CMake dependencies.
-4. Verifies repository/catalog integrity with the standard-library static gate.
-5. Runs the deterministic ChallengeManager test.
+4. Verifies repository/catalog/export/project integrity with the standard-library static gate.
+5. Runs the deterministic ChallengeManager test, including index invariants.
 6. Runs the deterministic ChallengeView timing/state test, including the 100-level renderer support contract.
 7. Runs the localization runtime test.
 8. Runs the extended-rule English fallback test.
@@ -54,7 +54,9 @@ The workflow is a repository-level verification mechanism. Its existence does **
 - non-empty English descriptions and valid correct indexes for all extensions;
 - expected family distribution: SEE 18 / REMEMBER 20 / REACT 18 / SWITCH 19 / TRICK 19 / MIX 6;
 - all 21 locale CSV headers and duplicate-key protection;
-- Android API 36, package identity and arm64-only ABI settings.
+- Godot 4.3 main-scene, 1080×1920 portrait viewport, canvas-item stretch, English fallback and mobile compatibility renderer settings;
+- Android API 36, min SDK 24, package identity, unsigned release boundary and arm64-only ABI settings;
+- both Android Debug APK and unsigned Release AAB presets remain present.
 
 ## Development gate
 
@@ -72,6 +74,7 @@ The workflow is a repository-level verification mechanism. Its existence does **
 12. Verify localization on representative locales and confirm no raw technical rule keys are shown for extended challenges.
 13. Verify every challenge visually and semantically, including timing-dependent challenges.
 14. Verify streak, best streak, counters and current-level persistence across restart.
+15. Verify rapid repeated taps cannot record more than one answer for a single challenge.
 
 ## Release gate
 
