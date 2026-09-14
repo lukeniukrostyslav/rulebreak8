@@ -3,7 +3,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 REQUIRED = {
-    "docs/RELEASE_ARTIFACT_POLICY.md": ["Debug APK", "Unsigned Release AAB", "Signed Release AAB", "source SHA", "SHA-256"],
+    "docs/RELEASE_ARTIFACT_POLICY.md": ["Debug APK", "Unsigned Release AAB", "Signed Release AAB", "source SHA", "SHA-256", ".metadata.txt"],
     "docs/CI_RELEASE_GATE.md": ["Critical GDScript compile", "End-to-end gameplay smoke", "Unsigned Release AAB export", "Freshness rule"],
     "docs/RELEASE_READINESS_CHECKLIST.md": ["Physical Android QA", "Production release", "fresh authoritative GREEN"],
     "docs/PHYSICAL_ANDROID_QA.md": ["portrait", "persistence", "haptic", "all 100"],
@@ -26,4 +26,4 @@ assert "production signing: not verified" in evidence
 assert "signed release aab: not verified" in evidence
 assert "google play testing/production: not verified" in evidence
 
-print("RULEBREAK release documentation: PASS — required release boundaries and evidence rules are present")
+print("RULEBREAK release documentation: PASS — required release boundaries, artifact metadata, and evidence rules are present")
