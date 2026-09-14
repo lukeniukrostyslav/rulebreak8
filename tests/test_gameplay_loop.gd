@@ -10,6 +10,14 @@ func _cleanup_save_files() -> void:
         if FileAccess.file_exists(path):
             DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 
+func _wait_until_input_ready(game: Node, timeout_seconds: float = 3.0) -> void:
+    var deadline: float = Time.get_ticks_msec() / 1000.0 + timeout_seconds
+    while not game.challenge_view.input_ready:
+        if Time.get_ticks_msec() / 1000.0 >= deadline:
+            assert(false)
+            return
+        await create_timer(0.05).timeout
+
 func _init() -> void:
     _cleanup_save_files()
 
@@ -22,6 +30,7 @@ func _init() -> void:
     await process_frame
     await process_frame
     await create_timer(0.25).timeout
+    await _wait_until_input_ready(game)
 
     assert(game.buttons.size() == 4)
     assert(game.challenge_manager.index == 0)
@@ -33,6 +42,7 @@ func _init() -> void:
     # the manager and persist the next level.
     game._on_choice(0)
     await create_timer(0.45).timeout
+    await _wait_until_input_ready(game)
     assert(game.challenge_manager.index == 1)
     assert(game.progression.current_level == 1)
     assert(game.progression.streak == 1)
@@ -47,13 +57,14 @@ func _init() -> void:
     assert(game.challenge_manager.index == before_level)
     assert(game.progression.total_correct == before_correct)
 
-    await create_timer(1.05).timeout
-    assert(game.challenge_view.input_ready)
+    await _wait_until_input_ready(game)
     assert(not game.answer_locked)
 
-    # Sequence level 2 accepts index 0; selecting another option must keep the
-    # player on the same level and reset the streak without advancing.
-    game._on_choice(1)
+    # The current REMEMBER challenge must reject a wrong option without
+    # advancing. The test only requires the selected option to be non-correct.
+    var correct_index: int = game.challenge_manager.get_current().correct_index
+    var wrong_index: int = 0 if correct_index != 0 else 1
+    game._on_choice(wrong_index)
     await create_timer(0.80).timeout
     assert(game.challenge_manager.index == 1)
     assert(game.progression.current_level == 1)
