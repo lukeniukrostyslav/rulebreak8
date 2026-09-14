@@ -161,6 +161,9 @@ def main() -> None:
         'DirAccess.rename_absolute(save_abs, backup_abs)',
         'DirAccess.rename_absolute(temp_abs, save_abs)',
         '_try_restore_backup()',
+        'func _is_valid_payload(parsed: Dictionary) -> bool:',
+        'required_keys := [',
+        'return int(parsed.get("version", -1)) == save_version',
     ]
     for contract in required_persistence_contracts:
         if contract not in progression:
