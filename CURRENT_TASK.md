@@ -10,7 +10,7 @@ ENGINEERING / MVP BUILD — release candidate hardening
 Turn the existing Godot foundation into a reusable, testable RULEBREAK game loop with 100 challenge entries and a verifiable Android release path.
 
 ## Latest verified checkpoint
-- Commit `32cadfef545c62cb494bb9a07b9502ab21a2510f` is the latest checkpoint recorded as fully GREEN in project history.
+- Commit `32cadfef545c62cb4949bb9a07b9502ab21a2510f` is the latest checkpoint recorded as fully GREEN in project history.
 - That verification passed repository integrity, Godot headless runtime tests, localization generation, Android Debug APK export, APK validation and GitHub Release publication.
 - The same checkpoint passed the independent Android release artifact verification job with unsigned Release AAB export/validation.
 - The AAB is intentionally unsigned and is not Google Play-ready.
@@ -21,6 +21,8 @@ Turn the existing Godot foundation into a reusable, testable RULEBREAK game loop
 - ChallengeView runtime coverage now checks renderer support for all 100 catalog entries and explicit contracts for representative extended SWITCH/REACT challenges.
 - Extended `react_late` renderer contract is explicitly aligned to `LATE`.
 - Build/test documentation now records the expanded verification gates.
+- GDScript 4.3 type-inference compatibility fix is now committed at `906c9418ebad795c35365e8f1e83629097bbc5e6` for `challenge_view_v2.gd`.
+- A clean post-fix Android verification run is now required before this head can be marked GREEN.
 
 Current unverified head commits are intentionally not described as GREEN until the corresponding GitHub Actions runs finish successfully.
 
@@ -35,7 +37,7 @@ Current unverified head commits are intentionally not described as GREEN until t
 - 100-level challenge catalog is the content target and is guarded by static and runtime contracts.
 
 ## Immediate sequence
-1. Complete CI verification for the latest hardening head and inspect APK/AAB artifacts.
+1. Complete clean CI verification after the GDScript type fix and inspect APK/AAB artifacts.
 2. Continue automated catalog/rendering semantic checks where they improve confidence without expanding MVP scope.
 3. Perform physical-device testing: touch, portrait layout, persistence/restart and all 100 levels.
 4. Finish production-quality audio/haptics/feedback and visual polish.
