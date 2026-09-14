@@ -188,6 +188,11 @@ func _extended_choices(challenge_id: String, correct: int) -> Array:
         "trick_mislead": return ["FOLLOW","IGNORE","REVERSE","WAIT"]
         "trick_wrong_label": return ["LABEL","RULE","BOTH","NEITHER"]
         "trick_contradiction": return ["OLD","LATEST","BOTH","NONE"]
+        "mix_memory_switch": return ["FIRST","SECOND","THIRD","FOURTH"]
+        "mix_see_react": return ["FIRST","SECOND","THIRD","FOURTH"]
+        "mix_trick_react": return ["FIRST","SECOND","THIRD","FOURTH"]
+        "mix_switch_memory": return ["FIRST","SECOND","THIRD","FOURTH"]
+        "mix_full": return ["FIRST","SECOND","THIRD","FOURTH"]
         _: return ["FIRST","SECOND","THIRD","FOURTH"]
 
 func _place_correct(choices: Array, correct: int, value: String) -> Array:
@@ -211,6 +216,9 @@ func check(choice: int) -> bool:
 
 func next() -> void:
     index = (index + 1) % challenges.size()
+
+func previous() -> void:
+    index = (index - 1 + challenges.size()) % challenges.size()
 
 func _normalize_index() -> void:
     if challenges.is_empty():
