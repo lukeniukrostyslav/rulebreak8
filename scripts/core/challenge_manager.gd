@@ -123,18 +123,40 @@ func _place_correct(choices: Array, correct: int, value: String) -> Array:
     result[correct] = value
     if existing_index >= 0:
         result[existing_index] = original
+
+    var used := {}
+    for i in result.size():
+        var choice := str(result[i])
+        if not used.has(choice):
+            used[choice] = true
+            continue
+        var replacement := "DECOY_%d" % (i + 1)
+        while used.has(replacement):
+            replacement += "_X"
+        result[i] = replacement
+        used[replacement] = true
     return result
 
 func current() -> Dictionary:
+    _normalize_index()
     return challenges[index]
 
 func check(choice: int) -> bool:
+    _normalize_index()
     return choice == int(challenges[index].get("correct", -1))
 
 func next() -> void:
+    if challenges.is_empty():
+        index = 0
+        return
+    _normalize_index()
     index = (index + 1) % challenges.size()
 
 func previous() -> void:
+    if challenges.is_empty():
+        index = 0
+        return
+    _normalize_index()
     index = (index - 1 + challenges.size()) % challenges.size()
 
 func reset() -> void:
