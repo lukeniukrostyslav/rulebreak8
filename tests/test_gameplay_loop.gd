@@ -81,6 +81,10 @@ func _init() -> void:
     assert(game.progression.total_wrong == 1)
     assert(not game.answer_locked)
 
+    # Explicitly free the instantiated scene so the smoke test does not leave
+    # CanvasItem/ObjectDB resources behind and mask real lifecycle regressions.
+    game.queue_free()
+    await process_frame
     _cleanup_save_files()
     print("RULEBREAK gameplay loop smoke: PASS — boot, correct answer, immediate input lock, persistence/advance and wrong-answer retry")
     quit(0)
