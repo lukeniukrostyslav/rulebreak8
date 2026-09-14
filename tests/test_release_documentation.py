@@ -7,6 +7,8 @@ REQUIRED = {
     "docs/CI_RELEASE_GATE.md": ["Critical GDScript compile", "End-to-end gameplay smoke", "Unsigned Release AAB export", "Freshness rule"],
     "docs/RELEASE_READINESS_CHECKLIST.md": ["Physical Android QA", "Production release", "fresh authoritative GREEN"],
     "docs/PHYSICAL_ANDROID_QA.md": ["portrait", "persistence", "haptic", "all 100"],
+    "docs/PHYSICAL_ANDROID_QA_CHECKLIST.md": ["Install and launch", "Touch and layout", "all 100 catalog entries", "airplane mode"],
+    "docs/PHYSICAL_ANDROID_QA_RECORD.md": ["APK SHA-256", "Source commit SHA", "Final sign-off", "Build identity"],
     "docs/RELEASE_SIGNING.md": ["keystore", "Never commit", "signed Release AAB", "Google Play"],
     "docs/QA_EVIDENCE_MATRIX.md": ["CI evidence", "Physical device", "Signed artifact"],
     "docs/RELEASE_GO_NO_GO.md": ["GO requires", "NO-GO triggers", "signed AAB"],
@@ -26,4 +28,4 @@ assert "production signing: not verified" in evidence
 assert "signed release aab: not verified" in evidence
 assert "google play testing/production: not verified" in evidence
 
-print("RULEBREAK release documentation: PASS — required release boundaries, artifact metadata, and evidence rules are present")
+print("RULEBREAK release documentation: PASS — required release boundaries, artifact metadata, physical QA record, and evidence rules are present")
