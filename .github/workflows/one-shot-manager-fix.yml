@@ -1,0 +1,56 @@
+name: one-shot manager choice repair
+
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Repair duplicate remember distractors and remove one-shot workflow
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("scripts/core/challenge_manager.gd")
+          text = path.read_text(encoding="utf-8")
+          old = '''func _place_correct(choices: Array, correct: int, value: String) -> Array:
+              var result: Array = choices.duplicate()
+              result[correct] = value
+              return result
+          '''
+          new = '''func _place_correct(choices: Array, correct: int, value: String) -> Array:
+              var result: Array = choices.duplicate()
+              var original: String = str(result[correct])
+              var existing_index := -1
+              for i in result.size():
+                  if i != correct and str(result[i]) == value:
+                      existing_index = i
+                      break
+              result[correct] = value
+              if existing_index >= 0:
+                  result[existing_index] = original
+              return result
+          '''
+          if old not in text:
+              raise SystemExit("expected helper block not found")
+          path.write_text(text.replace(old, new, 1), encoding="utf-8")
+          PY
+
+          rm .github/workflows/one-shot-manager-fix.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add scripts/core/challenge_manager.gd .github/workflows/one-shot-manager-fix.yml
+          git commit -m "fix: preserve unique remember choices"
+          git push origin HEAD:main
