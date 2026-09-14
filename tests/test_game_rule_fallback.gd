@@ -29,8 +29,17 @@ func _init() -> void:
     }
     assert(game._localized_rule_text(extended) == "Find the shape that changed direction.")
 
+    # The final defensive branch must still produce a readable rule when a
+    # challenge has neither a translated key nor a description.
     TranslationServer.set_locale("en")
+    var switch_fallback := {
+        "id": "rule_switch",
+        "rule_key": "RULE_SWITCH_MISSING_FOR_TEST",
+        "description": "",
+    }
+    assert(game._localized_rule_text(switch_fallback) == "Watch for the rule change.")
+
     assert(game._localized_rule_text(extended) == "Find the shape that changed direction.")
 
-    print("RULEBREAK game rule fallback tests: PASS — translated base rules + English extended fallback")
+    print("RULEBREAK game rule fallback tests: PASS — translated base rules, English extended fallback and defensive rule-switch fallback")
     quit(0)
