@@ -81,6 +81,14 @@ func _init() -> void:
         "trick_wrong_label": ["LABEL", "RULE", "BOTH", "NEITHER"],
         "trick_contradiction": ["OLD", "LATEST", "BOTH", "NONE"]
     }
+    var expected_render_markers := {
+        "trick_slowest": "TRICK_SLOWEST",
+        "trick_decoy": "TRICK_DECOY",
+        "trick_mislead": "TRICK_MISLEAD",
+        "trick_exception": "TRICK_EXCEPTION",
+        "trick_wrong_label": "TRICK_WRONG_LABEL",
+        "trick_contradiction": "TRICK_LATEST"
+    }
     for i in trick_ids.size():
         var challenge: Dictionary = _find(manager, trick_ids[i])
         assert(not challenge.is_empty(), "%s missing from catalog" % trick_ids[i])
@@ -96,7 +104,10 @@ func _init() -> void:
         await process_frame
         assert(view.input_ready, "%s did not become answerable" % trick_ids[i])
         assert(view.visual_root != null, "%s produced no renderer root" % trick_ids[i])
-        assert(not _visible_text(view).is_empty(), "%s produced empty renderer" % trick_ids[i])
+        var rendered := _visible_text(view)
+        assert(not rendered.is_empty(), "%s produced empty renderer" % trick_ids[i])
+        if expected_render_markers.has(trick_ids[i]):
+            assert(rendered.contains(str(expected_render_markers[trick_ids[i]])), "%s lost its deterministic renderer marker" % trick_ids[i])
 
     var mix_ids := ["mix_memory_switch", "mix_see_react", "mix_trick_react", "mix_switch_memory", "mix_full"]
     for id in mix_ids:
