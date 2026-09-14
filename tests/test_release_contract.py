@@ -48,6 +48,8 @@ def main() -> None:
 
     if catalog.get("version") != 2 or catalog.get("total_levels") != 100:
         raise AssertionError("challenge catalog version/size contract changed")
+    if catalog.get("base_seed_levels") != 20 or catalog.get("generated_extension_levels") != 80:
+        raise AssertionError("challenge catalog seed/extension metadata changed")
     if len(catalog.get("mvp_seed", [])) != 20:
         raise AssertionError("challenge catalog must retain 20 seed levels")
     if set(catalog.get("challenge_families", [])) != {"SEE", "REMEMBER", "REACT", "SWITCH", "TRICK", "MIX"}:
