@@ -71,12 +71,23 @@ func _extended_switch_choices(challenge_id: String) -> Array:
         "switch_after_two", "switch_after_three": return ["FIRST", "SECOND", "THIRD", "FOURTH"]
         _: return ["BLUE", "RED", "GREEN", "YELLOW"]
 
+func _normalize_index() -> void:
+    if challenges.is_empty():
+        index = 0
+        return
+    index = clampi(index, 0, challenges.size() - 1)
+
 func current() -> Dictionary:
+    _normalize_index()
     return challenges[index]
 
 func next() -> Dictionary:
+    if challenges.is_empty():
+        index = 0
+        return {}
+    _normalize_index()
     index = (index + 1) % challenges.size()
-    return current()
+    return challenges[index]
 
 func reset() -> void:
     index = 0
