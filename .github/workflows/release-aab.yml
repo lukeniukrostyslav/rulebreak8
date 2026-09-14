@@ -129,8 +129,15 @@ jobs:
           unzip -t build/android/rulebreak-release.aab >/dev/null
           unzip -l build/android/rulebreak-release.aab | grep -F 'AndroidManifest.xml'
           unzip -l build/android/rulebreak-release.aab | grep -F 'base/'
+      - name: Record AAB checksum
+        run: |
+          set -euo pipefail
+          sha256sum build/android/rulebreak-release.aab | tee build/android/rulebreak-release.aab.sha256
+          test -s build/android/rulebreak-release.aab.sha256
       - uses: actions/upload-artifact@v4
         with:
           name: rulebreak-android-release-aab
-          path: build/android/rulebreak-release.aab
+          path: |
+            build/android/rulebreak-release.aab
+            build/android/rulebreak-release.aab.sha256
           if-no-files-found: error
