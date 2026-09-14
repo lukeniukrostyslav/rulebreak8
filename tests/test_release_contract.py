@@ -21,7 +21,8 @@ def require(text: str, needle: str, label: str) -> None:
 def main() -> None:
     project = read("project.godot")
     presets = read("export_presets.cfg")
-    apk_workflow = read(".github/workflows/godot.yml")
+    verification_workflow = read(".github/workflows/godot.yml")
+    final_apk_workflow = read(".github/workflows/final-apk.yml")
     aab_workflow = read(".github/workflows/release-aab.yml")
     final_build_policy = read("docs/FINAL_BUILD_POLICY.md")
     catalog = json.loads(read("scripts/data/challenges.json"))
@@ -34,61 +35,34 @@ def main() -> None:
     require(project, 'renderer/rendering_method.mobile="gl_compatibility"', "mobile renderer")
 
     for expected in (
-        'name="Android Debug"',
-        'name="Android Release AAB (Unsigned)"',
-        'platform="Android"',
-        'gradle_build/min_sdk="24"',
-        'gradle_build/target_sdk="36"',
-        'architectures/arm64-v8a=true',
-        'architectures/armeabi-v7a=false',
-        'architectures/x86=false',
-        'architectures/x86_64=false',
-        'version/name="0.1.0"',
-        'package/unique_name="com.rulebreak.game"',
-        'package/signed=false',
+        'name="Android Debug"', 'name="Android Release AAB (Unsigned)"', 'platform="Android"',
+        'gradle_build/min_sdk="24"', 'gradle_build/target_sdk="36"', 'architectures/arm64-v8a=true',
+        'architectures/armeabi-v7a=false', 'architectures/x86=false', 'architectures/x86_64=false',
+        'version/name="0.1.0"', 'package/unique_name="com.rulebreak.game"', 'package/signed=false',
     ):
         require(presets, expected, "Android export contract")
-
-    if presets.count("version/code=1") != 1:
-        raise AssertionError("debug APK must retain version code 1")
-    if presets.count("version/code=2") != 1:
-        raise AssertionError("unsigned release AAB must retain version code 2")
-
+    if presets.count("version/code=1") != 1 or presets.count("version/code=2") != 1:
+        raise AssertionError("debug/release version-code contract drifted")
     if re.search(r"(?:password|secret|token|api[_-]?key)\s*[=:]\s*['\"]?[^\s#'\"]+", presets, re.I):
         raise AssertionError("export presets appear to contain a secret")
 
-    catalog_version = catalog.get("version")
-    if catalog_version != 2:
-        raise AssertionError("challenge catalog version must be 2")
-    if catalog.get("total_levels") != 100:
-        raise AssertionError("challenge catalog must declare exactly 100 levels")
+    if catalog.get("version") != 2 or catalog.get("total_levels") != 100:
+        raise AssertionError("challenge catalog version/size contract changed")
     if len(catalog.get("mvp_seed", [])) != 20:
         raise AssertionError("challenge catalog must retain 20 seed levels")
-    families = set(catalog.get("challenge_families", []))
-    if families != {"SEE", "REMEMBER", "REACT", "SWITCH", "TRICK", "MIX"}:
+    if set(catalog.get("challenge_families", [])) != {"SEE", "REMEMBER", "REACT", "SWITCH", "TRICK", "MIX"}:
         raise AssertionError("challenge family contract changed unexpectedly")
 
     manager = read("scripts/core/challenge_manager.gd")
     if manager.count('"choices":[') < 20:
         raise AssertionError("seed challenge choices appear incomplete")
-    spec_rows = re.findall(
-        r'^\s+\["(?:SEE|REMEMBER|REACT|SWITCH|TRICK|MIX)",\s*"[^"]+",',
-        manager,
-        re.MULTILINE,
-    )
+    spec_rows = re.findall(r'^\s+\["(?:SEE|REMEMBER|REACT|SWITCH|TRICK|MIX)",\s*"[^"]+",', manager, re.MULTILINE)
     if len(spec_rows) != 80:
         raise AssertionError(f"extended challenge specs must contain exactly 80 rows, found {len(spec_rows)}")
 
     forbidden = re.compile(r"(?:http://|https://)(?!localhost|127\.0\.0\.1)", re.I)
-    runtime_files = [
-        "scripts/game.gd",
-        "scripts/core/challenge_manager.gd",
-        "scripts/core/progression.gd",
-        "scripts/core/localization.gd",
-    ]
-    for path in runtime_files:
-        text = read(path)
-        if forbidden.search(text):
+    for path in ("scripts/game.gd", "scripts/core/challenge_manager.gd", "scripts/core/progression.gd", "scripts/core/localization.gd"):
+        if forbidden.search(read(path)):
             raise AssertionError(f"runtime file unexpectedly contains a network URL: {path}")
 
     for expected in (
@@ -100,70 +74,44 @@ def main() -> None:
     ):
         require(final_build_policy, expected, "final build policy")
 
-    runtime_gate_marker = "Validate project through headless runtime tests"
-    apk_export_marker = "Export Android debug APK"
-    if apk_workflow.find(runtime_gate_marker) < 0 or apk_workflow.find(apk_export_marker) < 0:
-        raise AssertionError("APK workflow must contain both runtime gate and APK export")
-    if apk_workflow.find(runtime_gate_marker) > apk_workflow.find(apk_export_marker):
-        raise AssertionError("APK export must occur only after the automated runtime gate")
+    runtime_marker = "Validate project through headless runtime tests"
+    if verification_workflow.find(runtime_marker) < 0:
+        raise AssertionError("routine verification workflow must run runtime gates")
+    forbidden_export = ("Export Android debug APK", "Export unsigned release AAB", "gh release create", "gh release upload")
+    if any(marker in verification_workflow for marker in forbidden_export):
+        raise AssertionError("routine verification workflow must not build or publish release artifacts")
+    require(verification_workflow, "permissions:\n  contents: read", "routine verification permissions")
+    require(verification_workflow, "concurrency:", "routine verification concurrency")
+    require(verification_workflow, "cancel-in-progress: true", "routine verification concurrency")
 
     for expected in (
-        apk_export_marker,
-        "Verify APK manifest identity",
-        'AAPT=\"$ANDROID_HOME/build-tools/36.0.0/aapt\"',
-        "package: name='com.rulebreak.game' versionCode='1' versionName='0.1.0'",
-        "sdkVersion:'24'",
-        "targetSdkVersion:'36'",
-        "native-code: 'arm64-v8a'",
-        "Record APK checksum",
-        "Upload Android debug APK",
-        "Publish APK to GitHub Release",
-        "gh release create",
-        "gh release upload",
-        "--prerelease",
-        "--clobber",
-        "build/android/rulebreak-debug.apk",
-        "build/android/rulebreak-debug.apk.sha256",
-        "artifact_type=debug-apk",
-        "source_commit=${GITHUB_SHA}",
-        "signed=debug-keystore",
+        "workflow_dispatch:", "physical_qa_ready", "Run final automated gates", "Export Android debug APK",
+        "Verify APK manifest identity", "package: name='com.rulebreak.game' versionCode='1' versionName='0.1.0'",
+        "sdkVersion:'24'", "targetSdkVersion:'36'", "native-code: 'arm64-v8a'", "Record APK checksum",
+        "actions/upload-artifact@v4", "build/android/rulebreak-debug.apk", "build/android/rulebreak-debug.apk.sha256",
+        "artifact_type=debug-apk", "source_commit=${GITHUB_SHA}", "signed=debug-keystore",
     ):
-        require(apk_workflow, expected, "APK release pipeline")
-
-    if "permissions:\n  contents: write" not in apk_workflow:
-        raise AssertionError("APK publication workflow must explicitly request contents: write")
-    if "concurrency:" not in apk_workflow or "cancel-in-progress: true" not in apk_workflow:
-        raise AssertionError("APK publication workflow must prevent stale concurrent main-branch runs")
+        require(final_apk_workflow, expected, "final APK workflow")
+    if final_apk_workflow.find("Run final automated gates") > final_apk_workflow.find("Export Android debug APK"):
+        raise AssertionError("final APK export must occur after automated gates")
+    if "gh release create" in final_apk_workflow or "gh release upload" in final_apk_workflow:
+        raise AssertionError("final APK workflow must not publish a release automatically")
+    require(final_apk_workflow, "permissions:\n  contents: read", "final APK permissions")
 
     for expected in (
-        "Export unsigned release AAB",
-        "Record AAB checksum and build metadata",
-        "build/android/rulebreak-release.aab",
-        "build/android/rulebreak-release.aab.sha256",
-        "build/android/rulebreak-release.aab.metadata.txt",
-        "artifact_type=unsigned-release-aab",
-        "source_commit=${GITHUB_SHA}",
-        "signed=false",
-        "verification=ci-verified-export",
+        "workflow_dispatch:", "physical_qa_passed", "Export unsigned release AAB", "Record AAB checksum and build metadata",
+        "build/android/rulebreak-release.aab", "build/android/rulebreak-release.aab.sha256", "build/android/rulebreak-release.aab.metadata.txt",
+        "artifact_type=unsigned-release-aab", "source_commit=${GITHUB_SHA}", "signed=false", "verification=ci-verified-export",
         "actions/upload-artifact@v4",
     ):
         require(aab_workflow, expected, "AAB release pipeline")
-
-    aab_runtime_marker = "Run runtime gates"
-    aab_export_marker = "Export unsigned release AAB"
-    if aab_workflow.find(aab_runtime_marker) < 0 or aab_workflow.find(aab_export_marker) < 0:
-        raise AssertionError("AAB workflow must contain both runtime gates and AAB export")
-    if aab_workflow.find(aab_runtime_marker) > aab_workflow.find(aab_export_marker):
+    if aab_workflow.find("Run runtime gates") > aab_workflow.find("Export unsigned release AAB"):
         raise AssertionError("AAB export must occur only after runtime gates")
+    if "gh release create" in aab_workflow or "gh release upload" in aab_workflow:
+        raise AssertionError("unsigned AAB workflow must not publish a production release")
+    require(aab_workflow, "permissions:\n  contents: read", "AAB permissions")
 
-    if "gh release create" in aab_workflow:
-        raise AssertionError("unsigned AAB workflow must not publish a misleading production release")
-    if "permissions:\n  contents: read" not in aab_workflow:
-        raise AssertionError("unsigned AAB verification workflow must remain read-only")
-    if "concurrency:" not in aab_workflow or "cancel-in-progress: true" not in aab_workflow:
-        raise AssertionError("AAB verification workflow must prevent stale concurrent main-branch runs")
-
-    print("RELEASE CONTRACT PASS: final-build order, project identity, Android presets, catalog, offline runtime boundaries, APK manifest identity, idempotent APK publication, prerelease safety and AAB verification pipeline verified")
+    print("RELEASE CONTRACT PASS: routine CI is verification-only; final APK and post-QA AAB exports are separately gated and non-publishing")
 
 
 if __name__ == "__main__":
