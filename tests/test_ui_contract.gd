@@ -27,6 +27,10 @@ func _init() -> void:
 
     _require(game, "const ChallengeViewV2Script = preload", "canonical ChallengeViewV2 preload")
     _require(game, "challenge_view := ChallengeViewV2Script.new()", "canonical ChallengeViewV2 instantiation")
+    _require(game, "var viewport_size := get_viewport_rect().size", "runtime viewport sizing")
+    _require(game, "var compact := viewport_size.y < 1700.0 or viewport_size.x < 900.0", "compact portrait layout branch")
+    _require(game, "var outer_margin := 24 if compact else 42", "responsive outer margins")
+    _require(game, "var button_height := 92 if compact else 112", "responsive touch target height")
     _require(game, "grid.columns = 2", "four-choice two-column layout")
     _require(game, "for i in 4:", "four answer buttons")
     _require(game, "Input.vibrate_handheld(35)", "correct-answer haptic feedback")
@@ -57,5 +61,5 @@ func _init() -> void:
     _require(project, "window/size/viewport_height=1920", "portrait viewport height")
     _require(project, "window/stretch/mode=\"canvas_items\"", "mobile stretch mode")
 
-    print("RULEBREAK UI contract: PASS — canonical renderer, four-choice input, feedback, haptics, audio, portrait viewport")
+    print("RULEBREAK UI contract: PASS — canonical renderer, responsive portrait layout, four-choice input, feedback, haptics, audio")
     quit(0)
