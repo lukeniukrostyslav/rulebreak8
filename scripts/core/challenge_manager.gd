@@ -1,4 +1,3 @@
-class_name ChallengeManager
 extends RefCounted
 
 var index: int = 0
@@ -17,11 +16,7 @@ var challenges: Array[Dictionary] = [
     {"id":"speed_change","rule_key":"RULE_SPEED","choices":["A","B","C","D"],"correct":2,"kind_key":"KIND_SEE"},
     {"id":"order_memory","rule_key":"RULE_ORDER","choices":["1-2-3","2-1-3","3-2-1","1-3-2"],"correct":0,"kind_key":"KIND_REMEMBER"},
     {"id":"only_x","rule_key":"RULE_X","choices":["X","O","△","□"],"correct":0,"kind_key":"KIND_REACT"},
-    {"id":"no_repeat","rule_key":"RULE_NO_REPEAT","choices":["LEFT","RIGHT","UP","NONE"],"correct":1,"kind_key":"KIND_SWITCH"},
-    {"id":"dont_press","rule_key":"RULE_DONT_PRESS","choices":["PRESS_IT","WAIT","LEAVE","PRESS_TWICE"],"correct":1,"kind_key":"KIND_TRICK"},
-    {"id":"mirrored","rule_key":"RULE_MIRROR","choices":["A","B","C","D"],"correct":3,"kind_key":"KIND_SEE"},
-    {"id":"vanishing_rule","rule_key":"RULE_VANISH","choices":["TAP_A","TAP_B","TAP_C","TAP_D"],"correct":2,"kind_key":"KIND_REMEMBER"},
-    {"id":"instruction_change","rule_key":"RULE_INSTRUCTION","choices":["FOLLOW_NEW","FOLLOW_OLD","IGNORE_BOTH","TAP_ALL"],"correct":0,"kind_key":"KIND_SWITCH"},
+    {"id":"dont_press","rule_key":"RULE_DONT_PRESS","choices":["PRESS","WAIT","IGNORE","TAP"],"correct":1,"kind_key":"KIND_TRICK"},
     {"id":"obvious_wrong","rule_key":"RULE_OBVIOUS","choices":["OBVIOUS","SECOND","THIRD","FOURTH"],"correct":1,"kind_key":"KIND_TRICK"},
     {"id":"mixed","rule_key":"RULE_MIX","choices":["FIRST","SECOND","THIRD","FOURTH"],"correct":2,"kind_key":"KIND_MIX"}
 ]
@@ -94,7 +89,7 @@ func _append_extended_levels() -> void:
         ["SWITCH", "switch_final", "Apply the final rule.", 2],
         ["TRICK", "trick_smallest", "The largest option is wrong; choose the smallest.", 0],
         ["TRICK", "trick_second", "The obvious first answer is wrong.", 1],
-        ["TRICK", "trick_hidden", "The hidden exception is correct.", 1],
+        ["TRICK", "trick_hidden", "The hidden exception is correct.", 2],
         ["TRICK", "trick_word", "Trust the word, not its color.", 0],
         ["TRICK", "trick_color", "Trust the color, not the word.", 1],
         ["TRICK", "trick_reverse", "Choose the opposite of the obvious answer.", 1],
@@ -118,67 +113,77 @@ func _append_extended_levels() -> void:
         var challenge_id: String = str(spec[1])
         var description: String = str(spec[2])
         var correct: int = int(spec[3])
-        challenges.append({
-            "id": challenge_id,
-            "rule_key": "RULE_" + challenge_id.to_upper(),
-            "description": description,
-            "choices": _build_extended_choices(family, challenge_id, correct),
-            "correct": correct,
-            "kind_key": "KIND_" + family,
-        })
+        var kind_key: String = "KIND_" + family
+        var choices: Array = _extended_choices(challenge_id, correct)
+        challenges.append({"id":challenge_id,"rule_key":"RULE_" + challenge_id.to_upper(),"description":description,"choices":choices,"correct":correct,"kind_key":kind_key})
 
-func _build_extended_choices(family: String, challenge_id: String, correct: int) -> Array:
+func _extended_choices(challenge_id: String, correct: int) -> Array:
     match challenge_id:
-        "remember_colors": return _place_correct(["BLUE-RED-YELLOW", "RED-BLUE-GREEN", "GREEN-RED-BLUE", "YELLOW-GREEN-RED"], correct, "RED-BLUE-GREEN")
-        "remember_shapes": return _place_correct(["■-●-◆", "●-▲-■", "◆-■-●", "▲-■-●"], correct, "●-▲-■")
-        "remember_numbers": return _place_correct(["7-2-9", "9-7-2", "2-9-7", "7-9-2"], correct, "7-2-9")
-        "remember_corners": return _place_correct(["TL-BR-TR", "TR-BL-BR", "BR-TL-BL", "BL-TR-TL"], correct, "TL-BR-TR")
-        "remember_direction": return _place_correct(["UP-RIGHT-DOWN", "LEFT-UP-RIGHT", "DOWN-LEFT-UP", "RIGHT-DOWN-LEFT"], correct, "UP-RIGHT-DOWN")
-        "remember_pairs": return _place_correct(["A1-B2-C3", "C1-A2-B3", "B1-C2-A3", "A3-B1-C2"], correct, "A1-B2-C3")
-        "remember_lights": return _place_correct(["1-2-3", "3-1-2", "2-3-1", "1-3-2"], correct, "1-2-3")
-        "remember_symbols": return _place_correct(["★-◆-✦", "◆-✦-★", "✦-★-◆", "★-✦-◆"], correct, "★-◆-✦")
-        "remember_path": return _place_correct(["A-C-B-D", "A-B-C-D", "D-B-C-A", "B-A-D-C"], correct, "A-C-B-D")
-        "remember_slots": return _place_correct(["1-3-4", "1-2-4", "2-3-4", "1-2-3"], correct, "1-3-4")
-        "remember_tones": return _place_correct(["LOW-HIGH-LOW", "HIGH-LOW-HIGH", "LOW-LOW-HIGH", "HIGH-HIGH-LOW"], correct, "LOW-HIGH-LOW")
-        "remember_letters": return _place_correct(["A-D-B", "B-A-D", "D-B-A", "A-B-D"], correct, "A-D-B")
-        "remember_icons": return _place_correct(["★-◆-●", "●-★-◆", "◆-●-★", "★-●-◆"], correct, "★-◆-●")
-        "remember_positions_2": return _place_correct(["TOP-RIGHT-BOTTOM-LEFT", "LEFT-TOP-RIGHT-BOTTOM", "BOTTOM-LEFT-TOP-RIGHT", "RIGHT-BOTTOM-LEFT-TOP"], correct, "TOP-RIGHT-BOTTOM-LEFT")
-        "remember_order_2": return _place_correct(["1-3-2-4", "1-2-3-4", "4-2-3-1", "2-1-4-3"], correct, "1-3-2-4")
-        "react_circle": return ["●", "▲", "■", "◆"]
-        "react_triangle": return ["●", "▲", "■", "◆"]
-        "react_star": return ["●", "▲", "★", "◆"]
-        "react_red": return ["RED", "BLUE", "GREEN", "YELLOW"]
-        "react_blue": return ["RED", "BLUE", "GREEN", "YELLOW"]
-        "react_yellow": return ["RED", "BLUE", "GREEN", "YELLOW"]
-        "react_even", "react_third", "react_fourth", "react_signal_two", "react_final": return ["FIRST", "SECOND", "THIRD", "FOURTH"]
-        "react_after_change": return ["BEFORE", "AFTER", "DURING", "NEVER"]
-        "react_late": return ["EARLY", "LATE", "NOW", "NEVER"]
-        "react_green_twice": return ["FIRST", "SECOND", "THIRD", "FOURTH"]
-        "react_x_only": return ["X", "O", "△", "□"]
-        "switch_color": return ["BLUE", "RED", "GREEN", "YELLOW"]
-        "switch_direction", "switch_direction_two": return ["UP", "RIGHT", "DOWN", "LEFT"]
-        "switch_after_two", "switch_after_three", "switch_second_rule": return ["FIRST", "SECOND", "THIRD", "FOURTH"]
-        "switch_after_signal", "switch_instruction", "switch_final": return ["OLD_RULE", "NEW_RULE", "IGNORE", "WAIT"]
-        "switch_reverse": return ["FORWARD", "REVERSE", "SAME", "NONE"]
-        "switch_number": return ["1", "2", "3", "4"]
-        "switch_shape": return ["●", "▲", "■", "◆"]
-        "switch_timing": return ["FAST", "SLOW", "NOW", "WAIT"]
-        "switch_action": return ["TAP", "HOLD", "SWIPE", "WAIT"]
-        "switch_target": return ["SHAPE", "COLOR", "NUMBER", "DIRECTION"]
-        "trick_smallest": return ["SMALLEST", "LARGEST", "MIDDLE", "NONE"]
-        "trick_second", "trick_obvious_two": return ["FIRST", "SECOND", "THIRD", "FOURTH"]
-        "trick_hidden", "trick_exception": return ["OBVIOUS", "DECOY", "EXCEPTION", "NONE"]
-        "trick_word": return ["WORD", "COLOR", "BOTH", "NONE"]
-        "trick_color": return ["WORD", "COLOR", "BOTH", "NONE"]
-        "trick_reverse": return ["OBVIOUS", "OPPOSITE", "BOTH", "NONE"]
-        "trick_forbidden": return ["FORBIDDEN", "SAFE", "WAIT", "NONE"]
-        "trick_slowest": return ["FASTEST", "MIDDLE", "SLOWEST", "NONE"]
-        "trick_not_largest": return ["SMALLEST", "LARGEST", "MIDDLE", "NONE"]
-        "trick_decoy": return ["DECOY", "TARGET", "BOTH", "NONE"]
-        "trick_mislead": return ["FOLLOW", "IGNORE", "REVERSE", "WAIT"]
-        "trick_wrong_label": return ["LABEL", "RULE", "BOTH", "NEITHER"]
-        "trick_contradiction": return ["OLD", "LATEST", "BOTH", "NONE"]
-        _: return ["FIRST", "SECOND", "THIRD", "FOURTH"]
+        "see_shape_shift": return _place_correct(["●","▲","■","◆"], correct, "◀")
+        "see_missing_edge": return _place_correct(["●","▲","■","◆"], correct, "◢")
+        "see_rotation": return _place_correct(["●","▲","■","◆"], correct, "◐")
+        "see_size_change": return _place_correct(["SMALL","SMALL","SMALL","SMALL"], correct, "LARGE")
+        "see_pattern_break": return _place_correct(["●","▲","■","●"], correct, "✦")
+        "see_odd_symbol": return _place_correct(["●","▲","■","◆"], correct, "★")
+        "see_position_shift": return _place_correct(["TOP","RIGHT","BOTTOM","LEFT"], correct, "CENTER")
+        "see_filled_shape": return _place_correct(["○","□","△","◇"], correct, "◆")
+        "see_outline_break": return _place_correct(["●","■","◆","▲"], correct, "□")
+        "see_angle_change": return _place_correct(["UP","RIGHT","DOWN","LEFT"], correct, "DIAGONAL")
+        "see_duplicate": return _place_correct(["A","B","C","D"], correct, "A A")
+        "see_color_change": return _place_correct(["RED","BLUE","GREEN","YELLOW"], correct, "PURPLE")
+        "see_spacing": return _place_correct(["A A","B B","C C","D D"], correct, "A    A")
+        "see_direction": return _place_correct(["UP","RIGHT","DOWN","LEFT"], correct, "WRONG")
+        "see_symmetry": return _place_correct(["SYMMETRIC","SYMMETRIC","SYMMETRIC","BROKEN"], correct, "BROKEN")
+        "remember_colors": return _place_correct(["RED-BLUE-GREEN","BLUE-GREEN-RED","GREEN-RED-BLUE","RED-GREEN-BLUE"], correct, "RED-BLUE-GREEN")
+        "remember_shapes": return _place_correct(["●-▲-■","▲-■-●","■-●-▲","●-■-▲"], correct, "●-▲-■")
+        "remember_numbers": return _place_correct(["7-2-9","9-7-2","2-9-7","7-9-2"], correct, "7-2-9")
+        "remember_corners": return _place_correct(["TL-BR-TR","TR-BL-BR","BR-TL-BL","TL-TR-BL"], correct, "TL-BR-TR")
+        "remember_direction": return _place_correct(["UP-RIGHT-DOWN","RIGHT-DOWN-LEFT","DOWN-LEFT-UP","LEFT-UP-RIGHT"], correct, "UP-RIGHT-DOWN")
+        "remember_pairs": return _place_correct(["A1-B2-C3","C3-A1-B2","B2-C3-A1","A1-C3-B2"], correct, "A1-B2-C3")
+        "remember_lights": return _place_correct(["1-2-3","3-1-2","2-3-1","1-3-2"], correct, "1-2-3")
+        "remember_symbols": return _place_correct(["★-◆-✦","✦-★-◆","◆-✦-★","★-✦-◆"], correct, "★-◆-✦")
+        "remember_path": return _place_correct(["A-C-B-D","A-B-C-D","D-B-C-A","B-A-D-C"], correct, "A-C-B-D")
+        "remember_slots": return _place_correct(["1-3-4","1-2-4","2-3-4","1-2-3"], correct, "1-3-4")
+        "remember_tones": return _place_correct(["LOW-HIGH-LOW","HIGH-LOW-HIGH","LOW-LOW-HIGH","HIGH-HIGH-LOW"], correct, "LOW-HIGH-LOW")
+        "remember_letters": return _place_correct(["A-D-B","B-A-D","D-B-A","A-B-D"], correct, "A-D-B")
+        "remember_icons": return _place_correct(["★-◆-●","●-★-◆","◆-●-★","★-●-◆"], correct, "★-◆-●")
+        "remember_positions_2": return _place_correct(["TOP-RIGHT-BOTTOM-LEFT","LEFT-TOP-RIGHT-BOTTOM","BOTTOM-LEFT-TOP-RIGHT","RIGHT-BOTTOM-LEFT-TOP"], correct, "TOP-RIGHT-BOTTOM-LEFT")
+        "remember_order_2": return _place_correct(["1-3-2-4","1-2-3-4","4-2-3-1","2-1-4-3"], correct, "1-3-2-4")
+        "react_circle": return ["●","▲","■","◆"]
+        "react_triangle": return ["●","▲","■","◆"]
+        "react_star": return ["●","▲","★","◆"]
+        "react_red": return ["RED","BLUE","GREEN","YELLOW"]
+        "react_blue": return ["RED","BLUE","GREEN","YELLOW"]
+        "react_yellow": return ["RED","BLUE","GREEN","YELLOW"]
+        "react_even", "react_third", "react_fourth", "react_signal_two", "react_final": return ["FIRST","SECOND","THIRD","FOURTH"]
+        "react_after_change": return ["BEFORE","AFTER","DURING","NEVER"]
+        "react_late": return ["EARLY","LATE","NOW","NEVER"]
+        "react_green_twice": return ["FIRST","SECOND","THIRD","FOURTH"]
+        "react_x_only": return ["X","O","△","□"]
+        "switch_color": return ["BLUE","RED","GREEN","YELLOW"]
+        "switch_direction", "switch_direction_two": return ["UP","RIGHT","DOWN","LEFT"]
+        "switch_after_two", "switch_after_three", "switch_second_rule": return ["FIRST","SECOND","THIRD","FOURTH"]
+        "switch_after_signal", "switch_instruction", "switch_final": return ["OLD_RULE","NEW_RULE","IGNORE","WAIT"]
+        "switch_reverse": return ["FORWARD","REVERSE","SAME","NONE"]
+        "switch_number": return ["1","2","3","4"]
+        "switch_shape": return ["●","▲","■","◆"]
+        "switch_timing": return ["FAST","SLOW","NOW","WAIT"]
+        "switch_action": return ["TAP","HOLD","SWIPE","WAIT"]
+        "switch_target": return ["SHAPE","COLOR","NUMBER","DIRECTION"]
+        "trick_smallest": return ["SMALLEST","LARGEST","MIDDLE","NONE"]
+        "trick_second", "trick_obvious_two": return ["FIRST","SECOND","THIRD","FOURTH"]
+        "trick_hidden", "trick_exception": return ["OBVIOUS","DECOY","EXCEPTION","NONE"]
+        "trick_word": return ["WORD","COLOR","BOTH","NONE"]
+        "trick_color": return ["WORD","COLOR","BOTH","NONE"]
+        "trick_reverse": return ["OBVIOUS","OPPOSITE","BOTH","NONE"]
+        "trick_forbidden": return ["FORBIDDEN","SAFE","WAIT","NONE"]
+        "trick_slowest": return ["FASTEST","MIDDLE","SLOWEST","NONE"]
+        "trick_not_largest": return ["SMALLEST","LARGEST","MIDDLE","NONE"]
+        "trick_decoy": return ["DECOY","TARGET","BOTH","NONE"]
+        "trick_mislead": return ["FOLLOW","IGNORE","REVERSE","WAIT"]
+        "trick_wrong_label": return ["LABEL","RULE","BOTH","NEITHER"]
+        "trick_contradiction": return ["OLD","LATEST","BOTH","NONE"]
+        _: return ["FIRST","SECOND","THIRD","FOURTH"]
 
 func _place_correct(choices: Array, correct: int, value: String) -> Array:
     var result: Array = choices.duplicate()
@@ -193,33 +198,17 @@ func _place_correct(choices: Array, correct: int, value: String) -> Array:
         result[existing_index] = original
     return result
 
+func current() -> Dictionary:
+    return challenges[index]
+
+func check(choice: int) -> bool:
+    return choice == int(challenges[index].get("correct", -1))
+
+func next() -> void:
+    index = (index + 1) % challenges.size()
+
 func _normalize_index() -> void:
     if challenges.is_empty():
         index = 0
-        return
-    index = clamp(index, 0, challenges.size() - 1)
-
-func current() -> Dictionary:
-    _normalize_index()
-    return challenges[index]
-
-func check(choice_index: int) -> bool:
-    _normalize_index()
-    return choice_index == int(challenges[index].get("correct", -1))
-
-func next() -> Dictionary:
-    if challenges.is_empty():
-        index = 0
-        return {}
-    index = (index + 1) % challenges.size()
-    return challenges[index]
-
-func previous() -> Dictionary:
-    if challenges.is_empty():
-        index = 0
-        return {}
-    index = (index - 1 + challenges.size()) % challenges.size()
-    return challenges[index]
-
-func reset() -> void:
-    index = 0
+    else:
+        index = clamp(index, 0, challenges.size() - 1)
