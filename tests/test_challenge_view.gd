@@ -73,7 +73,7 @@ func _init() -> void:
     # catalogued MIX id reaches its intended composite phase and exposes a
     # distinct final presentation.
     var mix_ids := ["mix_memory_switch", "mix_see_react", "mix_trick_react", "mix_switch_memory", "mix_full"]
-    var expected_markers := ["MIX_RECALL", "MIX_REACT", "MIX_REACT", "MIX_RECALL", "MIX_REACT"]
+    var expected_markers := ["REMEMBER_CHOOSE", "MIX_REACT", "MIX_REACT", "REMEMBER_CHOOSE", "MIX_REACT"]
     for i in mix_ids.size():
         var mix := {"id":mix_ids[i], "kind_key":"KIND_MIX", "correct":2}
         view.show_challenge(mix)
