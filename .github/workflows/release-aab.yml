@@ -2,6 +2,12 @@ name: Android release artifact verification
 
 on:
   workflow_dispatch:
+    inputs:
+      physical_qa_passed:
+        description: 'Confirm the final debug APK passed physical Android QA on the target device'
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -12,8 +18,9 @@ concurrency:
 
 jobs:
   aab:
+    if: ${{ inputs.physical_qa_passed == true }}
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v5
@@ -48,7 +55,7 @@ jobs:
           unzip -q /tmp/templates/templates/android_source.zip -d android/build
           test -f android/build/build.gradle
           godot --version
-      - name: Configure debug signing environment for Godot export
+      - name: Configure debug signing environment for export tooling
         run: |
           set -euo pipefail
           mkdir -p "$HOME/.config/godot" "$HOME/.android"
@@ -68,9 +75,6 @@ jobs:
           set -euo pipefail
           python3 tests/test_static_integrity.py
           python3 tests/test_release_documentation.py
-      - name: Validate release contract
-        run: |
-          set -euo pipefail
           python3 tests/test_release_contract.py
       - name: Compile critical GDScript
         run: |
@@ -144,12 +148,13 @@ jobs:
           build_timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)
           signed=false
           verification=ci-verified-export
+          physical_qa_passed=true
           EOF
           test -s build/android/rulebreak-release.aab.sha256
           test -s build/android/rulebreak-release.aab.metadata.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: rulebreak-android-release-aab
+          name: rulebreak-verified-release-aab
           path: |
             build/android/rulebreak-release.aab
             build/android/rulebreak-release.aab.sha256
