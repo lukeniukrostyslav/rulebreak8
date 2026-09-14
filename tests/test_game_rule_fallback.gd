@@ -37,7 +37,7 @@ func _init() -> void:
         "rule_key": "RULE_SWITCH_MISSING_FOR_TEST",
         "description": "",
     }
-    assert(game._localized_rule_text(switch_fallback) == "Watch for the rule change.")
+    assert(game._localized_rule_text(switch_fallback) == "WATCH THE RULE CHANGE")
 
     assert(game._localized_rule_text(extended) == "Find the shape that changed direction.")
 
