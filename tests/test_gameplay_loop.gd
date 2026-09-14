@@ -76,8 +76,24 @@ func _init() -> void:
     assert(game.progression.total_wrong == 1)
     assert(not game.answer_locked)
 
+    # A real missed reaction must be recorded as a timeout, not silently
+    # remain in the renderer's retry loop. Start the first REACT challenge
+    # directly and wait beyond its response window without answering.
+    game.challenge_manager.index = 4
+    game.progression.set_current_level(4)
+    game._show_challenge()
+    await _wait_until_input_ready(game, 2.0)
+    assert(game.reaction_duration_ms == 1400)
+    assert(not game.answer_locked)
+    await create_timer(2.0).timeout
+    assert(game.challenge_manager.index == 4)
+    assert(game.progression.current_level == 4)
+    assert(game.progression.total_wrong == 2)
+    assert(game.progression.streak == 0)
+    assert(not game.challenge_view.input_ready)
+
     game.queue_free()
     await process_frame
     _cleanup_save_files()
-    print("RULEBREAK gameplay loop smoke: PASS — boot, correct answer, immediate input lock, persistence/advance and wrong-answer retry")
+    print("RULEBREAK gameplay loop smoke: PASS — boot, correct answer, immediate input lock, wrong-answer retry and real reaction timeout")
     quit(0)
