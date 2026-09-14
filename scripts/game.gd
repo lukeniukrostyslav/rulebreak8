@@ -146,6 +146,10 @@ func _on_choice(choice: int) -> void:
     if not challenge_view.input_ready:
         return
 
+    # Disable the logical input state immediately, not only the visual
+    # buttons, so rapid double-taps cannot record two answers while the
+    # feedback delay is awaiting its timer.
+    challenge_view.input_ready = false
     var reaction_timed_out := false
     if reaction_started_at_ms >= 0:
         reaction_timed_out = Time.get_ticks_msec() - reaction_started_at_ms > reaction_duration_ms
