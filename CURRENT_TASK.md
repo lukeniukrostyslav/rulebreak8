@@ -10,38 +10,30 @@ ENGINEERING / MVP BUILD — release candidate hardening
 Turn the existing Godot foundation into a reusable, testable RULEBREAK game loop with 100 challenge entries and a verifiable Android release path.
 
 ## Latest verified checkpoint
-- Commit `32cadfef545c62cb4949bb9a07b9502ab21a2510f` is the latest checkpoint recorded as fully GREEN in project history.
-- That verification passed repository integrity, Godot headless runtime tests, localization generation, Android Debug APK export, APK validation and GitHub Release publication.
-- The same checkpoint passed the independent Android release artifact verification job with unsigned Release AAB export/validation.
-- The AAB is intentionally unsigned and is not Google Play-ready.
-
-## New hardening work pending CI verification
-- Progression runtime persistence/invariant gate is included in both Android verification workflows.
-- Static integrity now cross-checks the 20 seed entries against runtime manager family/choice/correct-index semantics.
-- ChallengeView runtime coverage now checks renderer support for all 100 catalog entries and explicit contracts for representative extended SWITCH/REACT challenges.
-- Extended `react_late` renderer contract is explicitly aligned to `LATE`.
-- Build/test documentation now records the expanded verification gates.
-- GDScript 4.3 type-inference compatibility fix is now committed at `906c9418ebad795c35365e8f1e83629097bbc5e6` for `challenge_view_v2.gd`.
-- A clean post-fix Android verification run is now required before this head can be marked GREEN.
-
-Current unverified head commits are intentionally not described as GREEN until the corresponding GitHub Actions runs finish successfully.
+- Source `34e218e0f8e4f338e70937029b58529eed8c4578` is verified GREEN for the current release-candidate hardening pass.
+- Android verification run `34835983629` passed repository integrity, Godot 4.3 headless runtime tests, localization preparation, Debug APK export, upload and GitHub Release publication.
+- Android release artifact verification run `34835983641` passed repository integrity, runtime gates, localization preparation, unsigned Release AAB export and artifact upload.
+- Progression persistence tests now prove that a structurally truncated/invalid primary save is recovered from the known-good backup instead of silently resetting progress.
+- The permanent GDScript 4.3 type-inference fix in `challenge_view_v2.gd` was verified by the clean Android runs.
+- Temporary `.github/workflows/gdscript-type-fix.yml` has been removed after verification.
+- The AAB remains intentionally unsigned and is not Google Play-ready.
 
 ## Completed / present
 - ChallengeManager + Progression integrated into the game loop.
 - ChallengeView implements SEE, REMEMBER, REACT, SWITCH, TRICK and MIX; expanded renderer is active through the canonical game controller.
-- Local progression parsing/writing hardened with current-level and streak invariants.
-- Deterministic ChallengeManager, ChallengeView, localization, rule-fallback and Progression tests exist.
+- Local progression parsing/writing hardened with required-save-structure validation, backup recovery, current-level bounds and streak invariants.
+- Deterministic ChallengeManager, ChallengeView, localization, rule-fallback and Progression tests exist and passed in the latest Android runtime gate.
 - Runtime CSV localization path exists for 21 locales; extended rules have an explicit English fallback layer so raw keys are not intentionally shown.
-- Credentials-free Android arm64 Debug export preset and unsigned Release AAB preset exist.
+- Credentials-free Android arm64 Debug export preset and unsigned Release AAB preset exist and have passed clean CI verification.
 - Godot 4.3 GitHub Actions verification and independent AAB verification workflows exist.
 - 100-level challenge catalog is the content target and is guarded by static and runtime contracts.
 
 ## Immediate sequence
-1. Complete clean CI verification after the GDScript type fix and inspect APK/AAB artifacts.
-2. Continue automated catalog/rendering semantic checks where they improve confidence without expanding MVP scope.
+1. Continue automated semantic checks only where they materially improve confidence without expanding MVP scope.
+2. Finish production-quality UI/visual polish and audio/haptic feedback where feasible without external device access.
 3. Perform physical-device testing: touch, portrait layout, persistence/restart and all 100 levels.
-4. Finish production-quality audio/haptics/feedback and visual polish.
-5. Prepare production signing and complete the Google Play readiness audit.
+4. Prepare production signing and complete the Google Play readiness audit.
+5. Capture final store assets and run the signed AAB through an owner-side Play testing track.
 
 ## Current blockers
 - Physical Android device validation: unverified in this execution environment.
