@@ -33,7 +33,7 @@ jobs:
       - name: Install Godot 4.3 and export templates
         run: |
           set -euo pipefail
-          V=4.3
+          V="4.3"
           TEMPLATE_DIR="$HOME/.local/share/godot/export_templates/${V}.stable"
           curl -fsSL -o /tmp/godot.zip "https://github.com/godotengine/godot-builds/releases/download/${V}-stable/Godot_v${V}-stable_linux.x86_64.zip"
           unzip -q /tmp/godot.zip -d /tmp/godot
@@ -43,13 +43,10 @@ jobs:
           rm -rf /tmp/templates "$TEMPLATE_DIR"
           mkdir -p /tmp/templates "$TEMPLATE_DIR"
           unzip -q /tmp/templates.tpz -d /tmp/templates
-          test -f /tmp/templates/templates/android_source.zip
-          cp -f /tmp/templates/templates/android_source.zip "$TEMPLATE_DIR/android_source.zip"
-          cp -f /tmp/templates/templates/android_debug.apk "$TEMPLATE_DIR/android_debug.apk"
-          cp -f /tmp/templates/templates/android_release.apk "$TEMPLATE_DIR/android_release.apk"
-          test -s "$TEMPLATE_DIR/android_source.zip"
-          test -s "$TEMPLATE_DIR/android_debug.apk"
-          test -s "$TEMPLATE_DIR/android_release.apk"
+          for template in android_source.zip android_debug.apk android_release.apk; do
+            test -s "/tmp/templates/templates/$template"
+            cp -f "/tmp/templates/templates/$template" "$TEMPLATE_DIR/$template"
+          done
           rm -rf android/build
           mkdir -p android/build
           unzip -q /tmp/templates/templates/android_source.zip -d android/build
@@ -74,6 +71,7 @@ jobs:
         run: |
           set -euo pipefail
           python3 tests/test_static_integrity.py
+          python3 tests/test_release_documentation.py
       - name: Compile critical GDScript
         run: |
           set -euo pipefail
