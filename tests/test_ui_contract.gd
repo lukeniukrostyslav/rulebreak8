@@ -15,6 +15,13 @@ func _require(text: String, needle: String, label: String) -> bool:
         return false
     return true
 
+func _require_any(text: String, needles: Array[String], label: String) -> bool:
+    for needle in needles:
+        if text.contains(needle):
+            return true
+    _fail("missing %s; accepted forms: %s" % [label, needles])
+    return false
+
 func _init() -> void:
     var game := FileAccess.get_file_as_string(GAME_PATH)
     var view := FileAccess.get_file_as_string(VIEW_PATH)
@@ -27,9 +34,9 @@ func _init() -> void:
 
     _require(game, "const ChallengeViewV2Script = preload", "canonical ChallengeViewV2 preload")
     _require(game, "challenge_view := ChallengeViewV2Script.new()", "canonical ChallengeViewV2 instantiation")
-    _require(game, "var viewport_size := get_viewport_rect().size", "runtime viewport sizing")
-    _require(game, "var compact := viewport_size.y < 1700.0 or viewport_size.x < 900.0", "compact portrait layout branch")
-    _require(game, "var outer_margin := 24 if compact else 42", "responsive outer margins")
+    _require_any(game, ["var viewport_size := get_viewport_rect().size", "var viewport_size: Vector2 = get_viewport_rect().size"], "runtime viewport sizing")
+    _require_any(game, ["var compact := viewport_size.y < 1700.0 or viewport_size.x < 900.0", "var compact: bool = viewport_size.y < 1700.0 or viewport_size.x < 900.0"], "compact portrait layout branch")
+    _require_any(game, ["var outer_margin := 24 if compact else 42", "var outer_margin: int = 24 if compact else 42"], "responsive outer margins")
     _require(game, "var button_height := 92 if compact else 112", "responsive touch target height")
     _require(game, "grid.columns = 2", "four-choice two-column layout")
     _require(game, "for i in 4:", "four answer buttons")
@@ -40,12 +47,15 @@ func _init() -> void:
     _require(game, "answer_locked = true", "logical double-answer lock")
     _require(game, "if answer_locked or not challenge_view.input_ready:", "input-state guard")
     _require(game, "challenge_view.modulate.a = 0.0", "challenge entrance animation")
-    _require(game, 'tween_property(challenge_view, "modulate:a"', "challenge fade-in animation")
+    _require(game, "func _localized_rule_text", "localized rule fallback function")
+    _require(game, "if not rule_key.is_empty() and translated != rule_key:", "translated rule selection")
+    _require(game, "if not description.is_empty():", "non-empty description fallback")
+    _require(game, "tween_property(challenge_view, \"modulate:a\"", "challenge fade-in animation")
     _require(game, "func _style_rule_panel", "rule hierarchy panel styling")
     _require(game, "style.shadow_size = 8", "rule panel depth styling")
     _require(game, "normal.shadow_size = 6", "answer button depth styling")
     _require(game, "func _animate_feedback", "answer feedback animation")
-    _require(game, 'feedback_label, "scale"', "feedback scale animation")
+    _require(game, "feedback_label, \"scale\"", "feedback scale animation")
 
     _require(view, "signal input_ready_changed", "challenge input readiness signal")
     _require(view, "signal response_window_started", "timed-response signal")
@@ -61,5 +71,5 @@ func _init() -> void:
     _require(project, "window/size/viewport_height=1920", "portrait viewport height")
     _require(project, "window/stretch/mode=\"canvas_items\"", "mobile stretch mode")
 
-    print("RULEBREAK UI contract: PASS — canonical renderer, responsive portrait layout, four-choice input, feedback, haptics, audio")
+    print("RULEBREAK UI contract: PASS — canonical renderer, typed responsive layout, fallback rule text, four-choice input, feedback, haptics, audio")
     quit(0)
