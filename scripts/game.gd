@@ -50,7 +50,7 @@ func _build_ui() -> void:
     var challenge_height: int = 190 if compact else 230
     var streak_size: int = 20 if compact else 22
     var grid_height: int = 205 if compact else 250
-    var button_height: int = 92 if compact else 112
+    var button_height := 92 if compact else 112
     var button_size: int = 24 if compact else 27
     var feedback_height: int = 48 if compact else 58
     var feedback_size: int = 22 if compact else 25
