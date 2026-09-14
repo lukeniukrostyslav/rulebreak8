@@ -40,13 +40,15 @@ func _init() -> void:
         return
 
     manager.index = 99
-    var wrapped := manager.next()
+    manager.next()
+    var wrapped := manager.current()
     if manager.index != 0 or str(wrapped.get("id", "")) != str(manager.challenges[0].get("id", "")):
         _fail("next() did not wrap from final challenge to first")
         return
 
     manager.index = 0
-    var previous := manager.previous()
+    manager.previous()
+    var previous := manager.current()
     if manager.index != 99 or str(previous.get("id", "")) != str(manager.challenges[99].get("id", "")):
         _fail("previous() did not wrap from first challenge to final")
         return
