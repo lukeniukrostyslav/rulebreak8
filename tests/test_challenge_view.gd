@@ -10,6 +10,16 @@ func _assert_ready(view, expected_id: String, expected_ready: bool) -> void:
     assert(view.challenge_id == expected_id)
     assert(view.input_ready == expected_ready)
 
+func _visible_text(view) -> String:
+    var parts: Array[String] = []
+    if view.visual_root:
+        for child in view.visual_root.get_children():
+            if child is Label:
+                parts.append(str(child.text))
+            elif child is PanelContainer and child.get_child_count() > 0 and child.get_child(0) is Label:
+                parts.append(str(child.get_child(0).text))
+    return " | ".join(parts)
+
 func _init() -> void:
     var view = ChallengeViewScript.new()
     root.add_child(view)
@@ -58,10 +68,20 @@ func _init() -> void:
     view.show_challenge(trick)
     await process_frame
     _assert_ready(view, "word_color", true)
-    var mix := {"id":"mixed", "kind_key":"KIND_MIX", "correct":2}
-    view.show_challenge(mix)
-    assert(not view.input_ready)
-    await _wait(1.45)
-    _assert_ready(view, "mixed", true)
-    print("RULEBREAK ChallengeView timing/state/content tests: PASS — 100-level renderer support contract")
+
+    # MIX is a real family, not a single generic renderer. Verify every
+    # catalogued MIX id reaches its intended composite phase and exposes a
+    # distinct final presentation.
+    var mix_ids := ["mix_memory_switch", "mix_see_react", "mix_trick_react", "mix_switch_memory", "mix_full"]
+    var expected_markers := ["MIX_RECALL", "MIX_REACT", "MIX_REACT", "MIX_RECALL", "MIX_REACT"]
+    for i in mix_ids.size():
+        var mix := {"id":mix_ids[i], "kind_key":"KIND_MIX", "correct":2}
+        view.show_challenge(mix)
+        assert(not view.input_ready)
+        await _wait(2.10)
+        _assert_ready(view, mix_ids[i], true)
+        var rendered := _visible_text(view)
+        assert(rendered.contains(expected_markers[i]), "%s missing final phase marker: %s" % [mix_ids[i], rendered])
+
+    print("RULEBREAK ChallengeView timing/state/content tests: PASS — 100-level renderer support contract and all MIX composite flows")
     quit(0)
