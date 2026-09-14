@@ -15,8 +15,10 @@ func _init() -> void:
 
     feedback.play_correct()
     feedback.play_wrong()
+    feedback.play_timeout()
+    await process_frame
     await process_frame
 
     assert(feedback.playback.get_frames_available() >= 0)
-    print("RULEBREAK audio feedback smoke: PASS — generator/player/playback initialized and tones accepted")
+    print("RULEBREAK audio feedback smoke: PASS — correct, wrong and timeout tones accepted")
     quit(0)
