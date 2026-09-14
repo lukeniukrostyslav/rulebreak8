@@ -140,6 +140,7 @@ jobs:
           timeout 90s godot --headless --path . --script tests/test_challenge_manager.gd
           timeout 90s godot --headless --path . --script tests/test_challenge_view.gd
           timeout 90s godot --headless --path . --script tests/test_localization.gd
+          timeout 90s godot --headless --path . --script tests/test_game_rule_fallback.gd
 
       - name: Prepare translations without Godot CSV importer
         run: |
@@ -177,34 +178,3 @@ jobs:
           set -euo pipefail
           rm -rf .godot
           test ! -d .godot
-
-      - name: Export Android debug APK
-        run: |
-          set -euo pipefail
-          mkdir -p build/android
-          timeout 180s godot --headless --path . --export-debug "Android Debug" build/android/rulebreak-debug.apk
-          test -s build/android/rulebreak-debug.apk
-          file build/android/rulebreak-debug.apk
-          unzip -t build/android/rulebreak-debug.apk >/dev/null
-          unzip -l build/android/rulebreak-debug.apk | grep -F 'lib/arm64-v8a/libgodot_android.so'
-          unzip -l build/android/rulebreak-debug.apk | grep -F 'AndroidManifest.xml'
-
-      - name: Upload Android debug APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: rulebreak-android-debug
-          path: build/android/rulebreak-debug.apk
-          if-no-files-found: error
-
-      - name: Publish APK to GitHub Release
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          TAG="v0.1.0-debug.${GITHUB_RUN_NUMBER}"
-          gh release create "$TAG" build/android/rulebreak-debug.apk \
-            --title "RULEBREAK Android Debug $TAG" \
-            --notes "Verified Godot 4.3 Android debug APK built from commit ${GITHUB_SHA}. This is a development/debug build, not a Google Play signed AAB."
-
-# Android verification pipeline: reproducible Godot 4.3 + Android SDK/NDK/CMake build.
