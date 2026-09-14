@@ -1,8 +1,12 @@
 extends Control
 
-var challenge_manager := ChallengeManager.new()
-var progression := Progression.new()
-var challenge_view := ChallengeViewV2.new()
+const ChallengeManagerScript = preload("res://scripts/core/challenge_manager.gd")
+const ProgressionScript = preload("res://scripts/core/progression.gd")
+const ChallengeViewV2Script = preload("res://scripts/core/challenge_view_v2.gd")
+
+var challenge_manager := ChallengeManagerScript.new()
+var progression := ProgressionScript.new()
+var challenge_view := ChallengeViewV2Script.new()
 
 var buttons: Array[Button] = []
 var rule_label: Label
