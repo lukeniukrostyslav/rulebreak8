@@ -1,17 +1,13 @@
 name: Android release artifact verification
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: rulebreak-aab-${{ github.ref }}
+  group: rulebreak-aab-manual
   cancel-in-progress: true
 
 jobs:
@@ -88,6 +84,8 @@ jobs:
           set -euo pipefail
           timeout 90s godot --headless --path . --script tests/test_challenge_manager.gd
           timeout 90s godot --headless --path . --script tests/test_challenge_view.gd
+          timeout 90s godot --headless --path . --script tests/test_family_behavior_contract.gd
+          timeout 180s godot --headless --path . --script tests/test_all_challenge_render_contract.gd
           timeout 90s godot --headless --path . --script tests/test_localization.gd
           timeout 90s godot --headless --path . --script tests/test_game_rule_fallback.gd
           timeout 90s godot --headless --path . --script tests/test_localization_fallback_coverage.gd
