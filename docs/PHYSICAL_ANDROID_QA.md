@@ -24,7 +24,7 @@ Owner-side checklist for the first real-device pass after CI release-candidate v
 - [ ] All six challenge families are exercised.
 - [ ] No raw `RULE_*` key is visible to the player.
 - [ ] Extended challenges show English fallback when a localized description is absent.
-- [ ] No progression regression is observed across the 100-level catalog.
+- [ ] All 100 catalog levels are covered by the release QA plan.
 
 ## Persistence pass
 - [ ] Progression survives app close and relaunch.
