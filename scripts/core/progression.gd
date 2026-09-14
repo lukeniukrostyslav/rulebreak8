@@ -56,15 +56,26 @@ func _is_valid_payload(parsed: Dictionary) -> bool:
         if not parsed.has(key):
             return false
 
-    if typeof(parsed.get("version")) != TYPE_INT:
+    if not _is_integer_value(parsed.get("version")):
         return false
     if int(parsed.get("version", -1)) != save_version:
         return false
 
     for key in ["streak", "best_streak", "total_correct", "total_wrong", "current_level"]:
-        if typeof(parsed.get(key)) != TYPE_INT:
+        if not _is_integer_value(parsed.get(key)):
             return false
     return true
+
+func _is_integer_value(value: Variant) -> bool:
+    var value_type := typeof(value)
+    if value_type == TYPE_INT:
+        return true
+    if value_type != TYPE_FLOAT:
+        return false
+    var numeric := float(value)
+    if not is_finite(numeric):
+        return false
+    return numeric == floor(numeric)
 
 func record(correct: bool) -> void:
     if correct:
