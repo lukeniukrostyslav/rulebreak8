@@ -38,16 +38,17 @@ func _init() -> void:
     assert(game.challenge_view.input_ready)
     assert(not game.answer_locked)
 
-    # Correct answer: the public gameplay path must record progress, advance
-    # the manager and persist the next level.
+    # Correct answer: the public gameplay path must lock input immediately,
+    # then record progress, advance the manager and persist the next level.
     game._on_choice(0)
+    assert(game.answer_locked)
+    assert(not game.challenge_view.input_ready)
     await create_timer(0.45).timeout
     assert(game.challenge_manager.index == 1)
     assert(game.progression.current_level == 1)
     assert(game.progression.streak == 1)
     assert(game.progression.total_correct == 1)
-    assert(game.answer_locked)
-    assert(not game.challenge_view.input_ready)
+    assert(not game.answer_locked)
 
     # The next REMEMBER challenge is not immediately answerable. A premature
     # input must therefore be ignored and must not mutate progression.
@@ -81,5 +82,5 @@ func _init() -> void:
     assert(not game.answer_locked)
 
     _cleanup_save_files()
-    print("RULEBREAK gameplay loop smoke: PASS — boot, correct answer, persistence/advance, input lock and wrong-answer retry")
+    print("RULEBREAK gameplay loop smoke: PASS — boot, correct answer, immediate input lock, persistence/advance and wrong-answer retry")
     quit(0)
