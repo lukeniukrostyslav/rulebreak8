@@ -26,7 +26,7 @@ func load_state() -> void:
         return
 
     var parsed = JSON.parse_string(file.get_as_text())
-    if parsed is Dictionary:
+    if parsed is Dictionary and _is_valid_payload(parsed):
         streak = max(0, int(parsed.get("streak", 0)))
         best_streak = max(0, int(parsed.get("best_streak", 0)))
         total_correct = max(0, int(parsed.get("total_correct", 0)))
@@ -37,9 +37,24 @@ func load_state() -> void:
         # contains a best streak lower than the current streak.
         best_streak = max(best_streak, streak)
     elif FileAccess.file_exists(BACKUP_SAVE_PATH):
-        # A truncated primary file must never silently erase valid progress.
+        # A truncated or structurally invalid primary file must never silently
+        # erase valid progress. Restore the known-good backup and re-read it.
         _restore_backup()
         load_state()
+
+func _is_valid_payload(parsed: Dictionary) -> bool:
+    var required_keys := [
+        "version",
+        "streak",
+        "best_streak",
+        "total_correct",
+        "total_wrong",
+        "current_level"
+    ]
+    for key in required_keys:
+        if not parsed.has(key):
+            return false
+    return int(parsed.get("version", -1)) == save_version
 
 func record(correct: bool) -> void:
     if correct:
