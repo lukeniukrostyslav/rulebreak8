@@ -49,11 +49,11 @@ func _init() -> void:
         assert(not _visible_text(view).is_empty(), "challenge %d (%s) rendered no visible text" % [index, id])
         assert(view.input_ready, "challenge %d (%s) never became answerable" % [index, id])
 
-    assert(int(family_counts.get("KIND_SEE", 0)) == 16, "SEE distribution drifted")
-    assert(int(family_counts.get("KIND_REMEMBER", 0)) == 16, "REMEMBER distribution drifted")
-    assert(int(family_counts.get("KIND_REACT", 0)) == 17, "REACT distribution drifted")
-    assert(int(family_counts.get("KIND_SWITCH", 0)) == 17, "SWITCH distribution drifted")
-    assert(int(family_counts.get("KIND_TRICK", 0)) == 17, "TRICK distribution drifted")
+    assert(int(family_counts.get("KIND_SEE", 0)) == 18, "SEE distribution drifted")
+    assert(int(family_counts.get("KIND_REMEMBER", 0)) == 20, "REMEMBER distribution drifted")
+    assert(int(family_counts.get("KIND_REACT", 0)) == 18, "REACT distribution drifted")
+    assert(int(family_counts.get("KIND_SWITCH", 0)) == 19, "SWITCH distribution drifted")
+    assert(int(family_counts.get("KIND_TRICK", 0)) == 19, "TRICK distribution drifted")
     assert(int(family_counts.get("KIND_MIX", 0)) == 6, "MIX distribution drifted")
 
     print("RULEBREAK all-challenge render contract: PASS — 100 unique entries, four choices, valid answers, exact family distribution, all renderable")
