@@ -89,11 +89,13 @@ def main() -> None:
         "Upload Android debug APK",
         "Publish APK to GitHub Release",
         "gh release create",
+        "gh release upload",
+        "--clobber",
         "build/android/rulebreak-debug.apk",
         "build/android/rulebreak-debug.apk.sha256",
         "artifact_type=debug-apk",
         "source_commit=${GITHUB_SHA}",
-        "signed=false",
+        "signed=debug-keystore",
     ):
         require(apk_workflow, expected, "APK release pipeline")
 
@@ -114,7 +116,7 @@ def main() -> None:
     if "gh release create" in aab_workflow:
         raise AssertionError("unsigned AAB workflow must not publish a misleading production release")
 
-    print("RELEASE CONTRACT PASS: project, Android presets, catalog, offline runtime boundaries, APK metadata and AAB verification pipeline verified")
+    print("RELEASE CONTRACT PASS: project, Android presets, catalog, offline runtime boundaries, idempotent APK publication and AAB verification pipeline verified")
 
 
 if __name__ == "__main__":
