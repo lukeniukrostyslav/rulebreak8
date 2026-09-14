@@ -60,7 +60,6 @@ func _build_ui() -> void:
     progress_bar.custom_minimum_size = Vector2(0, 10)
     progress_bar.show_percentage = false
     progress_bar.max_value = challenge_manager.challenges.size()
-    progress_bar.add_theme_icon_override("background", null)
     root.add_child(progress_bar)
 
     challenge_label = Label.new()
