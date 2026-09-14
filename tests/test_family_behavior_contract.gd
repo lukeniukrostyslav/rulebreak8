@@ -106,8 +106,8 @@ func _init() -> void:
         assert(not _visible_text(view).is_empty(), "%s final presentation is empty" % id)
 
     view.show_challenge({"id":"mixed", "kind_key":"KIND_MIX", "correct":2})
-    await process_frame
-    assert(view.input_ready)
+    await _wait(1.20)
+    assert(view.input_ready, "mixed did not reach final input")
     assert(view.visual_root != null)
 
     assert(manager.challenges.size() == 100)
