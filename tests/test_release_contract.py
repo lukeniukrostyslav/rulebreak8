@@ -25,6 +25,7 @@ def require(text: str, needle: str, label: str) -> None:
 def main() -> None:
     project = read("project.godot")
     presets = read("export_presets.cfg")
+    workflow = read(".github/workflows/godot.yml")
     catalog = json.loads(read("scripts/data/challenges.json"))
 
     require(project, 'config/name="RULEBREAK"', "project identity")
@@ -68,7 +69,7 @@ def main() -> None:
     if manager.count('challenges.append({') < 80:
         raise AssertionError("extended challenge generation appears incomplete")
 
-    forbidden = re.compile(r"(?:http://|https://)(?!localhost|127\\.0\\.0\\.1)", re.I)
+    forbidden = re.compile(r"(?:http://|https://)(?!localhost|127\.0\.0\.1)", re.I)
     runtime_files = [
         "scripts/game.gd",
         "scripts/core/challenge_manager.gd",
@@ -80,7 +81,18 @@ def main() -> None:
         if forbidden.search(text):
             raise AssertionError(f"runtime file unexpectedly contains a network URL: {path}")
 
-    print("RELEASE CONTRACT PASS: project, Android presets, catalog and offline runtime boundaries verified")
+    for expected in (
+        "Export Android debug APK",
+        "Record APK checksum",
+        "Upload Android debug APK",
+        "Publish APK to GitHub Release",
+        "gh release create",
+        "build/android/rulebreak-debug.apk",
+        "build/android/rulebreak-debug.apk.sha256",
+    ):
+        require(workflow, expected, "APK release pipeline")
+
+    print("RELEASE CONTRACT PASS: project, Android presets, catalog, offline runtime boundaries and APK release pipeline verified")
 
 
 if __name__ == "__main__":
