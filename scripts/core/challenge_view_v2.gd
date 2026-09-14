@@ -86,10 +86,7 @@ func _remember(token:int)->void:
 func _react(token:int)->void:
     _label("REACT_WAIT",30); _card("○",72,86); await get_tree().create_timer(0.5).timeout
     if token!=phase_token:return
-    var target: String = REACT[correct_index]
-    if challenge_id=="second_signal" or challenge_id=="react_signal_two": target="SECOND"
-    elif challenge_id=="only_x" or challenge_id=="react_x_only": target="X"
-    elif challenge_id=="color_timer": target="GREEN"
+    var target: String = _react_target()
     clear_view(); _new_root(); _label("REACT_WATCH",26); _card(target,58,92); await get_tree().create_timer(0.25).timeout
     if token!=phase_token:return
     clear_view(); _new_root(); _label("REACT_NOW",28); _pulse(_card(target,64,96)); _set_input_ready(true)
@@ -97,14 +94,44 @@ func _react(token:int)->void:
     if token==phase_token and input_ready: _set_input_ready(false); _label("TOO_SLOW",26)
 
 func _switch(token:int)->void:
-    _label("SWITCH_RULE_ONE",24); _card(tr("SWITCH_BLUE"),40,72); await get_tree().create_timer(0.6).timeout
+    _label("SWITCH_RULE_ONE",24); _card(tr("SWITCH_RULE"),40,72); await get_tree().create_timer(0.6).timeout
     if token!=phase_token:return
     clear_view(); _new_root(); _label("SWITCH_RULE_CHANGED",26); _card(_switch_new(),40,82); await get_tree().create_timer(0.4).timeout
     if token!=phase_token:return
-    clear_view(); _new_root(); _label("SWITCH_CHOOSE",28); _card(["BLUE   RED   GREEN   YELLOW","●   ▲   ■   ◆","↑   →   ↓   ←","1   2   3   4"][abs(challenge_id.hash())%4],36,82); _set_input_ready(true)
+    clear_view(); _new_root(); _label("SWITCH_CHOOSE",28); _card(_switch_choices_preview(),36,82); _set_input_ready(true)
+
+func _react_target() -> String:
+    match challenge_id:
+        "second_signal", "react_signal_two": return "SECOND"
+        "only_x", "react_x_only": return "X"
+        "color_timer", "react_green_twice": return "GREEN"
+        "react_circle": return "●"
+        "react_triangle": return "▲"
+        "react_star": return "★"
+        "react_even": return "SECOND"
+        "react_third": return "THIRD"
+        "react_fourth": return "FOURTH"
+        "react_after_change": return "AFTER"
+        "react_final": return "FINAL"
+        _: return REACT[correct_index] if correct_index >= 0 and correct_index < REACT.size() else "GO"
+
+func _switch_choices_preview() -> String:
+    match challenge_id:
+        "switch_direction", "switch_direction_two": return "UP   RIGHT   DOWN   LEFT"
+        "switch_shape": return "●   ▲   ■   ◆"
+        "switch_number": return "1   2   3   4"
+        "switch_action": return "TAP   HOLD   SWIPE   WAIT"
+        "switch_after_two", "switch_after_three": return "FIRST   SECOND   THIRD   FOURTH"
+        _: return "BLUE   RED   GREEN   YELLOW"
 
 func _switch_new()->String:
-    return [tr("SWITCH_NEW_RULE"),tr("SWITCH_REVERSE"),tr("SWITCH_DIRECTION"),tr("SWITCH_ACTION")][abs(challenge_id.hash())%4]
+    match challenge_id:
+        "switch_direction", "switch_direction_two": return "SWITCH DIRECTION"
+        "switch_shape": return "● → ▲"
+        "switch_number": return "1 → 2"
+        "switch_action": return "SWITCH ACTION"
+        "switch_after_two", "switch_after_three": return "FIRST → SECOND"
+        _: return tr("SWITCH_RULE")
 
 func _trick()->void:
     var mode: int = abs(challenge_id.hash()) % 4
@@ -115,7 +142,7 @@ func _trick()->void:
 func _mix(token:int)->void:
     _label("MIX_SEE",24); _card("●   ▲   ◆   ●",42,72); _label("MIX_NOTICE",22); await get_tree().create_timer(0.4).timeout
     if token!=phase_token:return
-    clear_view(); _new_root(); _label("MIX_SWITCH",24); _card(tr("SWITCH_NEW_RULE"),36,78); await get_tree().create_timer(0.4).timeout
+    clear_view(); _new_root(); _label("MIX_SWITCH",24); _card(tr("SWITCH_RULE"),36,78); await get_tree().create_timer(0.4).timeout
     if token!=phase_token:return
     clear_view(); _new_root(); _label("MIX_REACT",24); _card("WAIT → GO",42,76); _label("MIX_CHOOSE_SIGNAL",24); _card("FIRST  SECOND  THIRD  FOURTH",30,78); _set_input_ready(true)
 
