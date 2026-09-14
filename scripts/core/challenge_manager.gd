@@ -58,6 +58,7 @@ func _extended_react_choices(challenge_id: String) -> Array:
         "react_even", "react_third", "react_fourth", "react_signal_two", "react_final": return ["FIRST", "SECOND", "THIRD", "FOURTH"]
         "react_after_change": return ["BEFORE", "AFTER", "DURING", "NEVER"]
         "react_green_twice": return ["FIRST", "SECOND", "THIRD", "FOURTH"]
+        "react_late": return ["EARLY", "LATE", "BOTH", "NEVER"]
         "react_x_only": return ["X", "O", "△", "□"]
         _: return ["RED", "BLUE", "GREEN", "YELLOW"]
 
