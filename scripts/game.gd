@@ -36,7 +36,7 @@ func _ready() -> void:
 
 func _build_ui() -> void:
     var bg := ColorRect.new()
-    bg.color = Color("0D0F14")
+    bg.color = Color("0B0E14")
     bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
     add_child(bg)
 
@@ -73,13 +73,20 @@ func _build_ui() -> void:
     challenge_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     root.add_child(challenge_label)
 
+    var rule_panel := PanelContainer.new()
+    rule_panel.custom_minimum_size = Vector2(0, 116)
+    _style_rule_panel(rule_panel)
+    root.add_child(rule_panel)
+
     rule_label = Label.new()
     rule_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+    rule_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
     rule_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
     rule_label.add_theme_font_size_override("font_size", 38)
     rule_label.add_theme_color_override("font_color", Color("FFFFFF"))
-    rule_label.custom_minimum_size.y = 105
-    root.add_child(rule_label)
+    rule_label.add_theme_constant_override("outline_size", 2)
+    rule_label.add_theme_color_override("font_outline_color", Color("11151D"))
+    rule_panel.add_child(rule_label)
 
     challenge_view.custom_minimum_size = Vector2(0, 230)
     challenge_view.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -120,8 +127,25 @@ func _build_ui() -> void:
     feedback_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
     feedback_label.add_theme_font_size_override("font_size", 25)
     feedback_label.add_theme_color_override("font_color", Color("C9D1DE"))
+    feedback_label.add_theme_constant_override("outline_size", 2)
+    feedback_label.add_theme_color_override("font_outline_color", Color("11151D"))
     feedback_label.custom_minimum_size.y = 58
     root.add_child(feedback_label)
+
+func _style_rule_panel(panel: PanelContainer) -> void:
+    var style := StyleBoxFlat.new()
+    style.bg_color = Color("141923")
+    style.border_color = Color("303A4D")
+    style.set_border_width_all(2)
+    style.set_corner_radius_all(20)
+    style.content_margin_left = 24
+    style.content_margin_right = 24
+    style.content_margin_top = 12
+    style.content_margin_bottom = 12
+    style.shadow_color = Color(0, 0, 0, 0.28)
+    style.shadow_size = 8
+    style.shadow_offset = Vector2(0, 4)
+    panel.add_theme_stylebox_override("panel", style)
 
 func _style_choice_button(button: Button) -> void:
     var normal := StyleBoxFlat.new()
@@ -133,18 +157,25 @@ func _style_choice_button(button: Button) -> void:
     normal.content_margin_right = 18
     normal.content_margin_top = 14
     normal.content_margin_bottom = 14
+    normal.shadow_color = Color(0, 0, 0, 0.24)
+    normal.shadow_size = 6
+    normal.shadow_offset = Vector2(0, 3)
 
     var hover := normal.duplicate()
     hover.bg_color = Color("202838")
     hover.border_color = Color("596A86")
+    hover.shadow_size = 9
 
     var pressed := normal.duplicate()
     pressed.bg_color = Color("273348")
     pressed.border_color = Color("8A9AB5")
+    pressed.shadow_size = 2
+    pressed.shadow_offset = Vector2(0, 1)
 
     var disabled := normal.duplicate()
     disabled.bg_color = Color("11151C")
     disabled.border_color = Color("202632")
+    disabled.shadow_size = 0
 
     button.add_theme_stylebox_override("normal", normal)
     button.add_theme_stylebox_override("hover", hover)
@@ -226,6 +257,15 @@ func _animate_answer_button(choice: int) -> void:
     tween.tween_property(button, "scale", Vector2(0.96, 0.96), 0.05)
     tween.tween_property(button, "scale", Vector2.ONE, 0.10)
 
+func _animate_feedback(correct: bool) -> void:
+    if feedback_label == null:
+        return
+    feedback_label.scale = Vector2(0.94, 0.94)
+    feedback_label.modulate.a = 0.55
+    var tween := create_tween().set_parallel(true)
+    tween.tween_property(feedback_label, "scale", Vector2.ONE, 0.16).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+    tween.tween_property(feedback_label, "modulate:a", 1.0, 0.12)
+
 func _on_choice(choice: int) -> void:
     if answer_locked or not challenge_view.input_ready:
         return
@@ -246,6 +286,7 @@ func _on_choice(choice: int) -> void:
     if correct:
         feedback_label.text = "%s  ✓" % tr("CORRECT")
         feedback_label.add_theme_color_override("font_color", Color("77E0A2"))
+        _animate_feedback(true)
         Input.vibrate_handheld(35)
         audio_feedback.play_correct()
         challenge_manager.next()
@@ -255,6 +296,7 @@ func _on_choice(choice: int) -> void:
     else:
         feedback_label.text = "%s  •  %s" % [tr("WRONG"), tr("TRY_AGAIN")]
         feedback_label.add_theme_color_override("font_color", Color("FF8F8F"))
+        _animate_feedback(false)
         Input.vibrate_handheld(55)
         audio_feedback.play_wrong()
         streak_label.text = "%s  %d   •   %s  %d" % [tr("STREAK"), progression.streak, tr("BEST"), progression.best_streak]
