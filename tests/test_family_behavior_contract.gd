@@ -82,7 +82,7 @@ func _init() -> void:
         "trick_contradiction": ["OLD", "LATEST", "BOTH", "NONE"]
     }
     for i in trick_ids.size():
-        challenge := _find(manager, trick_ids[i])
+        var challenge: Dictionary = _find(manager, trick_ids[i])
         assert(not challenge.is_empty(), "%s missing from catalog" % trick_ids[i])
         var choices: Array = challenge.get("choices", [])
         var correct := int(challenge.get("correct", -1))
