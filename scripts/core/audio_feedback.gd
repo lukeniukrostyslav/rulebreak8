@@ -21,18 +21,16 @@ func _ready() -> void:
 
 func play_correct() -> void:
     _play_tone(740.0, 0.08, 0.12)
-    _play_tone_delayed(988.0, 0.07, 0.09, 0.055)
+    get_tree().create_timer(0.055).timeout.connect(_play_second_correct_tone, CONNECT_ONE_SHOT)
+
+func _play_second_correct_tone() -> void:
+    _play_tone(988.0, 0.07, 0.09)
 
 func play_wrong() -> void:
     _play_tone(220.0, 0.11, 0.10)
 
 func _play_tone(frequency: float, duration: float, amplitude: float) -> void:
     _push_tone(frequency, duration, amplitude)
-
-func _play_tone_delayed(frequency: float, duration: float, amplitude: float, delay: float) -> void:
-    get_tree().create_timer(delay).timeout.connect(func() -> void:
-        _push_tone(frequency, duration, amplitude)
-    , CONNECT_ONE_SHOT)
 
 func _push_tone(frequency: float, duration: float, amplitude: float) -> void:
     if playback == null:
